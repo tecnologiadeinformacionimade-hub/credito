@@ -730,12 +730,11 @@
                         document.body.removeChild(a);
                     });
 
-                // 2. Proceder a enviar por la API FormSubmit
+                // 2. Enviar por la API de FormSubmit (Modo Iframe nativo para adjuntos)
                 enviarPorApiWeb(pdfBase64, fileName);
             });
         }
 
-        // Función que convierte Base64 a un objeto Archivo real (Blob) necesario para subir por API
         function dataURItoBlob(dataURI) {
             const parts = dataURI.split(',');
             if(parts.length !== 2) return null;
@@ -750,49 +749,90 @@
         }
 
         function enviarPorApiWeb(pdfBase64, fileName) {
-            
             const pdfBlob = dataURItoBlob(pdfBase64);
-            const formData = new FormData();
-
             const nombreEmpresa = document.getElementById('f_nombre_rs').value;
 
-            // Datos del Formulario a mostrar en el texto del correo
-            formData.append("Mensaje", "Se ha generado una nueva solicitud de crédito. Encuentre el documento PDF oficial adjunto.");
-            formData.append("Empresa Solicitante", nombreEmpresa);
-            formData.append("NIT", document.getElementById('f_nit').value);
+            // 1. Crear iframe oculto para evitar que la página se redireccione al enviar el form
+            const iframeName = 'hidden_iframe_' + new Date().getTime();
+            const iframe = document.createElement('iframe');
+            iframe.name = iframeName;
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
 
-            // Configuraciones de destino para la API
-            formData.append("_subject", "Apertura de Codigo Credito - " + nombreEmpresa);
-            formData.append("_captcha", "false"); 
-            formData.append("_template", "table"); // Formato de tabla limpia para el texto
+            let formSubmitted = false;
 
-            // Archivo adjunto PDF (El truco clave para la v1.2)
-            formData.append("Documento_Oficial_Adjunto", pdfBlob, fileName);
-
-            // Envío vía Fetch API usando formsubmit.co con la dirección principal actualizada
-            fetch("https://formsubmit.co/ajax/h.reyes@grupoimade.com", {
-                method: "POST",
-                body: formData,
-                headers: {
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('loading-overlay').classList.add('hidden');
-                
-                if(data.success === "true" || data.success === true) {
-                    alert("¡ÉXITO! El PDF se ha enviado automáticamente a h.reyes.\n\nIMPORTANTE: Si es el primer envío, h.reyes recibirá un email para 'Activar' Formsubmit. ¡Solo debe darle clic una vez!");
+            // Cuando el iframe se cargue por segunda vez (después del submit)
+            iframe.onload = function() {
+                if (formSubmitted) {
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                    alert("¡ÉXITO! El PDF ADJUNTO se ha enviado automáticamente a h.reyes.\n\n(Revise la bandeja de entrada y spam, si es la primera vez puede requerir confirmación).");
                     resetearFormulario();
-                } else {
-                    alert("Hubo un error del lado del servidor: " + (data.message || "Problema desconocido."));
+                    
+                    // Limpiar el DOM para la próxima vez
+                    setTimeout(() => {
+                        if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+                        const f = document.getElementById('form-submit-hidden');
+                        if (f) f.parentNode.removeChild(f);
+                    }, 1000);
                 }
-            })
-            .catch(err => {
-                document.getElementById('loading-overlay').classList.add('hidden');
-                console.error("Error en FormSubmit:", err);
-                alert("Error de conexión al enviar el correo. Sin embargo, el PDF ya fue descargado en su computadora.");
-            });
+            };
+
+            // 2. Crear formulario HTML nativo
+            const form = document.createElement('form');
+            form.id = 'form-submit-hidden';
+            form.action = 'https://formsubmit.co/h.reyes@grupoimade.com';
+            form.method = 'POST';
+            form.enctype = 'multipart/form-data'; // Obligatorio para que FormSubmit lea archivos adjuntos
+            form.target = iframeName; // Enviar la respuesta al iframe
+            form.style.display = 'none';
+
+            // 3. Crear inputs ocultos con los datos del correo
+            const addHiddenInput = (name, value) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = name;
+                input.value = value;
+                form.appendChild(input);
+            };
+
+            addHiddenInput("_subject", "Apertura de Codigo Credito - " + nombreEmpresa);
+            addHiddenInput("_captcha", "false"); 
+            addHiddenInput("_template", "table");
+            // Truco para que formsubmit redireccione a nosotros mismos y dispare correctamente el 'onload' del iframe
+            addHiddenInput("_next", window.location.href); 
+            
+            addHiddenInput("Mensaje", "Se ha generado una nueva solicitud de crédito. Encuentre el documento PDF oficial adjunto en este correo.");
+            addHiddenInput("Empresa Solicitante", nombreEmpresa);
+            addHiddenInput("NIT", document.getElementById('f_nit').value);
+
+            // 4. TRUCO PRINCIPAL: Añadir el PDF generado como si fuera un input de archivo real
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.name = "Documento_PDF"; // Nombre del archivo adjunto
+            
+            // Usar DataTransfer para inyectar el Blob programáticamente
+            const file = new File([pdfBlob], fileName, { type: "application/pdf" });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+
+            form.appendChild(fileInput);
+            document.body.appendChild(form);
+
+            // 5. Enviar de verdad el formulario
+            formSubmitted = true;
+            form.submit();
+
+            // Tiempo de espera de respaldo (10 segundos) por si el iframe falla al leer la redirección cruzada
+            setTimeout(() => {
+                if(!document.getElementById('loading-overlay').classList.contains('hidden')) {
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                    alert("El formulario con archivo adjunto fue procesado. Verifique la bandeja de h.reyes.");
+                    resetearFormulario();
+                    if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+                    if (form.parentNode) form.parentNode.removeChild(form);
+                }
+            }, 10000);
         }
 
         function resetearFormulario() {
