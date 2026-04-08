@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud de Apertura de Código para Crédito v1.2</title>
+    <title>Solicitud de Apertura de Código para Crédito v1.3</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- html2pdf.js -->
@@ -51,27 +51,46 @@
             top: 0;
             background: white;
         }
+        
+        /* Ajustes específicos para que quepa en 1 sola hoja CARTA */
         #document-container {
-            width: 210mm;
-            min-height: 297mm;
-            padding: 15mm;
+            width: 200mm; /* Ancho ajustado para dar margen */
             font-family: 'Arial', sans-serif;
             background: white;
+            color: black;
+            font-size: 11px; /* Fuente base pequeña */
+            line-height: 1.2;
         }
         .pdf-field {
             display: inline-block;
             border-bottom: 1px solid black;
-            min-height: 20px;
+            min-height: 14px;
             width: 100%;
-            padding: 0 4px;
+            padding: 0 2px;
             font-family: inherit;
-            font-size: 0.875rem;
+            color: #1a202c;
+            font-weight: normal;
         }
         .signature-img {
             max-width: 100%;
-            height: 60px;
+            height: 45px;
             object-fit: contain;
             display: none;
+        }
+        .pdf-title-box {
+            background-color: #e5e7eb; /* gray-200 */
+            border: 1px solid black;
+            font-weight: bold;
+            text-align: center;
+            padding: 2px;
+            font-size: 10px;
+            margin-bottom: 0;
+        }
+        .pdf-grid-box {
+            border: 1px solid black;
+            border-top: none;
+            padding: 4px 6px;
+            font-size: 10px;
         }
     </style>
 </head>
@@ -313,96 +332,101 @@
         </form>
     </div>
 
-    <!-- EL DOCUMENTO A4 OCULTO (Para generar el PDF) -->
+    <!-- EL DOCUMENTO A4 OCULTO (Para generar el PDF Ultra Compacto) -->
     <div id="pdf-template-wrapper">
         <div id="document-container">
             
             <!-- Header / Logo -->
-            <div class="flex justify-between items-end mb-6">
+            <div class="flex justify-between items-end mb-2">
                 <div class="flex items-center">
-                    <img src="logo.png" alt="imade logo" class="h-16" onerror="this.outerHTML='<div class=\'text-blue-800 font-extrabold text-6xl italic\' style=\'font-family: Georgia, serif;\'><span class=\'text-blue-500 text-7xl\'>i</span>made</div>'">
+                    <img src="logo.png" alt="imade logo" class="h-10" onerror="this.outerHTML='<div class=\'text-blue-800 font-extrabold text-4xl italic\' style=\'font-family: Georgia, serif;\'><span class=\'text-blue-500 text-5xl\'>i</span>made</div>'">
                 </div>
-                <div class="text-right pb-2">
-                    <h2 class="font-bold text-xl uppercase">Solicitud de Apertura de Código para Crédito</h2>
+                <div class="text-right pb-1">
+                    <h2 class="font-bold text-lg uppercase tracking-tight">Solicitud de Apertura de Código para Crédito</h2>
                 </div>
             </div>
 
             <!-- Datos de Facturación -->
-            <div class="mb-4">
-                <h3 class="bg-gray-200 font-bold p-1 border border-black text-center text-sm">DATOS DE FACTURACIÓN</h3>
-                <div class="border border-t-0 border-black p-3 text-sm grid grid-cols-12 gap-y-2 gap-x-4">
-                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Nombre o Rs:</span><div id="p_nombre_rs" class="pdf-field"></div></div>
-                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">N.I.T.:</span><div id="p_nit" class="pdf-field"></div></div>
-                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Dirección:</span><div id="p_direccion" class="pdf-field"></div></div>
-                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">País:</span><div id="p_pais" class="pdf-field"></div></div>
-                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Municipio:</span><div id="p_municipio" class="pdf-field"></div></div>
-                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Coordenadas Latitud:</span><div id="p_latitud" class="pdf-field"></div></div>
-                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Departamento:</span><div id="p_departamento" class="pdf-field"></div></div>
-                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Longitud:</span><div id="p_longitud" class="pdf-field"></div></div>
-                    <div class="col-span-12 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Telefono con WhatsApp:</span><div id="p_tel_whatsapp" class="pdf-field"></div></div>
+            <div class="mb-2">
+                <div class="pdf-title-box">DATOS DE FACTURACIÓN</div>
+                <div class="pdf-grid-box grid grid-cols-12 gap-y-1 gap-x-2">
+                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Nombre o Rs:</span><div id="p_nombre_rs" class="pdf-field"></div></div>
+                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">N.I.T.:</span><div id="p_nit" class="pdf-field"></div></div>
+                    
+                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Dirección:</span><div id="p_direccion" class="pdf-field"></div></div>
+                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">País:</span><div id="p_pais" class="pdf-field"></div></div>
+                    
+                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Municipio:</span><div id="p_municipio" class="pdf-field"></div></div>
+                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Coordenadas Latitud:</span><div id="p_latitud" class="pdf-field"></div></div>
+                    
+                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Departamento:</span><div id="p_departamento" class="pdf-field"></div></div>
+                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Longitud:</span><div id="p_longitud" class="pdf-field"></div></div>
+                    
+                    <div class="col-span-12 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Telefono con WhatsApp:</span><div id="p_tel_whatsapp" class="pdf-field"></div></div>
                 </div>
             </div>
 
             <!-- Información General -->
-            <div class="mb-4">
-                <h3 class="bg-gray-200 font-bold p-1 border border-black text-center text-sm">INFORMACIÓN GENERAL</h3>
-                <div class="border border-t-0 border-black p-3 text-sm grid grid-cols-12 gap-y-2 gap-x-4">
-                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Dirección del Negocio:</span><div id="p_dir_negocio" class="pdf-field"></div></div>
-                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Teléfonos:</span><div id="p_tel_negocio" class="pdf-field"></div></div>
-                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Dirección de Entrega:</span><div id="p_dir_entrega" class="pdf-field"></div></div>
-                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Teléfonos:</span><div id="p_tel_entrega" class="pdf-field"></div></div>
+            <div class="mb-2">
+                <div class="pdf-title-box">INFORMACIÓN GENERAL</div>
+                <div class="pdf-grid-box grid grid-cols-12 gap-y-1 gap-x-2">
+                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Dirección del Negocio:</span><div id="p_dir_negocio" class="pdf-field"></div></div>
+                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Teléfonos:</span><div id="p_tel_negocio" class="pdf-field"></div></div>
                     
-                    <div class="col-span-6 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Contacto Compras:</span><div id="p_contacto_compras" class="pdf-field"></div></div>
-                    <div class="col-span-3 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Teléfonos:</span><div id="p_tel_compras" class="pdf-field"></div></div>
-                    <div class="col-span-3 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">E-mail:</span><div id="p_email_compras" class="pdf-field"></div></div>
+                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Dirección de Entrega:</span><div id="p_dir_entrega" class="pdf-field"></div></div>
+                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Teléfonos:</span><div id="p_tel_entrega" class="pdf-field"></div></div>
+                    
+                    <div class="col-span-5 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Contacto Compras:</span><div id="p_contacto_compras" class="pdf-field"></div></div>
+                    <div class="col-span-3 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Teléfonos:</span><div id="p_tel_compras" class="pdf-field"></div></div>
+                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">E-mail:</span><div id="p_email_compras" class="pdf-field"></div></div>
 
-                    <div class="col-span-6 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Contacto Cobros:</span><div id="p_contacto_cobros" class="pdf-field"></div></div>
-                    <div class="col-span-3 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Teléfonos:</span><div id="p_tel_cobros" class="pdf-field"></div></div>
-                    <div class="col-span-3 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">E-mail:</span><div id="p_email_cobros" class="pdf-field"></div></div>
+                    <div class="col-span-5 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Contacto Cobros:</span><div id="p_contacto_cobros" class="pdf-field"></div></div>
+                    <div class="col-span-3 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Teléfonos:</span><div id="p_tel_cobros" class="pdf-field"></div></div>
+                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">E-mail:</span><div id="p_email_cobros" class="pdf-field"></div></div>
                 </div>
             </div>
 
             <!-- Referencias Comerciales -->
-            <div class="mb-4">
-                <h3 class="bg-gray-200 font-bold p-1 border border-black text-center text-sm">REFERENCIAS COMERCIALES</h3>
-                <table class="w-full text-sm border-collapse border border-black text-center">
+            <div class="mb-2">
+                <div class="pdf-title-box">REFERENCIAS COMERCIALES</div>
+                <table class="w-full text-[10px] border-collapse border border-black text-center" style="border-top:none;">
                     <thead>
-                        <tr class="font-bold border-b border-black bg-gray-50">
-                            <td class="border-r border-black py-1 w-1/3">NOMBRE</td>
-                            <td class="border-r border-black py-1 w-1/3">TELÉFONOS</td>
-                            <td class="py-1 w-1/3">RELACIÓN</td>
+                        <tr class="font-bold border-b border-black">
+                            <td class="border-r border-black py-0.5 w-1/3">NOMBRE</td>
+                            <td class="border-r border-black py-0.5 w-1/3">TELÉFONOS</td>
+                            <td class="py-0.5 w-1/3">RELACIÓN</td>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="border-b border-black h-6">
-                            <td class="border-r border-black px-2" id="p_ref1_nombre"></td>
-                            <td class="border-r border-black px-2" id="p_ref1_tel"></td>
-                            <td class="px-2" id="p_ref1_rel"></td>
+                        <tr class="border-b border-black h-5">
+                            <td class="border-r border-black px-1" id="p_ref1_nombre"></td>
+                            <td class="border-r border-black px-1" id="p_ref1_tel"></td>
+                            <td class="px-1" id="p_ref1_rel"></td>
                         </tr>
-                        <tr class="border-b border-black h-6">
-                            <td class="border-r border-black px-2" id="p_ref2_nombre"></td>
-                            <td class="border-r border-black px-2" id="p_ref2_tel"></td>
-                            <td class="px-2" id="p_ref2_rel"></td>
+                        <tr class="border-b border-black h-5">
+                            <td class="border-r border-black px-1" id="p_ref2_nombre"></td>
+                            <td class="border-r border-black px-1" id="p_ref2_tel"></td>
+                            <td class="px-1" id="p_ref2_rel"></td>
                         </tr>
-                        <tr class="h-6">
-                            <td class="border-r border-black px-2" id="p_ref3_nombre"></td>
-                            <td class="border-r border-black px-2" id="p_ref3_tel"></td>
-                            <td class="px-2" id="p_ref3_rel"></td>
+                        <tr class="h-5">
+                            <td class="border-r border-black px-1" id="p_ref3_nombre"></td>
+                            <td class="border-r border-black px-1" id="p_ref3_tel"></td>
+                            <td class="px-1" id="p_ref3_rel"></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
             <!-- Limite de Crédito y Condiciones -->
-            <div class="mb-6 text-sm">
-                <div class="flex items-end mb-3">
-                    <h3 class="font-bold underline mr-4">LÍMITE DE CRÉDITO</h3>
-                    <span class="mr-2 font-semibold">DIAS CRÉDITO:</span>
-                    <div id="p_dias_credito" class="border-b border-black w-24 text-center"></div>
+            <div class="mb-3 text-[10px]">
+                <div class="flex items-end mb-2">
+                    <h3 class="font-bold underline mr-3 text-xs">LÍMITE DE CRÉDITO</h3>
+                    <span class="mr-1 font-bold">DIAS CRÉDITO:</span>
+                    <div id="p_dias_credito" class="border-b border-black w-16 text-center font-bold"></div>
                 </div>
 
-                <p class="font-semibold mb-2">Nota: Si el crédito solicitado es concedido, deberá cumplir con las siguientes condiciones:</p>
-                <ol class="list-decimal pl-5 space-y-1 mb-4">
+                <p class="font-bold mb-1">Nota: Si el crédito solicitado es concedido, deberá cumplir con las siguientes condiciones:</p>
+                <ol class="list-decimal pl-4 space-y-0.5 mb-2 leading-tight">
                     <li>Hacer efectivos sus pagos el día de vencimiento del crédito.</li>
                     <li>Todo pago con cheque, debe hacerlo a nombre de la empresa (PINTURAS Y MAS, S.A.).</li>
                     <li>Todo pago se respalda únicamente con Recibo de Caja de PINTURAS Y MAS, S.A.</li>
@@ -410,68 +434,68 @@
                     <li>Cualquier cambio de dirección, teléfono u otro dato de esta solicitud, debe comunicarlo inmediatamente.</li>
                 </ol>
 
-                <div class="border border-black p-2 font-bold text-justify">
+                <div class="border border-black p-1.5 font-bold text-justify leading-tight bg-gray-50">
                     IMPORTANTE: Favor llenar este formulario, imprimirlo y adjuntar fotocopia de patente de comercio (cuando aplique), RTU y fotocopia del DPI del representante legal de la empresa, recibo de luz o agua y fotografías del negocio.
                 </div>
             </div>
 
             <!-- Firma Cliente -->
-            <div class="grid grid-cols-2 gap-8 text-sm mb-8">
+            <div class="grid grid-cols-2 gap-6 text-[10px] mb-4">
                 <div>
-                    <div class="flex items-end mb-2">
-                        <span class="whitespace-nowrap mr-2 font-semibold">NOMBRE DE QUIEN SOLICITA:</span>
+                    <div class="flex items-end mb-1">
+                        <span class="whitespace-nowrap mr-1 font-bold">NOMBRE DE QUIEN SOLICITA:</span>
                         <div id="p_nombre_solicita" class="pdf-field"></div>
                     </div>
                     <div class="flex items-end">
-                        <span class="whitespace-nowrap mr-2 font-semibold">FECHA:</span>
-                        <div id="p_fecha_solicita" class="pdf-field"></div>
+                        <span class="whitespace-nowrap mr-1 font-bold">FECHA:</span>
+                        <div id="p_fecha_solicita" class="pdf-field w-32"></div>
                     </div>
                 </div>
                 
                 <div class="flex flex-col items-center justify-end">
-                    <div class="w-full h-16 border-b border-black flex items-end justify-center relative">
+                    <div class="w-4/5 h-12 border-b border-black flex items-end justify-center relative">
                         <img id="p_firma_cliente_img" src="" class="signature-img absolute bottom-0" alt="Firma Cliente">
                     </div>
-                    <span class="font-bold mt-1">FIRMA</span>
+                    <span class="font-bold mt-1 text-[9px]">FIRMA</span>
                 </div>
             </div>
 
             <!-- Uso Exclusivo Empresa -->
-            <div class="border-t-2 border-dashed border-black pt-4">
-                <h3 class="bg-gray-200 font-bold p-1 border border-black text-center text-sm mb-4">USO EXCLUSIVO PINTURAS Y MAS, S.A.</h3>
+            <div class="border-t-2 border-dashed border-black pt-2">
+                <div class="pdf-title-box mb-2">USO EXCLUSIVO PINTURAS Y MAS, S.A.</div>
                 
-                <div class="grid grid-cols-12 gap-4 text-sm mb-4">
+                <div class="grid grid-cols-12 gap-2 text-[10px] mb-2">
                     <div class="col-span-4 flex items-end">
-                        <span class="whitespace-nowrap mr-2 font-semibold">MONTO AUTORIZADO: Q.</span>
+                        <span class="whitespace-nowrap mr-1 font-bold">MONTO AUTORIZADO: Q.</span>
                         <div id="p_monto_autorizado" class="pdf-field"></div>
                     </div>
                     <div class="col-span-4 flex items-end">
-                        <span class="whitespace-nowrap mr-2 font-semibold">DIAS DE CRÉDITO:</span>
+                        <span class="whitespace-nowrap mr-1 font-bold">DIAS DE CRÉDITO:</span>
                         <div id="p_dias_autorizado" class="pdf-field"></div>
                     </div>
                     <div class="col-span-4 flex items-end">
-                        <span class="whitespace-nowrap mr-2 font-semibold">CÓDIGO DEL CLIENTE:</span>
+                        <span class="whitespace-nowrap mr-1 font-bold">CÓDIGO DEL CLIENTE:</span>
                         <div id="p_codigo_cliente" class="pdf-field"></div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-8 text-sm mt-6">
+                <div class="grid grid-cols-2 gap-6 text-[10px] mt-2">
                     <div>
-                        <div class="flex items-end mb-2">
-                            <span class="whitespace-nowrap mr-2 font-semibold">NOMBRE DE QUIEN AUTORIZA:</span>
+                        <div class="flex items-end mb-1">
+                            <span class="whitespace-nowrap mr-1 font-bold">NOMBRE DE QUIEN AUTORIZA:</span>
                             <div id="p_nombre_autoriza" class="pdf-field"></div>
                         </div>
                         <div class="flex items-end">
-                            <span class="whitespace-nowrap mr-2 font-semibold">FECHA AUTORIZACIÓN:</span>
-                            <div id="p_fecha_autoriza" class="pdf-field"></div>
+                            <span class="whitespace-nowrap mr-1 font-bold">FECHA AUTORIZACIÓN:</span>
+                            <div id="p_fecha_autoriza" class="pdf-field w-32"></div>
                         </div>
                     </div>
                     
                     <div class="flex flex-col items-center justify-end">
-                        <div class="w-full h-16 border-b border-black flex items-end justify-center relative">
+                        <div class="w-4/5 h-12 border-b border-black flex items-end justify-center relative">
                             <img id="p_firma_empresa_img" src="" class="signature-img absolute bottom-0" alt="Firma Empresa">
                         </div>
-                        <span class="font-bold mt-1">FIRMA</span>
+                        <span class="font-bold mt-1 text-[9px]">FIRMA</span>
                     </div>
                 </div>
             </div>
@@ -705,12 +729,13 @@
             const nitValue = document.getElementById('f_nit').value || 'documento';
             const fileName = "Solicitud_Credito_" + nitValue + ".pdf";
 
+            // CONFIGURACION PDF OPTIMIZADA (Tamaño CARTA / LETTER con márgenes exactos)
             const opt = {
-                margin:       0,
+                margin:       [10, 5, 10, 5], // top, left, bottom, right in mm
                 filename:     fileName,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                image:        { type: 'jpeg', quality: 1.0 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF:        { unit: 'mm', format: 'letter', orientation: 'portrait' }
             };
 
             html2pdf().set(opt).from(element).outputPdf('datauristring').then(function(pdfBase64) {
