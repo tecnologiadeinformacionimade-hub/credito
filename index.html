@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud de Apertura de Código para Crédito v2.1</title>
+    <title>Solicitud de Apertura de Código para Crédito v2.2</title>
     <!-- Tailwind CSS para el formulario UI -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- html2pdf.js -->
@@ -19,7 +19,7 @@
         .g-input:focus { border-bottom: 2px solid #2563eb; margin-bottom: -1px; }
         .g-label { display: block; font-weight: 500; color: #374151; margin-bottom: 4px; font-size: 0.95rem; }
 
-        /* --- ESTILOS DEL PDF (TABLAS A PRUEBA DE FALLOS) --- */
+        /* --- ESTILOS DEL PDF (CLONACIÓN EXACTA A LA IMAGEN) --- */
         #pdf-template-wrapper { 
             position: absolute; 
             left: -9999px; 
@@ -28,7 +28,8 @@
         }
         
         #document-container {
-            width: 760px; /* Ancho fijo seguro para el canvas */
+            width: 816px; /* Ancho exacto de hoja Carta a 96dpi */
+            padding: 50px 55px; /* Márgenes internos generosos para que nada se salga */
             background: white;
             font-family: Arial, Helvetica, sans-serif;
             color: black;
@@ -36,34 +37,36 @@
         }
 
         .pdf-title-sec {
-            font-size: 13px; font-weight: bold; text-transform: uppercase; margin-top: 15px; margin-bottom: 5px;
+            font-size: 12px; font-weight: bold; text-transform: uppercase; margin-top: 20px; margin-bottom: 10px;
         }
 
         /* Estructuras de Tabla Rock-Solid */
-        .pdf-tbl { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 8px; }
+        .pdf-tbl { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 12px; }
         .pdf-tbl td { padding: 4px 0; vertical-align: bottom; }
         .pdf-lbl { width: 1%; white-space: nowrap; padding-right: 5px; font-weight: normal; }
+        
+        /* Valores (Las líneas a llenar) */
         .pdf-val { 
             border-bottom: 1.5px solid black; 
             font-family: 'Courier New', Courier, monospace; 
-            font-size: 13px; 
+            font-size: 12px; 
             font-weight: bold; 
             padding-left: 5px; 
             color: #111;
         }
 
         /* Tabla de Referencias Comerciales */
-        .pdf-ref-tbl { width: 100%; border-collapse: collapse; text-align: center; margin-top: 5px; margin-bottom: 15px; }
-        .pdf-ref-tbl th, .pdf-ref-tbl td { border: 1.5px solid black; padding: 5px; }
+        .pdf-ref-tbl { width: 100%; border-collapse: collapse; text-align: center; margin-top: 5px; margin-bottom: 20px; }
+        .pdf-ref-tbl th, .pdf-ref-tbl td { border: 1.5px solid black; padding: 6px; }
         .pdf-ref-tbl th { font-size: 11px; font-weight: bold; }
-        .pdf-ref-tbl td { height: 22px; font-family: 'Courier New', Courier, monospace; font-size: 12px; font-weight: bold; }
+        .pdf-ref-tbl td { height: 24px; font-family: 'Courier New', Courier, monospace; font-size: 12px; font-weight: bold; }
 
-        .pdf-note { font-size: 11px; margin-top: 12px; line-height: 1.4; text-align: justify; }
-        .pdf-note ol { padding-left: 20px; margin: 5px 0 10px 0; }
+        .pdf-note { font-size: 10px; margin-top: 10px; line-height: 1.4; text-align: justify; }
+        .pdf-note ol { padding-left: 20px; margin: 4px 0 10px 0; line-height: 1.5; }
         
-        .pdf-important-box { border: 1px solid black; padding: 8px; font-weight: bold; text-align: justify; font-size: 10px; line-height: 1.2; background-color: #f9fafb; margin-bottom: 15px;}
+        .pdf-important-box { border: 1px solid black; padding: 10px; font-weight: bold; text-align: justify; font-size: 9.5px; line-height: 1.3; margin-bottom: 20px;}
 
-        .pdf-uso-exclusivo { border: 1.5px solid black; padding: 15px; margin-top: 20px; }
+        .pdf-uso-exclusivo { border: 1.5px solid black; padding: 25px; margin-top: 10px; height: 350px; }
         .signature-img { height: 40px; display: none; margin: 0 auto; object-fit: contain; }
     </style>
 </head>
@@ -82,7 +85,7 @@
             </button>
             
             <!-- INDICADOR DE VERSIÓN -->
-            <p class="text-xs font-semibold text-gray-400 mt-4 text-center">Versión 2.1 (Dos Páginas)</p>
+            <p class="text-xs font-semibold text-gray-400 mt-4 text-center">Versión 2.2 (Diseño Clónico)</p>
         </div>
     </div>
 
@@ -226,9 +229,15 @@
             <!-- Módulo 4: Crédito y Firma Cliente -->
             <div id="step-4" class="g-form-section g-form-step hidden">
                 <h2 class="text-xl font-bold mb-6 text-gray-800 border-b pb-2">4. Límite de Crédito y Aceptación</h2>
-                <div class="mb-6">
-                    <label class="g-label">Días de Crédito Solicitados <span class="text-red-500">*</span></label>
-                    <input type="number" id="f_dias_credito" class="g-input md:w-1/3" oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4);" required>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="g-label">Límite de Crédito Solicitado (Q.) <span class="text-red-500">*</span></label>
+                        <input type="text" id="f_limite_credito" class="g-input" maxlength="15" required>
+                    </div>
+                    <div>
+                        <label class="g-label">Días de Crédito Solicitados <span class="text-red-500">*</span></label>
+                        <input type="number" id="f_dias_credito" class="g-input" oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4);" required>
+                    </div>
                 </div>
 
                 <div class="bg-blue-50 p-4 rounded mb-6 text-sm text-blue-900 border border-blue-200">
@@ -310,21 +319,16 @@
         </form>
     </div>
 
-    <!-- EL DOCUMENTO A4 OCULTO (DISEÑO 100% TABLAS PARA CERO ERRORES) -->
+    <!-- EL DOCUMENTO A4 OCULTO (DISEÑO IDÉNTICO AL ORIGINAL) -->
     <div id="pdf-template-wrapper">
         <div id="document-container">
             
-            <!-- HEADER (Logo generado con CSS y Texto para evitar freeze de red) -->
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+            <!-- HEADER CON LOGO Y TÍTULO CENTRADO -->
+            <table style="width: 100%; margin-bottom: 25px;">
                 <tr>
-                    <td style="width: 25%; vertical-align: middle;">
-                        <!-- Logo simulado seguro -->
-                        <div style="font-family: Georgia, serif; font-size: 36px; font-weight: 900; font-style: italic; color: #1e3a8a;">
-                            <span style="color: #3b82f6; font-size: 44px;">i</span>made
-                        </div>
-                    </td>
-                    <td style="width: 75%; vertical-align: bottom; text-align: right; padding-bottom: 5px;">
-                        <div style="font-size: 17px; font-weight: bold; letter-spacing: -0.5px;">SOLICITUD DE APERTURA DE CÓDIGO PARA CRÉDITO</div>
+                    <td style="width: 20%;"><img src="logo.png" style="height: 50px;" onerror="this.style.display='none'"></td>
+                    <td style="width: 80%; text-align: center; vertical-align: middle; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">
+                        SOLICITUD DE APERTURA DE CÓDIGO PARA CRÉDITO
                     </td>
                 </tr>
             </table>
@@ -334,9 +338,9 @@
             
             <table class="pdf-tbl">
                 <tr>
-                    <td class="pdf-lbl">Nombre o Rs:</td>
+                    <td class="pdf-lbl">Nombre o Rs</td>
                     <td class="pdf-val" style="width: 60%;" id="p_nombre_rs"></td>
-                    <td class="pdf-lbl" style="padding-left: 10px;">N.I.T.:</td>
+                    <td class="pdf-lbl" style="padding-left: 20px;">N.I.T.:</td>
                     <td class="pdf-val" style="width: 35%;" id="p_nit"></td>
                 </tr>
             </table>
@@ -345,7 +349,7 @@
                 <tr>
                     <td class="pdf-lbl">Dirección:</td>
                     <td class="pdf-val" style="width: 50%;" id="p_direccion"></td>
-                    <td class="pdf-lbl" style="padding-left: 10px;">País:</td>
+                    <td class="pdf-lbl" style="padding-left: 20px;">País:</td>
                     <td class="pdf-val" style="width: 45%;" id="p_pais"></td>
                 </tr>
             </table>
@@ -353,18 +357,18 @@
             <table class="pdf-tbl">
                 <tr>
                     <td class="pdf-lbl">Municipio:</td>
-                    <td class="pdf-val" style="width: 40%;" id="p_municipio"></td>
-                    <td class="pdf-lbl" style="padding-left: 10px;">Coordenadas Latitud:</td>
-                    <td class="pdf-val" style="width: 35%;" id="p_latitud"></td>
+                    <td class="pdf-val" style="width: 50%;" id="p_municipio"></td>
+                    <td class="pdf-lbl" style="padding-left: 20px;">Coordenadas Latitud:</td>
+                    <td class="pdf-val" style="width: 45%;" id="p_latitud"></td>
                 </tr>
             </table>
             
             <table class="pdf-tbl">
                 <tr>
                     <td class="pdf-lbl">Departamento:</td>
-                    <td class="pdf-val" style="width: 40%;" id="p_departamento"></td>
-                    <td class="pdf-lbl" style="padding-left: 10px;">Longitud:</td>
-                    <td class="pdf-val" style="width: 35%;" id="p_longitud"></td>
+                    <td class="pdf-val" style="width: 50%;" id="p_departamento"></td>
+                    <td class="pdf-lbl" style="padding-left: 20px;">Longitud:</td>
+                    <td class="pdf-val" style="width: 45%;" id="p_longitud"></td>
                 </tr>
             </table>
             
@@ -376,13 +380,13 @@
             </table>
 
             <!-- Módulo 2 -->
-            <div class="pdf-title-sec">INFORMACIÓN GENERAL</div>
+            <div class="pdf-title-sec" style="margin-top: 25px;">INFORMACIÓN GENERAL</div>
             
             <table class="pdf-tbl">
                 <tr>
                     <td class="pdf-lbl">Dirección del Negocio:</td>
-                    <td class="pdf-val" style="width: 60%;" id="p_dir_negocio"></td>
-                    <td class="pdf-lbl" style="padding-left: 10px;">Teléfonos:</td>
+                    <td class="pdf-val" style="width: 65%;" id="p_dir_negocio"></td>
+                    <td class="pdf-lbl" style="padding-left: 20px;">Teléfonos:</td>
                     <td class="pdf-val" style="width: 30%;" id="p_tel_negocio"></td>
                 </tr>
             </table>
@@ -390,8 +394,8 @@
             <table class="pdf-tbl">
                 <tr>
                     <td class="pdf-lbl">Direccion de Entrega :</td>
-                    <td class="pdf-val" style="width: 60%;" id="p_dir_entrega"></td>
-                    <td class="pdf-lbl" style="padding-left: 10px;">Teléfonos:</td>
+                    <td class="pdf-val" style="width: 65%;" id="p_dir_entrega"></td>
+                    <td class="pdf-lbl" style="padding-left: 20px;">Teléfonos:</td>
                     <td class="pdf-val" style="width: 30%;" id="p_tel_entrega"></td>
                 </tr>
             </table>
@@ -400,9 +404,9 @@
                 <tr>
                     <td class="pdf-lbl">Contacto Compras:</td>
                     <td class="pdf-val" style="width: 35%;" id="p_contacto_compras"></td>
-                    <td class="pdf-lbl" style="padding-left: 10px;">Teléfonos:</td>
+                    <td class="pdf-lbl" style="padding-left: 20px;">Teléfonos:</td>
                     <td class="pdf-val" style="width: 25%;" id="p_tel_compras"></td>
-                    <td class="pdf-lbl" style="padding-left: 10px;">E mail:</td>
+                    <td class="pdf-lbl" style="padding-left: 20px;">E mail:</td>
                     <td class="pdf-val" style="width: 35%;" id="p_email_compras"></td>
                 </tr>
             </table>
@@ -411,15 +415,15 @@
                 <tr>
                     <td class="pdf-lbl">Contacto Cobros:</td>
                     <td class="pdf-val" style="width: 35%;" id="p_contacto_cobros"></td>
-                    <td class="pdf-lbl" style="padding-left: 10px;">Teléfonos:</td>
+                    <td class="pdf-lbl" style="padding-left: 20px;">Teléfonos:</td>
                     <td class="pdf-val" style="width: 25%;" id="p_tel_cobros"></td>
-                    <td class="pdf-lbl" style="padding-left: 10px;">E mail:</td>
+                    <td class="pdf-lbl" style="padding-left: 20px;">E mail:</td>
                     <td class="pdf-val" style="width: 35%;" id="p_email_cobros"></td>
                 </tr>
             </table>
 
             <!-- Módulo 3 -->
-            <div class="pdf-title-sec">REFERENCIAS COMERCIALES</div>
+            <div class="pdf-title-sec" style="margin-top: 25px;">REFERENCIAS COMERCIALES</div>
             <table class="pdf-ref-tbl">
                 <tr>
                     <th style="width: 40%;">NOMBRE</th>
@@ -432,13 +436,13 @@
             </table>
 
             <!-- Módulo 4 -->
-            <table class="pdf-tbl" style="margin-top: 15px; margin-bottom: 5px;">
+            <table class="pdf-tbl" style="margin-top: 25px; margin-bottom: 5px;">
                 <tr>
-                    <td class="pdf-lbl" style="font-weight: bold; font-size: 13px;">LIMITE DE CREDITO</td>
-                    <td class="pdf-val" style="width: 20%;"></td> 
-                    <td class="pdf-lbl" style="padding-left: 20px; font-weight: bold; font-size: 13px;">DIAS CREDITO:</td>
-                    <td class="pdf-val" style="width: 20%; text-align: center;" id="p_dias_credito"></td>
-                    <td></td> <!-- Relleno -->
+                    <td class="pdf-lbl" style="font-weight: bold; font-size: 12px;">LIMITE DE CREDITO</td>
+                    <td class="pdf-val" style="width: 35%; text-align: center;" id="p_limite_credito"></td> 
+                    <td class="pdf-lbl" style="padding-left: 30px; font-weight: bold; font-size: 12px;">DIAS CREDITO:</td>
+                    <td class="pdf-val" style="width: 25%; text-align: center;" id="p_dias_credito"></td>
+                    <td></td> <!-- Espacio extra -->
                 </tr>
             </table>
 
@@ -456,56 +460,56 @@
             </div>
 
             <!-- Firmas Cliente -->
-            <table style="width: 100%; margin-top: 20px; border-collapse: collapse;">
+            <table style="width: 100%; margin-top: 35px; border-collapse: collapse;">
                 <tr>
-                    <td style="width: 50%; vertical-align: bottom; padding-right: 20px;">
+                    <td style="width: 50%; vertical-align: bottom; padding-right: 30px;">
                         <table class="pdf-tbl">
                             <tr>
                                 <td class="pdf-lbl">NOMBRE DE QUIEN SOLICITA:</td>
                                 <td class="pdf-val" id="p_nombre_solicita"></td>
                             </tr>
                             <tr>
-                                <td class="pdf-lbl" style="padding-top: 15px;">FECHA:</td>
+                                <td class="pdf-lbl" style="padding-top: 20px;">FECHA:</td>
                                 <td class="pdf-val" id="p_fecha_solicita"></td>
                             </tr>
                         </table>
                     </td>
                     <td style="width: 50%; text-align: center; vertical-align: bottom;">
                         <img id="p_firma_cliente_img" class="signature-img">
-                        <div style="border-top: 1.5px solid black; width: 80%; margin: 0 auto; padding-top: 4px; font-size: 11px; font-weight: bold;">FIRMA</div>
+                        <div style="border-top: 1px solid black; width: 60%; margin: 0 auto; padding-top: 4px; font-size: 11px; font-weight: bold;">FIRMA</div>
                     </td>
                 </tr>
             </table>
 
-            <!-- SALTO DE PÁGINA AÑADIDO AQUÍ -->
+            <!-- SALTO DE PÁGINA: LA SECCIÓN DE ABAJO VA EN OTRA HOJA -->
             <div class="html2pdf__page-break"></div>
 
-            <!-- Módulo 5 (Uso Exclusivo) -->
+            <!-- Módulo 5 (Uso Exclusivo - Página 2) -->
             <div class="pdf-uso-exclusivo">
-                <div style="text-align: center; font-weight: bold; font-size: 15px; margin-bottom: 20px;">USO EXCLUSIVO PINTURAS Y MAS, S.A.</div>
+                <div style="text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 40px;">USO EXCLUSIVO PINTURAS Y MAS, S.A.</div>
                 
-                <table class="pdf-tbl">
+                <table class="pdf-tbl" style="margin-bottom: 30px;">
                     <tr>
                         <td class="pdf-lbl">MONTO AUTORIZADO:</td>
                         <td class="pdf-lbl" style="padding-left: 5px;">Q.</td>
-                        <td class="pdf-val" style="width: 30%;" id="p_monto_autorizado"></td>
-                        <td class="pdf-lbl" style="padding-left: 20px;">FECHA AUTORIZACIÓN:</td>
-                        <td class="pdf-val" style="width: 30%;" id="p_fecha_autoriza"></td>
+                        <td class="pdf-val" style="width: 35%;" id="p_monto_autorizado"></td>
+                        <td class="pdf-lbl" style="padding-left: 40px;">FECHA AUTORIZACIÓN:</td>
+                        <td class="pdf-val" style="width: 35%;" id="p_fecha_autoriza"></td>
                     </tr>
                 </table>
                 
                 <table class="pdf-tbl">
                     <tr>
                         <td class="pdf-lbl">DIAS DE CRÉDITO:</td>
-                        <td class="pdf-val" style="width: 35%;" id="p_dias_autorizado"></td>
-                        <td class="pdf-lbl" style="padding-left: 20px;">CÓDIGO DEL CLIENTE:</td>
-                        <td class="pdf-val" style="width: 35%;" id="p_codigo_cliente"></td>
+                        <td class="pdf-val" style="width: 40%;" id="p_dias_autorizado"></td>
+                        <td class="pdf-lbl" style="padding-left: 40px;">CÓDIGO DEL CLIENTE:</td>
+                        <td class="pdf-val" style="width: 40%;" id="p_codigo_cliente"></td>
                     </tr>
                 </table>
                 
-                <table style="width: 100%; margin-top: 30px; border-collapse: collapse;">
+                <table style="width: 100%; margin-top: 70px; border-collapse: collapse;">
                     <tr>
-                        <td style="width: 50%; vertical-align: bottom; padding-right: 20px;">
+                        <td style="width: 50%; vertical-align: bottom; padding-right: 30px;">
                             <table class="pdf-tbl">
                                 <tr>
                                     <td class="pdf-lbl">NOMBRE DE QUIEN AUTORIZA:</td>
@@ -515,7 +519,7 @@
                         </td>
                         <td style="width: 50%; text-align: center; vertical-align: bottom;">
                             <img id="p_firma_empresa_img" class="signature-img">
-                            <div style="border-top: 1.5px solid black; width: 80%; margin: 0 auto; padding-top: 4px; font-size: 11px; font-weight: bold;">FIRMA</div>
+                            <div style="border-top: 1px solid black; width: 80%; margin: 0 auto; padding-top: 4px; font-size: 11px; font-weight: bold;">FIRMA</div>
                         </td>
                     </tr>
                 </table>
@@ -712,7 +716,7 @@
             cerrarFirma();
         }
 
-        // --- Procesamiento, PDF y Envio V2.1 ---
+        // --- Procesamiento, PDF y Envio V2.2 ---
         function procesarFormulario(e) {
             e.preventDefault(); 
 
@@ -727,7 +731,7 @@
                 'nombre_rs', 'nit', 'direccion', 'pais', 'municipio', 'latitud', 'departamento', 'longitud', 'tel_whatsapp',
                 'dir_negocio', 'tel_negocio', 'dir_entrega', 'tel_entrega', 'contacto_compras', 'tel_compras', 'email_compras', 'contacto_cobros', 'tel_cobros', 'email_cobros',
                 'ref1_nombre', 'ref1_tel', 'ref1_rel', 'ref2_nombre', 'ref2_tel', 'ref2_rel', 'ref3_nombre', 'ref3_tel', 'ref3_rel',
-                'dias_credito', 'nombre_solicita', 'monto_autorizado', 'dias_autorizado', 'codigo_cliente', 'nombre_autoriza'
+                'limite_credito', 'dias_credito', 'nombre_solicita', 'monto_autorizado', 'dias_autorizado', 'codigo_cliente', 'nombre_autoriza'
             ];
 
             campos.forEach(campo => {
@@ -758,23 +762,22 @@
             const nitValue = document.getElementById('f_nit').value || 'documento';
             const fileName = "Solicitud_Credito_" + nitValue + ".pdf";
 
-            // V2.1 - CONFIGURACION SEGURA Y RAPIDA PARA TABLAS MULTI-PÁGINA
+            // V2.2 - MÁRGENES ESTÁNDAR CARTA PARA COMPENSAR ESPACIOS
             const opt = {
-                margin:       [0.3, 0.4, 0.3, 0.4], // Margenes en pulgadas
+                margin:       [0.4, 0.4, 0.4, 0.4], 
                 filename:     fileName,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true, logging: false }, 
                 jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' } 
             };
 
-            // Temporizador de seguridad (Si pasan 10 seg y el pdf no se crea, avisamos)
             const fallbackTimeout = setTimeout(() => {
                 document.getElementById('loading-overlay').classList.add('hidden');
                 alert("Hubo un problema de rendimiento en su navegador y el PDF no se pudo generar. Por favor, intente de nuevo.");
             }, 10000);
 
             html2pdf().set(opt).from(element).outputPdf('datauristring').then(function(pdfBase64) {
-                clearTimeout(fallbackTimeout); // Todo bien, cancelamos la alerta
+                clearTimeout(fallbackTimeout);
                 
                 fetch(pdfBase64)
                     .then(res => res.blob())
