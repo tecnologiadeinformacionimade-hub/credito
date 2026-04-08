@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud de Apertura de Código para Crédito v1.3</title>
+    <title>Solicitud de Apertura de Código para Crédito v1.4</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- html2pdf.js -->
@@ -44,7 +44,7 @@
             font-size: 0.95rem;
         }
 
-        /* Contenedor del PDF (Oculto en pantalla, usado solo para generar el archivo) */
+        /* --- CONFIGURACIÓN ESTRICTA DEL PDF (1 HOJA CARTA) --- */
         #pdf-template-wrapper {
             position: absolute;
             left: -9999px;
@@ -52,45 +52,47 @@
             background: white;
         }
         
-        /* Ajustes específicos para que quepa en 1 sola hoja CARTA */
         #document-container {
-            width: 200mm; /* Ancho ajustado para dar margen */
+            width: 205mm; /* Aprovechar al máximo el ancho de hoja carta */
             font-family: 'Arial', sans-serif;
             background: white;
             color: black;
-            font-size: 11px; /* Fuente base pequeña */
-            line-height: 1.2;
+            font-size: 9.5px; /* Fuente compacta pero legible */
+            line-height: 1.15;
         }
         .pdf-field {
-            display: inline-block;
+            display: flex;
+            align-items: flex-end;
             border-bottom: 1px solid black;
-            min-height: 14px;
+            min-height: 13px;
             width: 100%;
             padding: 0 2px;
             font-family: inherit;
             color: #1a202c;
             font-weight: normal;
+            white-space: nowrap;
+            overflow: hidden;
         }
         .signature-img {
             max-width: 100%;
-            height: 45px;
+            height: 32px; /* Reducido para evitar salto de página */
             object-fit: contain;
             display: none;
         }
         .pdf-title-box {
-            background-color: #e5e7eb; /* gray-200 */
+            background-color: #e5e7eb;
             border: 1px solid black;
             font-weight: bold;
             text-align: center;
-            padding: 2px;
-            font-size: 10px;
+            padding: 1.5px;
+            font-size: 9px;
             margin-bottom: 0;
         }
         .pdf-grid-box {
             border: 1px solid black;
             border-top: none;
-            padding: 4px 6px;
-            font-size: 10px;
+            padding: 3px 5px;
+            font-size: 9.5px;
         }
     </style>
 </head>
@@ -332,83 +334,94 @@
         </form>
     </div>
 
-    <!-- EL DOCUMENTO A4 OCULTO (Para generar el PDF Ultra Compacto) -->
+    <!-- EL DOCUMENTO A4 OCULTO (Para generar el PDF Ultra Compacto y Preciso) -->
     <div id="pdf-template-wrapper">
         <div id="document-container">
             
             <!-- Header / Logo -->
-            <div class="flex justify-between items-end mb-2">
+            <div class="flex justify-between items-end mb-1">
                 <div class="flex items-center">
-                    <img src="logo.png" alt="imade logo" class="h-10" onerror="this.outerHTML='<div class=\'text-blue-800 font-extrabold text-4xl italic\' style=\'font-family: Georgia, serif;\'><span class=\'text-blue-500 text-5xl\'>i</span>made</div>'">
+                    <img src="logo.png" alt="imade logo" class="h-8" onerror="this.outerHTML='<div class=\'text-blue-800 font-extrabold text-3xl italic\' style=\'font-family: Georgia, serif;\'><span class=\'text-blue-500 text-4xl\'>i</span>made</div>'">
                 </div>
-                <div class="text-right pb-1">
-                    <h2 class="font-bold text-lg uppercase tracking-tight">Solicitud de Apertura de Código para Crédito</h2>
+                <div class="text-right pb-0.5">
+                    <h2 class="font-bold text-[14px] uppercase tracking-tight">Solicitud de Apertura de Código para Crédito</h2>
                 </div>
             </div>
 
             <!-- Datos de Facturación -->
-            <div class="mb-2">
+            <div class="mb-1.5">
                 <div class="pdf-title-box">DATOS DE FACTURACIÓN</div>
-                <div class="pdf-grid-box grid grid-cols-12 gap-y-1 gap-x-2">
-                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Nombre o Rs:</span><div id="p_nombre_rs" class="pdf-field"></div></div>
-                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">N.I.T.:</span><div id="p_nit" class="pdf-field"></div></div>
-                    
-                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Dirección:</span><div id="p_direccion" class="pdf-field"></div></div>
-                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">País:</span><div id="p_pais" class="pdf-field"></div></div>
-                    
-                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Municipio:</span><div id="p_municipio" class="pdf-field"></div></div>
-                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Coordenadas Latitud:</span><div id="p_latitud" class="pdf-field"></div></div>
-                    
-                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Departamento:</span><div id="p_departamento" class="pdf-field"></div></div>
-                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Longitud:</span><div id="p_longitud" class="pdf-field"></div></div>
-                    
-                    <div class="col-span-12 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Telefono con WhatsApp:</span><div id="p_tel_whatsapp" class="pdf-field"></div></div>
+                <div class="pdf-grid-box">
+                    <div class="flex items-end mb-1">
+                        <div class="w-[70%] flex items-end pr-2"><span class="mr-1 font-bold">Nombre o Rs:</span><div id="p_nombre_rs" class="pdf-field"></div></div>
+                        <div class="w-[30%] flex items-end"><span class="mr-1 font-bold">N.I.T.:</span><div id="p_nit" class="pdf-field"></div></div>
+                    </div>
+                    <div class="flex items-end mb-1">
+                        <div class="w-[70%] flex items-end pr-2"><span class="mr-1 font-bold">Dirección:</span><div id="p_direccion" class="pdf-field"></div></div>
+                        <div class="w-[30%] flex items-end"><span class="mr-1 font-bold">País:</span><div id="p_pais" class="pdf-field"></div></div>
+                    </div>
+                    <div class="flex items-end mb-1">
+                        <div class="w-[45%] flex items-end pr-2"><span class="mr-1 font-bold">Municipio:</span><div id="p_municipio" class="pdf-field"></div></div>
+                        <div class="w-[55%] flex items-end"><span class="mr-1 font-bold">Coordenadas Latitud:</span><div id="p_latitud" class="pdf-field"></div></div>
+                    </div>
+                    <div class="flex items-end mb-1">
+                        <div class="w-[45%] flex items-end pr-2"><span class="mr-1 font-bold">Departamento:</span><div id="p_departamento" class="pdf-field"></div></div>
+                        <div class="w-[55%] flex items-end"><span class="mr-1 font-bold">Longitud:</span><div id="p_longitud" class="pdf-field"></div></div>
+                    </div>
+                    <div class="flex items-end">
+                        <div class="w-[50%] flex items-end"><span class="mr-1 font-bold">Telefono con WhatsApp:</span><div id="p_tel_whatsapp" class="pdf-field"></div></div>
+                    </div>
                 </div>
             </div>
 
             <!-- Información General -->
-            <div class="mb-2">
+            <div class="mb-1.5">
                 <div class="pdf-title-box">INFORMACIÓN GENERAL</div>
-                <div class="pdf-grid-box grid grid-cols-12 gap-y-1 gap-x-2">
-                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Dirección del Negocio:</span><div id="p_dir_negocio" class="pdf-field"></div></div>
-                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Teléfonos:</span><div id="p_tel_negocio" class="pdf-field"></div></div>
-                    
-                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Dirección de Entrega:</span><div id="p_dir_entrega" class="pdf-field"></div></div>
-                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Teléfonos:</span><div id="p_tel_entrega" class="pdf-field"></div></div>
-                    
-                    <div class="col-span-5 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Contacto Compras:</span><div id="p_contacto_compras" class="pdf-field"></div></div>
-                    <div class="col-span-3 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Teléfonos:</span><div id="p_tel_compras" class="pdf-field"></div></div>
-                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">E-mail:</span><div id="p_email_compras" class="pdf-field"></div></div>
-
-                    <div class="col-span-5 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Contacto Cobros:</span><div id="p_contacto_cobros" class="pdf-field"></div></div>
-                    <div class="col-span-3 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">Teléfonos:</span><div id="p_tel_cobros" class="pdf-field"></div></div>
-                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-1 font-bold">E-mail:</span><div id="p_email_cobros" class="pdf-field"></div></div>
+                <div class="pdf-grid-box">
+                    <div class="flex items-end mb-1">
+                        <div class="w-[70%] flex items-end pr-2"><span class="mr-1 font-bold">Dirección del Negocio:</span><div id="p_dir_negocio" class="pdf-field"></div></div>
+                        <div class="w-[30%] flex items-end"><span class="mr-1 font-bold">Teléfonos:</span><div id="p_tel_negocio" class="pdf-field"></div></div>
+                    </div>
+                    <div class="flex items-end mb-1">
+                        <div class="w-[70%] flex items-end pr-2"><span class="mr-1 font-bold">Dirección de Entrega:</span><div id="p_dir_entrega" class="pdf-field"></div></div>
+                        <div class="w-[30%] flex items-end"><span class="mr-1 font-bold">Teléfonos:</span><div id="p_tel_entrega" class="pdf-field"></div></div>
+                    </div>
+                    <div class="flex items-end mb-1">
+                        <div class="w-[38%] flex items-end pr-2"><span class="mr-1 font-bold">Contacto Compras:</span><div id="p_contacto_compras" class="pdf-field"></div></div>
+                        <div class="w-[24%] flex items-end pr-2"><span class="mr-1 font-bold">Teléfonos:</span><div id="p_tel_compras" class="pdf-field"></div></div>
+                        <div class="w-[38%] flex items-end"><span class="mr-1 font-bold">E-mail:</span><div id="p_email_compras" class="pdf-field"></div></div>
+                    </div>
+                    <div class="flex items-end">
+                        <div class="w-[38%] flex items-end pr-2"><span class="mr-1 font-bold">Contacto Cobros:</span><div id="p_contacto_cobros" class="pdf-field"></div></div>
+                        <div class="w-[24%] flex items-end pr-2"><span class="mr-1 font-bold">Teléfonos:</span><div id="p_tel_cobros" class="pdf-field"></div></div>
+                        <div class="w-[38%] flex items-end"><span class="mr-1 font-bold">E-mail:</span><div id="p_email_cobros" class="pdf-field"></div></div>
+                    </div>
                 </div>
             </div>
 
             <!-- Referencias Comerciales -->
-            <div class="mb-2">
+            <div class="mb-1.5">
                 <div class="pdf-title-box">REFERENCIAS COMERCIALES</div>
-                <table class="w-full text-[10px] border-collapse border border-black text-center" style="border-top:none;">
+                <table class="w-full text-[9px] border-collapse border border-black text-center" style="border-top:none;">
                     <thead>
                         <tr class="font-bold border-b border-black">
-                            <td class="border-r border-black py-0.5 w-1/3">NOMBRE</td>
-                            <td class="border-r border-black py-0.5 w-1/3">TELÉFONOS</td>
-                            <td class="py-0.5 w-1/3">RELACIÓN</td>
+                            <td class="border-r border-black py-0.5 w-[40%]">NOMBRE</td>
+                            <td class="border-r border-black py-0.5 w-[30%]">TELÉFONOS</td>
+                            <td class="py-0.5 w-[30%]">RELACIÓN</td>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="border-b border-black h-5">
+                        <tr class="border-b border-black h-4">
                             <td class="border-r border-black px-1" id="p_ref1_nombre"></td>
                             <td class="border-r border-black px-1" id="p_ref1_tel"></td>
                             <td class="px-1" id="p_ref1_rel"></td>
                         </tr>
-                        <tr class="border-b border-black h-5">
+                        <tr class="border-b border-black h-4">
                             <td class="border-r border-black px-1" id="p_ref2_nombre"></td>
                             <td class="border-r border-black px-1" id="p_ref2_tel"></td>
                             <td class="px-1" id="p_ref2_rel"></td>
                         </tr>
-                        <tr class="h-5">
+                        <tr class="h-4">
                             <td class="border-r border-black px-1" id="p_ref3_nombre"></td>
                             <td class="border-r border-black px-1" id="p_ref3_tel"></td>
                             <td class="px-1" id="p_ref3_rel"></td>
@@ -418,15 +431,15 @@
             </div>
 
             <!-- Limite de Crédito y Condiciones -->
-            <div class="mb-3 text-[10px]">
-                <div class="flex items-end mb-2">
-                    <h3 class="font-bold underline mr-3 text-xs">LÍMITE DE CRÉDITO</h3>
-                    <span class="mr-1 font-bold">DIAS CRÉDITO:</span>
-                    <div id="p_dias_credito" class="border-b border-black w-16 text-center font-bold"></div>
+            <div class="mb-2 text-[9px]">
+                <div class="flex items-end mb-1">
+                    <h3 class="font-bold underline mr-2 text-[10px]">LÍMITE DE CRÉDITO</h3>
+                    <span class="mr-1 font-bold text-[10px]">DIAS CRÉDITO:</span>
+                    <div id="p_dias_credito" class="border-b border-black w-14 text-center font-bold text-[10px]"></div>
                 </div>
 
-                <p class="font-bold mb-1">Nota: Si el crédito solicitado es concedido, deberá cumplir con las siguientes condiciones:</p>
-                <ol class="list-decimal pl-4 space-y-0.5 mb-2 leading-tight">
+                <p class="font-bold mb-0.5">Nota: Si el crédito solicitado es concedido, deberá cumplir con las siguientes condiciones:</p>
+                <ol class="list-decimal pl-4 space-y-0 mb-1.5 leading-tight">
                     <li>Hacer efectivos sus pagos el día de vencimiento del crédito.</li>
                     <li>Todo pago con cheque, debe hacerlo a nombre de la empresa (PINTURAS Y MAS, S.A.).</li>
                     <li>Todo pago se respalda únicamente con Recibo de Caja de PINTURAS Y MAS, S.A.</li>
@@ -440,62 +453,62 @@
             </div>
 
             <!-- Firma Cliente -->
-            <div class="grid grid-cols-2 gap-6 text-[10px] mb-4">
-                <div>
-                    <div class="flex items-end mb-1">
+            <div class="flex justify-between text-[9.5px] mb-2">
+                <div class="w-1/2 pr-4">
+                    <div class="flex items-end mb-1.5">
                         <span class="whitespace-nowrap mr-1 font-bold">NOMBRE DE QUIEN SOLICITA:</span>
                         <div id="p_nombre_solicita" class="pdf-field"></div>
                     </div>
                     <div class="flex items-end">
                         <span class="whitespace-nowrap mr-1 font-bold">FECHA:</span>
-                        <div id="p_fecha_solicita" class="pdf-field w-32"></div>
+                        <div id="p_fecha_solicita" class="pdf-field w-24"></div>
                     </div>
                 </div>
                 
-                <div class="flex flex-col items-center justify-end">
-                    <div class="w-4/5 h-12 border-b border-black flex items-end justify-center relative">
+                <div class="w-1/2 flex flex-col items-center justify-end pl-4">
+                    <div class="w-3/4 h-8 border-b border-black flex items-end justify-center relative">
                         <img id="p_firma_cliente_img" src="" class="signature-img absolute bottom-0" alt="Firma Cliente">
                     </div>
-                    <span class="font-bold mt-1 text-[9px]">FIRMA</span>
+                    <span class="font-bold mt-0.5 text-[8px]">FIRMA</span>
                 </div>
             </div>
 
             <!-- Uso Exclusivo Empresa -->
-            <div class="border-t-2 border-dashed border-black pt-2">
-                <div class="pdf-title-box mb-2">USO EXCLUSIVO PINTURAS Y MAS, S.A.</div>
+            <div class="border-t-2 border-dashed border-black pt-1.5">
+                <div class="pdf-title-box mb-1.5">USO EXCLUSIVO PINTURAS Y MAS, S.A.</div>
                 
-                <div class="grid grid-cols-12 gap-2 text-[10px] mb-2">
-                    <div class="col-span-4 flex items-end">
+                <div class="flex justify-between gap-2 text-[9.5px] mb-1.5">
+                    <div class="w-1/3 flex items-end">
                         <span class="whitespace-nowrap mr-1 font-bold">MONTO AUTORIZADO: Q.</span>
                         <div id="p_monto_autorizado" class="pdf-field"></div>
                     </div>
-                    <div class="col-span-4 flex items-end">
+                    <div class="w-1/3 flex items-end">
                         <span class="whitespace-nowrap mr-1 font-bold">DIAS DE CRÉDITO:</span>
                         <div id="p_dias_autorizado" class="pdf-field"></div>
                     </div>
-                    <div class="col-span-4 flex items-end">
+                    <div class="w-1/3 flex items-end">
                         <span class="whitespace-nowrap mr-1 font-bold">CÓDIGO DEL CLIENTE:</span>
                         <div id="p_codigo_cliente" class="pdf-field"></div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-6 text-[10px] mt-2">
-                    <div>
-                        <div class="flex items-end mb-1">
+                <div class="flex justify-between text-[9.5px] mt-1.5">
+                    <div class="w-1/2 pr-4">
+                        <div class="flex items-end mb-1.5">
                             <span class="whitespace-nowrap mr-1 font-bold">NOMBRE DE QUIEN AUTORIZA:</span>
                             <div id="p_nombre_autoriza" class="pdf-field"></div>
                         </div>
                         <div class="flex items-end">
                             <span class="whitespace-nowrap mr-1 font-bold">FECHA AUTORIZACIÓN:</span>
-                            <div id="p_fecha_autoriza" class="pdf-field w-32"></div>
+                            <div id="p_fecha_autoriza" class="pdf-field w-24"></div>
                         </div>
                     </div>
                     
-                    <div class="flex flex-col items-center justify-end">
-                        <div class="w-4/5 h-12 border-b border-black flex items-end justify-center relative">
+                    <div class="w-1/2 flex flex-col items-center justify-end pl-4">
+                        <div class="w-3/4 h-8 border-b border-black flex items-end justify-center relative">
                             <img id="p_firma_empresa_img" src="" class="signature-img absolute bottom-0" alt="Firma Empresa">
                         </div>
-                        <span class="font-bold mt-1 text-[9px]">FIRMA</span>
+                        <span class="font-bold mt-0.5 text-[8px]">FIRMA</span>
                     </div>
                 </div>
             </div>
@@ -505,18 +518,18 @@
 
     <!-- MODAL DE FIRMA -->
     <div id="firma-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center hidden">
-        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
-            <h3 class="text-lg font-bold mb-4 text-gray-800">Panel de Firma Digital</h3>
+        <div class="bg-white p-4 sm:p-6 rounded-lg shadow-xl w-[95%] max-w-lg">
+            <h3 class="text-lg font-bold mb-4 text-gray-800 text-center">Panel de Firma Digital</h3>
             
-            <div class="border-2 border-dashed border-gray-400 rounded bg-gray-50 mb-4 cursor-crosshair relative">
-                <canvas id="firma-canvas" width="450" height="200" class="w-full touch-none"></canvas>
+            <div class="border-2 border-dashed border-gray-400 rounded bg-gray-50 mb-4 cursor-crosshair relative w-full overflow-hidden">
+                <canvas id="firma-canvas" width="400" height="200" class="w-full touch-none"></canvas>
             </div>
             
             <div class="flex justify-between">
-                <button type="button" onclick="limpiarFirma()" class="px-4 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200 font-medium">Limpiar</button>
+                <button type="button" onclick="limpiarFirma()" class="px-3 py-2 sm:px-4 bg-red-100 text-red-700 rounded hover:bg-red-200 font-medium text-sm">Limpiar</button>
                 <div class="space-x-2">
-                    <button type="button" onclick="cerrarFirma()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 font-medium">Cancelar</button>
-                    <button type="button" onclick="guardarFirma()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium">Guardar Firma</button>
+                    <button type="button" onclick="cerrarFirma()" class="px-3 py-2 sm:px-4 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 font-medium text-sm">Cancelar</button>
+                    <button type="button" onclick="guardarFirma()" class="px-3 py-2 sm:px-4 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium text-sm">Guardar Firma</button>
                 </div>
             </div>
         </div>
@@ -529,7 +542,7 @@
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
         <p class="text-lg font-bold text-gray-700">Procesando documento y enviando correo...</p>
-        <p class="text-sm text-gray-500 mt-2">Enviando a través del servidor API seguro.</p>
+        <p class="text-sm text-gray-500 mt-2 text-center px-4">Por favor espere unos segundos mientras se sube el archivo a la API segura.</p>
     </div>
 
     <script>
@@ -606,7 +619,7 @@
             document.getElementById('txt-firma-empresa').style.display = 'block';
         }
 
-        // --- Lógica del Canvas (Firma) ---
+        // --- Lógica del Canvas (Firma Responsiva) ---
         const canvas = document.getElementById('firma-canvas');
         const ctx = canvas.getContext('2d');
         const modal = document.getElementById('firma-modal');
@@ -614,15 +627,20 @@
         let isDrawing = false;
         
         ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 2.5;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
         function getCoordinates(e) {
             const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return { x: clientX - rect.left, y: clientY - rect.top };
+            return { 
+                x: (clientX - rect.left) * scaleX, 
+                y: (clientY - rect.top) * scaleY 
+            };
         }
 
         function startDrawing(e) {
@@ -654,12 +672,16 @@
         function abrirFirma(target) {
             currentSignatureTarget = target; 
             modal.classList.remove('hidden');
-            limpiarFirma();
-            const rect = canvas.getBoundingClientRect();
+            
+            // Reajustar dimensiones para celulares
+            const rect = canvas.parentNode.getBoundingClientRect();
             canvas.width = rect.width;
-            canvas.height = rect.height;
+            canvas.height = 150; // Altura fija para móvil/desktop
+            
+            limpiarFirma();
+            
             ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 2.5;
             ctx.lineCap = 'round';
         }
 
@@ -683,7 +705,7 @@
             cerrarFirma();
         }
 
-        // --- Procesamiento, PDF y Envio V1.2 ---
+        // --- Procesamiento, PDF y Envio V1.4 ---
         function procesarFormulario(e) {
             e.preventDefault(); 
 
@@ -729,12 +751,12 @@
             const nitValue = document.getElementById('f_nit').value || 'documento';
             const fileName = "Solicitud_Credito_" + nitValue + ".pdf";
 
-            // CONFIGURACION PDF OPTIMIZADA (Tamaño CARTA / LETTER con márgenes exactos)
+            // CONFIGURACION PDF MILIMÉTRICA (Tamaño CARTA / LETTER con margen superior mini)
             const opt = {
-                margin:       [10, 5, 10, 5], // top, left, bottom, right in mm
+                margin:       [3, 5, 3, 5], // [Arriba 3mm, Izquierda 5mm, Abajo 3mm, Derecha 5mm]
                 filename:     fileName,
                 image:        { type: 'jpeg', quality: 1.0 },
-                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true, windowWidth: 800 },
                 jsPDF:        { unit: 'mm', format: 'letter', orientation: 'portrait' }
             };
 
@@ -777,7 +799,6 @@
             const pdfBlob = dataURItoBlob(pdfBase64);
             const nombreEmpresa = document.getElementById('f_nombre_rs').value;
 
-            // 1. Crear iframe oculto para evitar que la página se redireccione al enviar el form
             const iframeName = 'hidden_iframe_' + new Date().getTime();
             const iframe = document.createElement('iframe');
             iframe.name = iframeName;
@@ -786,14 +807,12 @@
 
             let formSubmitted = false;
 
-            // Cuando el iframe se cargue por segunda vez (después del submit)
             iframe.onload = function() {
                 if (formSubmitted) {
                     document.getElementById('loading-overlay').classList.add('hidden');
                     alert("¡ÉXITO! El PDF ADJUNTO se ha enviado automáticamente a h.reyes.\n\n(Revise la bandeja de entrada y spam, si es la primera vez puede requerir confirmación).");
                     resetearFormulario();
                     
-                    // Limpiar el DOM para la próxima vez
                     setTimeout(() => {
                         if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
                         const f = document.getElementById('form-submit-hidden');
@@ -802,16 +821,14 @@
                 }
             };
 
-            // 2. Crear formulario HTML nativo
             const form = document.createElement('form');
             form.id = 'form-submit-hidden';
             form.action = 'https://formsubmit.co/h.reyes@grupoimade.com';
             form.method = 'POST';
-            form.enctype = 'multipart/form-data'; // Obligatorio para que FormSubmit lea archivos adjuntos
-            form.target = iframeName; // Enviar la respuesta al iframe
+            form.enctype = 'multipart/form-data'; 
+            form.target = iframeName; 
             form.style.display = 'none';
 
-            // 3. Crear inputs ocultos con los datos del correo
             const addHiddenInput = (name, value) => {
                 const input = document.createElement('input');
                 input.type = 'hidden';
@@ -823,19 +840,16 @@
             addHiddenInput("_subject", "Apertura de Codigo Credito - " + nombreEmpresa);
             addHiddenInput("_captcha", "false"); 
             addHiddenInput("_template", "table");
-            // Truco para que formsubmit redireccione a nosotros mismos y dispare correctamente el 'onload' del iframe
             addHiddenInput("_next", window.location.href); 
             
             addHiddenInput("Mensaje", "Se ha generado una nueva solicitud de crédito. Encuentre el documento PDF oficial adjunto en este correo.");
             addHiddenInput("Empresa Solicitante", nombreEmpresa);
             addHiddenInput("NIT", document.getElementById('f_nit').value);
 
-            // 4. TRUCO PRINCIPAL: Añadir el PDF generado como si fuera un input de archivo real
             const fileInput = document.createElement('input');
             fileInput.type = 'file';
-            fileInput.name = "Documento_PDF"; // Nombre del archivo adjunto
+            fileInput.name = "Documento_PDF"; 
             
-            // Usar DataTransfer para inyectar el Blob programáticamente
             const file = new File([pdfBlob], fileName, { type: "application/pdf" });
             const dataTransfer = new DataTransfer();
             dataTransfer.items.add(file);
@@ -844,11 +858,9 @@
             form.appendChild(fileInput);
             document.body.appendChild(form);
 
-            // 5. Enviar de verdad el formulario
             formSubmitted = true;
             form.submit();
 
-            // Tiempo de espera de respaldo (10 segundos) por si el iframe falla al leer la redirección cruzada
             setTimeout(() => {
                 if(!document.getElementById('loading-overlay').classList.contains('hidden')) {
                     document.getElementById('loading-overlay').classList.add('hidden');
