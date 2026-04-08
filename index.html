@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud de Apertura de Código para Crédito v1.5</title>
+    <title>Solicitud de Apertura de Código para Crédito v1.6</title>
     <!-- Tailwind CSS para el formulario UI -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- html2pdf.js -->
@@ -19,45 +19,50 @@
         .g-input:focus { border-bottom: 2px solid #2563eb; margin-bottom: -1px; }
         .g-label { display: block; font-weight: 500; color: #374151; margin-bottom: 4px; font-size: 0.95rem; }
 
-        /* --- ESTILOS ESTRICTOS DEL PDF (SIN TAILWIND) --- */
+        /* --- ESTILOS ESTRICTOS DEL PDF (100% HOJA CARTA PIXEL PERFECT) --- */
         #pdf-template-wrapper { position: absolute; left: -9999px; top: 0; background: white; }
         
         #document-container {
-            width: 800px; /* Ancho fijo para garantizar consistencia en html2canvas */
-            padding: 20px 30px;
+            width: 816px;   /* Exactamente 8.5 pulgadas a 96dpi */
+            height: 1056px; /* Exactamente 11 pulgadas a 96dpi (Garantiza 1 sola hoja) */
+            padding: 40px 45px; /* Márgenes internos simulados */
             background: white;
             font-family: Arial, Helvetica, sans-serif;
             color: black;
             box-sizing: border-box;
+            overflow: hidden;
         }
 
-        .pdf-header { width: 100%; margin-bottom: 15px; border-collapse: collapse; }
+        .pdf-header { width: 100%; margin-bottom: 12px; border-collapse: collapse; }
         .pdf-header td { vertical-align: bottom; }
-        .pdf-logo { height: 45px; }
-        .pdf-title { font-size: 18px; font-weight: bold; text-align: right; letter-spacing: -0.5px; }
+        .pdf-logo { height: 42px; }
+        .pdf-title { font-size: 16px; font-weight: bold; text-align: right; letter-spacing: -0.3px; }
 
-        .pdf-section { border: 1px solid black; margin-bottom: 15px; }
-        .pdf-section-title { background-color: #e5e7eb; border-bottom: 1px solid black; text-align: center; font-weight: bold; padding: 4px; font-size: 12px; }
+        .pdf-section { border: 1px solid black; margin-bottom: 12px; }
+        .pdf-section-title { background-color: #e5e7eb; border-bottom: 1px solid black; text-align: center; font-weight: bold; padding: 3px; font-size: 11px; }
         
-        .pdf-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        .pdf-table td { padding: 5px; vertical-align: bottom; }
+        .pdf-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .pdf-table td { padding: 4px 6px; vertical-align: bottom; }
         .pdf-label { white-space: nowrap; font-weight: bold; width: 1%; }
-        .pdf-line { border-bottom: 1px solid black; width: auto; color: #111; font-family: inherit; }
+        .pdf-line { border-bottom: 1px solid black; width: auto; color: #111; vertical-align: bottom; padding-bottom: 1px; }
+        
+        /* Contenedor interno para evitar que el texto desborde hacia abajo */
+        .pdf-line div { min-height: 13px; white-space: nowrap; overflow: hidden; font-size: 11px; font-family: 'Courier New', Courier, monospace; font-weight: bold; }
 
         .pdf-ref-table { width: 100%; border-collapse: collapse; text-align: center; border-top: none; }
-        .pdf-ref-table th { border-bottom: 1px solid black; border-right: 1px solid black; padding: 5px; font-size: 11px; font-weight: bold; background-color: #f9fafb; }
+        .pdf-ref-table th { border-bottom: 1px solid black; border-right: 1px solid black; padding: 4px; font-size: 10px; font-weight: bold; background-color: #f9fafb; }
         .pdf-ref-table th:last-child { border-right: none; }
-        .pdf-ref-table td { border-bottom: 1px solid black; border-right: 1px solid black; padding: 5px; height: 22px; font-size: 12px; }
+        .pdf-ref-table td { border-bottom: 1px solid black; border-right: 1px solid black; padding: 4px; height: 20px; font-size: 11px; font-family: 'Courier New', Courier, monospace; font-weight: bold; }
         .pdf-ref-table tr:last-child td { border-bottom: none; }
         .pdf-ref-table td:last-child { border-right: none; }
 
-        .pdf-text-block { font-size: 11px; margin-bottom: 15px; }
-        .pdf-text-block ol { padding-left: 20px; margin: 5px 0 10px 0; line-height: 1.4; }
-        .pdf-important-box { border: 1px solid black; padding: 8px; font-weight: bold; text-align: justify; font-size: 10.5px; line-height: 1.3; }
+        .pdf-text-block { font-size: 11px; margin-bottom: 10px; }
+        .pdf-text-block ol { padding-left: 20px; margin: 4px 0 8px 0; line-height: 1.3; }
+        .pdf-important-box { border: 1px solid black; padding: 6px 8px; font-weight: bold; text-align: justify; font-size: 10px; line-height: 1.2; background-color: #f9fafb; }
 
-        .pdf-sig-table { width: 100%; margin-top: 5px; border-collapse: collapse; font-size: 12px; }
+        .pdf-sig-table { width: 100%; margin-top: 5px; border-collapse: collapse; font-size: 11px; }
         .pdf-sig-table td { vertical-align: bottom; }
-        .pdf-sig-line { border-top: 1px solid black; width: 220px; margin: 0 auto; padding-top: 4px; font-weight: bold; text-align: center; font-size: 11px; }
+        .pdf-sig-line { border-top: 1px solid black; width: 220px; margin: 0 auto; padding-top: 2px; font-weight: bold; text-align: center; font-size: 10px; }
         .signature-img { height: 40px; display: none; margin: 0 auto; object-fit: contain; padding-bottom: 2px; }
     </style>
 </head>
@@ -69,9 +74,13 @@
             <img src="logo.png" alt="imade logo" class="h-16 mx-auto mb-6" onerror="this.outerHTML='<div class=\'text-blue-800 font-extrabold text-5xl italic mb-6\'><span class=\'text-blue-500 text-6xl\'>i</span>made</div>'">
             <h1 class="text-2xl font-bold text-gray-800 mb-2">Solicitud de Crédito</h1>
             <p class="text-gray-600 mb-8">Por favor, complete todos los campos requeridos para procesar su solicitud de apertura de código.</p>
+            
             <button type="button" onclick="iniciarFormulario()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition duration-200">
                 Llenar Formulario
             </button>
+            
+            <!-- INDICADOR DE VERSIÓN -->
+            <p class="text-xs font-semibold text-gray-400 mt-4 text-center">Versión 1.6</p>
         </div>
     </div>
 
@@ -299,7 +308,7 @@
         </form>
     </div>
 
-    <!-- EL DOCUMENTO A4 OCULTO (Estructura de Tabla HTML Pura para PDF Perfecto) -->
+    <!-- EL DOCUMENTO A4 OCULTO (Estructura de Tabla HTML Pura 100% Exacta a Carta) -->
     <div id="pdf-template-wrapper">
         <div id="document-container">
             
@@ -313,40 +322,40 @@
             <!-- Módulo 1 -->
             <div class="pdf-section">
                 <div class="pdf-section-title">DATOS DE FACTURACIÓN</div>
-                <table class="pdf-table" style="margin-top: 4px; margin-bottom: 4px;">
+                <table class="pdf-table" style="margin-top: 2px; margin-bottom: 2px;">
                     <colgroup>
                         <col style="width: 1%;">
-                        <col style="width: 60%;">
+                        <col style="width: 58%;">
                         <col style="width: 1%;">
-                        <col style="width: 38%;">
+                        <col style="width: 40%;">
                     </colgroup>
                     <tr>
                         <td class="pdf-label">Nombre o Rs:</td>
-                        <td class="pdf-line"><span id="p_nombre_rs"></span></td>
+                        <td class="pdf-line"><div id="p_nombre_rs"></div></td>
                         <td class="pdf-label">N.I.T.:</td>
-                        <td class="pdf-line"><span id="p_nit"></span></td>
+                        <td class="pdf-line"><div id="p_nit"></div></td>
                     </tr>
                     <tr>
                         <td class="pdf-label">Dirección:</td>
-                        <td class="pdf-line"><span id="p_direccion"></span></td>
+                        <td class="pdf-line"><div id="p_direccion"></div></td>
                         <td class="pdf-label">País:</td>
-                        <td class="pdf-line"><span id="p_pais"></span></td>
+                        <td class="pdf-line"><div id="p_pais"></div></td>
                     </tr>
                     <tr>
                         <td class="pdf-label">Municipio:</td>
-                        <td class="pdf-line"><span id="p_municipio"></span></td>
+                        <td class="pdf-line"><div id="p_municipio"></div></td>
                         <td class="pdf-label">Coordenadas Latitud:</td>
-                        <td class="pdf-line"><span id="p_latitud"></span></td>
+                        <td class="pdf-line"><div id="p_latitud"></div></td>
                     </tr>
                     <tr>
                         <td class="pdf-label">Departamento:</td>
-                        <td class="pdf-line"><span id="p_departamento"></span></td>
+                        <td class="pdf-line"><div id="p_departamento"></div></td>
                         <td class="pdf-label">Longitud:</td>
-                        <td class="pdf-line"><span id="p_longitud"></span></td>
+                        <td class="pdf-line"><div id="p_longitud"></div></td>
                     </tr>
                     <tr>
                         <td class="pdf-label">Telefono con WhatsApp:</td>
-                        <td class="pdf-line" colspan="3"><span id="p_tel_whatsapp"></span></td>
+                        <td class="pdf-line" colspan="3"><div id="p_tel_whatsapp"></div></td>
                     </tr>
                 </table>
             </div>
@@ -354,7 +363,7 @@
             <!-- Módulo 2 -->
             <div class="pdf-section">
                 <div class="pdf-section-title">INFORMACIÓN GENERAL</div>
-                <table class="pdf-table" style="margin-top: 4px; margin-bottom: 4px;">
+                <table class="pdf-table" style="margin-top: 2px; margin-bottom: 2px;">
                     <colgroup>
                         <col style="width: 1%;">
                         <col style="width: 35%;">
@@ -365,31 +374,31 @@
                     </colgroup>
                     <tr>
                         <td class="pdf-label">Dirección del Negocio:</td>
-                        <td class="pdf-line" colspan="3"><span id="p_dir_negocio"></span></td>
+                        <td class="pdf-line" colspan="3"><div id="p_dir_negocio"></div></td>
                         <td class="pdf-label">Teléfonos:</td>
-                        <td class="pdf-line"><span id="p_tel_negocio"></span></td>
+                        <td class="pdf-line"><div id="p_tel_negocio"></div></td>
                     </tr>
                     <tr>
                         <td class="pdf-label">Dirección de Entrega:</td>
-                        <td class="pdf-line" colspan="3"><span id="p_dir_entrega"></span></td>
+                        <td class="pdf-line" colspan="3"><div id="p_dir_entrega"></div></td>
                         <td class="pdf-label">Teléfonos:</td>
-                        <td class="pdf-line"><span id="p_tel_entrega"></span></td>
+                        <td class="pdf-line"><div id="p_tel_entrega"></div></td>
                     </tr>
                     <tr>
                         <td class="pdf-label">Contacto Compras:</td>
-                        <td class="pdf-line"><span id="p_contacto_compras"></span></td>
+                        <td class="pdf-line"><div id="p_contacto_compras"></div></td>
                         <td class="pdf-label">Teléfonos:</td>
-                        <td class="pdf-line"><span id="p_tel_compras"></span></td>
+                        <td class="pdf-line"><div id="p_tel_compras"></div></td>
                         <td class="pdf-label">E-mail:</td>
-                        <td class="pdf-line"><span id="p_email_compras"></span></td>
+                        <td class="pdf-line"><div id="p_email_compras"></div></td>
                     </tr>
                     <tr>
                         <td class="pdf-label">Contacto Cobros:</td>
-                        <td class="pdf-line"><span id="p_contacto_cobros"></span></td>
+                        <td class="pdf-line"><div id="p_contacto_cobros"></div></td>
                         <td class="pdf-label">Teléfonos:</td>
-                        <td class="pdf-line"><span id="p_tel_cobros"></span></td>
+                        <td class="pdf-line"><div id="p_tel_cobros"></div></td>
                         <td class="pdf-label">E-mail:</td>
-                        <td class="pdf-line"><span id="p_email_cobros"></span></td>
+                        <td class="pdf-line"><div id="p_email_cobros"></div></td>
                     </tr>
                 </table>
             </div>
@@ -404,30 +413,30 @@
                         <th style="width: 30%;">RELACIÓN</th>
                     </tr>
                     <tr>
-                        <td><span id="p_ref1_nombre"></span></td>
-                        <td><span id="p_ref1_tel"></span></td>
-                        <td><span id="p_ref1_rel"></span></td>
+                        <td><div id="p_ref1_nombre"></div></td>
+                        <td><div id="p_ref1_tel"></div></td>
+                        <td><div id="p_ref1_rel"></div></td>
                     </tr>
                     <tr>
-                        <td><span id="p_ref2_nombre"></span></td>
-                        <td><span id="p_ref2_tel"></span></td>
-                        <td><span id="p_ref2_rel"></span></td>
+                        <td><div id="p_ref2_nombre"></div></td>
+                        <td><div id="p_ref2_tel"></div></td>
+                        <td><div id="p_ref2_rel"></div></td>
                     </tr>
                     <tr>
-                        <td><span id="p_ref3_nombre"></span></td>
-                        <td><span id="p_ref3_tel"></span></td>
-                        <td><span id="p_ref3_rel"></span></td>
+                        <td><div id="p_ref3_nombre"></div></td>
+                        <td><div id="p_ref3_tel"></div></td>
+                        <td><div id="p_ref3_rel"></div></td>
                     </tr>
                 </table>
             </div>
 
             <!-- Módulo 4 -->
             <div class="pdf-text-block">
-                <table class="pdf-table" style="width: auto; margin-bottom: 8px;">
+                <table class="pdf-table" style="width: auto; margin-bottom: 6px;">
                     <tr>
                         <td class="pdf-label" style="text-decoration: underline;">LÍMITE DE CRÉDITO</td>
                         <td class="pdf-label" style="padding-left: 20px;">DIAS CRÉDITO:</td>
-                        <td class="pdf-line" style="width: 80px; text-align: center;"><span id="p_dias_credito"></span></td>
+                        <td class="pdf-line" style="width: 80px; text-align: center;"><div id="p_dias_credito"></div></td>
                     </tr>
                 </table>
 
@@ -452,11 +461,11 @@
                         <table class="pdf-table">
                             <tr>
                                 <td class="pdf-label">NOMBRE DE QUIEN SOLICITA:</td>
-                                <td class="pdf-line"><span id="p_nombre_solicita"></span></td>
+                                <td class="pdf-line"><div id="p_nombre_solicita"></div></td>
                             </tr>
                             <tr>
                                 <td class="pdf-label" style="padding-top: 15px;">FECHA:</td>
-                                <td class="pdf-line"><span id="p_fecha_solicita"></span></td>
+                                <td class="pdf-line"><div id="p_fecha_solicita"></div></td>
                             </tr>
                         </table>
                     </td>
@@ -468,31 +477,31 @@
             </table>
 
             <!-- Módulo 5 (Uso Exclusivo) -->
-            <div class="pdf-section" style="margin-top: 25px; border-top: 2px dashed black;">
+            <div class="pdf-section" style="margin-top: 15px; border-top: 2px dashed black;">
                 <div class="pdf-section-title">USO EXCLUSIVO PINTURAS Y MAS, S.A.</div>
                 
                 <table class="pdf-table" style="margin-top: 5px;">
                     <tr>
                         <td class="pdf-label">MONTO AUTORIZADO: Q.</td>
-                        <td class="pdf-line" style="width: 20%;"><span id="p_monto_autorizado"></span></td>
+                        <td class="pdf-line" style="width: 20%;"><div id="p_monto_autorizado"></div></td>
                         <td class="pdf-label" style="padding-left: 15px;">DIAS DE CRÉDITO:</td>
-                        <td class="pdf-line" style="width: 20%;"><span id="p_dias_autorizado"></span></td>
+                        <td class="pdf-line" style="width: 20%;"><div id="p_dias_autorizado"></div></td>
                         <td class="pdf-label" style="padding-left: 15px;">CÓDIGO DEL CLIENTE:</td>
-                        <td class="pdf-line" style="width: 25%;"><span id="p_codigo_cliente"></span></td>
+                        <td class="pdf-line" style="width: 25%;"><div id="p_codigo_cliente"></div></td>
                     </tr>
                 </table>
 
-                <table class="pdf-sig-table" style="margin-top: 15px; margin-bottom: 10px;">
+                <table class="pdf-sig-table" style="margin-top: 15px; margin-bottom: 5px;">
                     <tr>
                         <td style="width: 50%;">
                             <table class="pdf-table">
                                 <tr>
                                     <td class="pdf-label">NOMBRE DE QUIEN AUTORIZA:</td>
-                                    <td class="pdf-line"><span id="p_nombre_autoriza"></span></td>
+                                    <td class="pdf-line"><div id="p_nombre_autoriza"></div></td>
                                 </tr>
                                 <tr>
                                     <td class="pdf-label" style="padding-top: 15px;">FECHA AUTORIZACIÓN:</td>
-                                    <td class="pdf-line"><span id="p_fecha_autoriza"></span></td>
+                                    <td class="pdf-line"><div id="p_fecha_autoriza"></div></td>
                                 </tr>
                             </table>
                         </td>
@@ -695,7 +704,7 @@
             cerrarFirma();
         }
 
-        // --- Procesamiento, PDF y Envio V1.5 ---
+        // --- Procesamiento, PDF y Envio V1.6 ---
         function procesarFormulario(e) {
             e.preventDefault(); 
 
@@ -741,13 +750,13 @@
             const nitValue = document.getElementById('f_nit').value || 'documento';
             const fileName = "Solicitud_Credito_" + nitValue + ".pdf";
 
-            // CONFIGURACION PDF OPTIMIZADA PARA LA TABLA (Márgenes iguales, se ajusta automático al ancho 800px)
+            // V1.6 - CONFIGURACION ESTRICTA PARA EVITAR COMPRESIÓN EN MÓVILES
             const opt = {
-                margin:       [10, 10, 10, 10], 
+                margin:       0, // Los márgenes ya están en el CSS como padding
                 filename:     fileName,
                 image:        { type: 'jpeg', quality: 1.0 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'letter', orientation: 'portrait' }
+                html2canvas:  { scale: 2, useCORS: true, windowWidth: 816, windowHeight: 1056 }, // Fuerza dimensiones de PC
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' } // Formato exacto Carta
             };
 
             html2pdf().set(opt).from(element).outputPdf('datauristring').then(function(pdfBase64) {
