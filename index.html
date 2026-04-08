@@ -1,1 +1,828 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud de Apertura de Código para Crédito</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- SMTP.js -->
+    <script src="https://smtpjs.com/v3/smtp.js"></script>
 
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* Estilos tipo Google Forms */
+        .g-form-section {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .g-form-header {
+            border-top: 8px solid #2563eb;
+        }
+        .g-input {
+            width: 100%;
+            border: none;
+            border-bottom: 1px solid #d1d5db;
+            padding: 8px 0;
+            background-color: transparent;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .g-input:focus {
+            border-bottom: 2px solid #2563eb;
+            margin-bottom: -1px;
+        }
+        .g-label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 4px;
+            font-size: 0.95rem;
+        }
+
+        /* Contenedor del PDF (Oculto en pantalla, usado solo para generar el archivo) */
+        #pdf-template-wrapper {
+            position: absolute;
+            left: -9999px;
+            top: 0;
+            background: white;
+        }
+        #document-container {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 15mm;
+            font-family: 'Arial', sans-serif;
+            background: white;
+        }
+        .pdf-field {
+            display: inline-block;
+            border-bottom: 1px solid black;
+            min-height: 20px;
+            width: 100%;
+            padding: 0 4px;
+            font-family: inherit;
+            font-size: 0.875rem;
+        }
+        .signature-img {
+            max-width: 100%;
+            height: 60px;
+            object-fit: contain;
+            display: none;
+        }
+    </style>
+</head>
+<body class="text-gray-900">
+
+    <!-- PANTALLA DE INICIO -->
+    <div id="pantalla-inicio" class="min-h-screen flex flex-col items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center border-t-8 border-blue-600">
+            <img src="logo.png" alt="imade logo" class="h-16 mx-auto mb-6" onerror="this.outerHTML='<div class=\'text-blue-800 font-extrabold text-5xl italic mb-6\'><span class=\'text-blue-500 text-6xl\'>i</span>made</div>'">
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">Solicitud de Crédito</h1>
+            <p class="text-gray-600 mb-8">Por favor, complete todos los campos requeridos para procesar su solicitud de apertura de código.</p>
+            <button type="button" onclick="iniciarFormulario()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition duration-200">
+                Llenar Formulario
+            </button>
+        </div>
+    </div>
+
+    <!-- PANTALLA DEL FORMULARIO (Estilo Google Forms) -->
+    <div id="pantalla-formulario" class="hidden min-h-screen py-8 px-4">
+        <form id="main-form" class="max-w-3xl mx-auto" onsubmit="procesarFormulario(event)">
+            
+            <!-- Encabezado del Formulario -->
+            <div class="g-form-section g-form-header">
+                <div class="flex justify-between items-start">
+                    <img src="logo.png" alt="imade logo" class="h-12 mb-4" onerror="this.outerHTML='<div class=\'text-blue-800 font-extrabold text-4xl italic mb-4\'><span class=\'text-blue-500 text-5xl\'>i</span>made</div>'">
+                    <span id="step-indicator" class="bg-blue-100 text-blue-800 text-sm font-bold px-3 py-1 rounded-full">Paso 1 de 5</span>
+                </div>
+                <h1 class="text-3xl font-bold mb-2">Solicitud de Apertura de Código para Crédito</h1>
+                <p class="text-red-500 text-sm">* Indica que la pregunta es obligatoria</p>
+            </div>
+
+            <!-- Módulo 1: Datos de Facturación -->
+            <div id="step-1" class="g-form-section g-form-step">
+                <h2 class="text-xl font-bold mb-6 text-gray-800 border-b pb-2">1. Datos de Facturación</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label class="g-label">Nombre o Razón Social <span class="text-red-500">*</span></label>
+                        <input type="text" id="f_nombre_rs" class="g-input" required>
+                    </div>
+                    <div>
+                        <label class="g-label">N.I.T. <span class="text-red-500">*</span></label>
+                        <input type="text" id="f_nit" class="g-input" required>
+                    </div>
+                    <div>
+                        <label class="g-label">Teléfono con WhatsApp <span class="text-red-500">*</span></label>
+                        <input type="text" id="f_tel_whatsapp" class="g-input" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="g-label">Dirección <span class="text-red-500">*</span></label>
+                        <input type="text" id="f_direccion" class="g-input" required>
+                    </div>
+                    <div>
+                        <label class="g-label">País <span class="text-red-500">*</span></label>
+                        <input type="text" id="f_pais" class="g-input" required>
+                    </div>
+                    <div>
+                        <label class="g-label">Departamento <span class="text-red-500">*</span></label>
+                        <input type="text" id="f_departamento" class="g-input" required>
+                    </div>
+                    <div>
+                        <label class="g-label">Municipio <span class="text-red-500">*</span></label>
+                        <input type="text" id="f_municipio" class="g-input" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="g-label">Latitud <span class="text-red-500">*</span></label>
+                            <input type="text" id="f_latitud" class="g-input" required>
+                        </div>
+                        <div>
+                            <label class="g-label">Longitud <span class="text-red-500">*</span></label>
+                            <input type="text" id="f_longitud" class="g-input" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Módulo 2: Información General -->
+            <div id="step-2" class="g-form-section g-form-step hidden">
+                <h2 class="text-xl font-bold mb-6 text-gray-800 border-b pb-2">2. Información General</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2">
+                        <label class="g-label">Dirección del Negocio <span class="text-red-500">*</span></label>
+                        <input type="text" id="f_dir_negocio" class="g-input" required>
+                    </div>
+                    <div>
+                        <label class="g-label">Teléfonos del Negocio <span class="text-red-500">*</span></label>
+                        <input type="text" id="f_tel_negocio" class="g-input" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="g-label">Dirección de Entrega <span class="text-red-500">*</span></label>
+                        <input type="text" id="f_dir_entrega" class="g-input" required>
+                    </div>
+                    <div>
+                        <label class="g-label">Teléfonos de Entrega <span class="text-red-500">*</span></label>
+                        <input type="text" id="f_tel_entrega" class="g-input" required>
+                    </div>
+                </div>
+                
+                <h3 class="font-bold text-gray-700 mt-6 mb-4">Contactos</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4 bg-gray-50 p-4 rounded border border-gray-200">
+                    <div>
+                        <label class="g-label">Contacto Compras <span class="text-red-500">*</span></label>
+                        <input type="text" id="f_contacto_compras" class="g-input" required>
+                    </div>
+                    <div>
+                        <label class="g-label">Teléfonos <span class="text-red-500">*</span></label>
+                        <input type="text" id="f_tel_compras" class="g-input" required>
+                    </div>
+                    <div>
+                        <label class="g-label">E-mail <span class="text-red-500">*</span></label>
+                        <input type="email" id="f_email_compras" class="g-input" required>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-50 p-4 rounded border border-gray-200">
+                    <div>
+                        <label class="g-label">Contacto Cobros <span class="text-red-500">*</span></label>
+                        <input type="text" id="f_contacto_cobros" class="g-input" required>
+                    </div>
+                    <div>
+                        <label class="g-label">Teléfonos <span class="text-red-500">*</span></label>
+                        <input type="text" id="f_tel_cobros" class="g-input" required>
+                    </div>
+                    <div>
+                        <label class="g-label">E-mail <span class="text-red-500">*</span></label>
+                        <input type="email" id="f_email_cobros" class="g-input" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Módulo 3: Referencias Comerciales -->
+            <div id="step-3" class="g-form-section g-form-step hidden">
+                <h2 class="text-xl font-bold mb-6 text-gray-800 border-b pb-2">3. Referencias Comerciales</h2>
+                <p class="text-sm text-gray-600 mb-4">Por favor proporcione 3 referencias comerciales.</p>
+                
+                <!-- Ref 1 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 border-l-4 border-blue-400 pl-4">
+                    <div><label class="g-label">Nombre Ref. 1 <span class="text-red-500">*</span></label><input type="text" id="f_ref1_nombre" class="g-input" required></div>
+                    <div><label class="g-label">Teléfonos <span class="text-red-500">*</span></label><input type="text" id="f_ref1_tel" class="g-input" required></div>
+                    <div><label class="g-label">Relación <span class="text-red-500">*</span></label><input type="text" id="f_ref1_rel" class="g-input" required></div>
+                </div>
+                <!-- Ref 2 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 border-l-4 border-blue-400 pl-4">
+                    <div><label class="g-label">Nombre Ref. 2 <span class="text-red-500">*</span></label><input type="text" id="f_ref2_nombre" class="g-input" required></div>
+                    <div><label class="g-label">Teléfonos <span class="text-red-500">*</span></label><input type="text" id="f_ref2_tel" class="g-input" required></div>
+                    <div><label class="g-label">Relación <span class="text-red-500">*</span></label><input type="text" id="f_ref2_rel" class="g-input" required></div>
+                </div>
+                <!-- Ref 3 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-l-4 border-blue-400 pl-4">
+                    <div><label class="g-label">Nombre Ref. 3 <span class="text-red-500">*</span></label><input type="text" id="f_ref3_nombre" class="g-input" required></div>
+                    <div><label class="g-label">Teléfonos <span class="text-red-500">*</span></label><input type="text" id="f_ref3_tel" class="g-input" required></div>
+                    <div><label class="g-label">Relación <span class="text-red-500">*</span></label><input type="text" id="f_ref3_rel" class="g-input" required></div>
+                </div>
+            </div>
+
+            <!-- Módulo 4: Crédito y Firma Cliente -->
+            <div id="step-4" class="g-form-section g-form-step hidden">
+                <h2 class="text-xl font-bold mb-6 text-gray-800 border-b pb-2">4. Límite de Crédito y Aceptación</h2>
+                <div class="mb-6">
+                    <label class="g-label">Días de Crédito Solicitados <span class="text-red-500">*</span></label>
+                    <input type="number" id="f_dias_credito" class="g-input md:w-1/3" required>
+                </div>
+
+                <div class="bg-blue-50 p-4 rounded mb-6 text-sm text-blue-900 border border-blue-200">
+                    <p class="font-bold mb-2">Condiciones al aceptar:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Hacer efectivos sus pagos el día de vencimiento del crédito.</li>
+                        <li>Todo pago con cheque a nombre de PINTURAS Y MAS, S.A.</li>
+                        <li>Todo pago se respalda únicamente con Recibo de Caja.</li>
+                        <li>Cheque rechazado genera cobro de Q100.00.</li>
+                    </ul>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                    <div>
+                        <label class="g-label">Nombre de quien solicita <span class="text-red-500">*</span></label>
+                        <input type="text" id="f_nombre_solicita" class="g-input mb-4" required>
+                        
+                        <label class="g-label">Fecha <span class="text-red-500">*</span></label>
+                        <input type="date" id="f_fecha_solicita" class="g-input" required>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <label class="g-label w-full text-center mb-2">Firma del Cliente <span class="text-red-500">*</span></label>
+                        <div class="w-full border-2 border-dashed border-gray-300 h-24 flex items-center justify-center rounded bg-gray-50 relative cursor-pointer hover:bg-gray-100 transition" onclick="abrirFirma('cliente')">
+                            <span id="txt-firma-cliente" class="text-gray-500 text-sm">Clic aquí para firmar</span>
+                            <img id="preview-firma-cliente" src="" class="absolute inset-0 w-full h-full object-contain hidden" alt="Firma">
+                        </div>
+                        <input type="hidden" id="f_firma_cliente_data" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Módulo 5: Uso Exclusivo Empresa -->
+            <div id="step-5" class="g-form-section g-form-step hidden bg-gray-100">
+                <h2 class="text-xl font-bold mb-6 text-gray-800 border-b border-gray-300 pb-2">5. Uso Exclusivo Empresa</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div>
+                        <label class="g-label">Monto Autorizado (Q.) <span class="text-red-500">*</span></label>
+                        <input type="number" step="0.01" id="f_monto_autorizado" class="g-input" required>
+                    </div>
+                    <div>
+                        <label class="g-label">Días de Crédito <span class="text-red-500">*</span></label>
+                        <input type="number" id="f_dias_autorizado" class="g-input" required>
+                    </div>
+                    <div>
+                        <label class="g-label">Código de Cliente <span class="text-red-500">*</span></label>
+                        <input type="text" id="f_codigo_cliente" class="g-input" required>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                    <div>
+                        <label class="g-label">Nombre de quien autoriza <span class="text-red-500">*</span></label>
+                        <input type="text" id="f_nombre_autoriza" class="g-input mb-4" required>
+                        
+                        <label class="g-label">Fecha Autorización <span class="text-red-500">*</span></label>
+                        <input type="date" id="f_fecha_autoriza" class="g-input" required>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <label class="g-label w-full text-center mb-2">Firma Empresa <span class="text-red-500">*</span></label>
+                        <div class="w-full border-2 border-dashed border-gray-400 h-24 flex items-center justify-center rounded bg-white relative cursor-pointer hover:bg-gray-50 transition" onclick="abrirFirma('empresa')">
+                            <span id="txt-firma-empresa" class="text-gray-500 text-sm">Clic aquí para firmar</span>
+                            <img id="preview-firma-empresa" src="" class="absolute inset-0 w-full h-full object-contain hidden" alt="Firma">
+                        </div>
+                        <input type="hidden" id="f_firma_empresa_data" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de Acción / Navegación del Wizard -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-between items-center mb-10 g-form-section">
+                <button type="button" onclick="cancelarFormulario()" class="w-full sm:w-auto px-6 py-2 text-red-600 hover:bg-red-50 rounded font-bold transition">Cancelar y Salir</button>
+                <div class="flex gap-4 w-full sm:w-auto justify-end">
+                    <button type="button" id="btn-prev" onclick="prevStep()" class="hidden w-full sm:w-auto px-6 py-2 text-gray-600 hover:bg-gray-200 rounded font-bold transition">Anterior</button>
+                    <button type="button" id="btn-next" onclick="nextStep()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded shadow-lg font-bold transition">Siguiente</button>
+                    <button type="submit" id="btn-submit" class="hidden w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded shadow-lg font-bold transition flex items-center justify-center">
+                        Finalizar y Enviar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- EL DOCUMENTO A4 OCULTO (Para generar el PDF) -->
+    <div id="pdf-template-wrapper">
+        <div id="document-container">
+            
+            <!-- Header / Logo -->
+            <div class="flex justify-between items-end mb-6">
+                <div class="flex items-center">
+                    <img src="logo.png" alt="imade logo" class="h-16" onerror="this.outerHTML='<div class=\'text-blue-800 font-extrabold text-6xl italic\' style=\'font-family: Georgia, serif;\'><span class=\'text-blue-500 text-7xl\'>i</span>made</div>'">
+                </div>
+                <div class="text-right pb-2">
+                    <h2 class="font-bold text-xl uppercase">Solicitud de Apertura de Código para Crédito</h2>
+                </div>
+            </div>
+
+            <!-- Datos de Facturación -->
+            <div class="mb-4">
+                <h3 class="bg-gray-200 font-bold p-1 border border-black text-center text-sm">DATOS DE FACTURACIÓN</h3>
+                <div class="border border-t-0 border-black p-3 text-sm grid grid-cols-12 gap-y-2 gap-x-4">
+                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Nombre o Rs:</span><div id="p_nombre_rs" class="pdf-field"></div></div>
+                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">N.I.T.:</span><div id="p_nit" class="pdf-field"></div></div>
+                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Dirección:</span><div id="p_direccion" class="pdf-field"></div></div>
+                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">País:</span><div id="p_pais" class="pdf-field"></div></div>
+                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Municipio:</span><div id="p_municipio" class="pdf-field"></div></div>
+                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Coordenadas Latitud:</span><div id="p_latitud" class="pdf-field"></div></div>
+                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Departamento:</span><div id="p_departamento" class="pdf-field"></div></div>
+                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Longitud:</span><div id="p_longitud" class="pdf-field"></div></div>
+                    <div class="col-span-12 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Telefono con WhatsApp:</span><div id="p_tel_whatsapp" class="pdf-field"></div></div>
+                </div>
+            </div>
+
+            <!-- Información General -->
+            <div class="mb-4">
+                <h3 class="bg-gray-200 font-bold p-1 border border-black text-center text-sm">INFORMACIÓN GENERAL</h3>
+                <div class="border border-t-0 border-black p-3 text-sm grid grid-cols-12 gap-y-2 gap-x-4">
+                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Dirección del Negocio:</span><div id="p_dir_negocio" class="pdf-field"></div></div>
+                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Teléfonos:</span><div id="p_tel_negocio" class="pdf-field"></div></div>
+                    <div class="col-span-8 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Dirección de Entrega:</span><div id="p_dir_entrega" class="pdf-field"></div></div>
+                    <div class="col-span-4 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Teléfonos:</span><div id="p_tel_entrega" class="pdf-field"></div></div>
+                    
+                    <div class="col-span-6 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Contacto Compras:</span><div id="p_contacto_compras" class="pdf-field"></div></div>
+                    <div class="col-span-3 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Teléfonos:</span><div id="p_tel_compras" class="pdf-field"></div></div>
+                    <div class="col-span-3 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">E-mail:</span><div id="p_email_compras" class="pdf-field"></div></div>
+
+                    <div class="col-span-6 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Contacto Cobros:</span><div id="p_contacto_cobros" class="pdf-field"></div></div>
+                    <div class="col-span-3 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">Teléfonos:</span><div id="p_tel_cobros" class="pdf-field"></div></div>
+                    <div class="col-span-3 flex items-end"><span class="whitespace-nowrap mr-2 font-semibold">E-mail:</span><div id="p_email_cobros" class="pdf-field"></div></div>
+                </div>
+            </div>
+
+            <!-- Referencias Comerciales -->
+            <div class="mb-4">
+                <h3 class="bg-gray-200 font-bold p-1 border border-black text-center text-sm">REFERENCIAS COMERCIALES</h3>
+                <table class="w-full text-sm border-collapse border border-black text-center">
+                    <thead>
+                        <tr class="font-bold border-b border-black bg-gray-50">
+                            <td class="border-r border-black py-1 w-1/3">NOMBRE</td>
+                            <td class="border-r border-black py-1 w-1/3">TELÉFONOS</td>
+                            <td class="py-1 w-1/3">RELACIÓN</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-black h-6">
+                            <td class="border-r border-black px-2" id="p_ref1_nombre"></td>
+                            <td class="border-r border-black px-2" id="p_ref1_tel"></td>
+                            <td class="px-2" id="p_ref1_rel"></td>
+                        </tr>
+                        <tr class="border-b border-black h-6">
+                            <td class="border-r border-black px-2" id="p_ref2_nombre"></td>
+                            <td class="border-r border-black px-2" id="p_ref2_tel"></td>
+                            <td class="px-2" id="p_ref2_rel"></td>
+                        </tr>
+                        <tr class="h-6">
+                            <td class="border-r border-black px-2" id="p_ref3_nombre"></td>
+                            <td class="border-r border-black px-2" id="p_ref3_tel"></td>
+                            <td class="px-2" id="p_ref3_rel"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Limite de Crédito y Condiciones -->
+            <div class="mb-6 text-sm">
+                <div class="flex items-end mb-3">
+                    <h3 class="font-bold underline mr-4">LÍMITE DE CRÉDITO</h3>
+                    <span class="mr-2 font-semibold">DIAS CRÉDITO:</span>
+                    <div id="p_dias_credito" class="border-b border-black w-24 text-center"></div>
+                </div>
+
+                <p class="font-semibold mb-2">Nota: Si el crédito solicitado es concedido, deberá cumplir con las siguientes condiciones:</p>
+                <ol class="list-decimal pl-5 space-y-1 mb-4">
+                    <li>Hacer efectivos sus pagos el día de vencimiento del crédito.</li>
+                    <li>Todo pago con cheque, debe hacerlo a nombre de la empresa (PINTURAS Y MAS, S.A.).</li>
+                    <li>Todo pago se respalda únicamente con Recibo de Caja de PINTURAS Y MAS, S.A.</li>
+                    <li>Todo cheque rechazado genera un cobro Administrativo de Q100.00</li>
+                    <li>Cualquier cambio de dirección, teléfono u otro dato de esta solicitud, debe comunicarlo inmediatamente.</li>
+                </ol>
+
+                <div class="border border-black p-2 font-bold text-justify">
+                    IMPORTANTE: Favor llenar este formulario, imprimirlo y adjuntar fotocopia de patente de comercio (cuando aplique), RTU y fotocopia del DPI del representante legal de la empresa, recibo de luz o agua y fotografías del negocio.
+                </div>
+            </div>
+
+            <!-- Firma Cliente -->
+            <div class="grid grid-cols-2 gap-8 text-sm mb-8">
+                <div>
+                    <div class="flex items-end mb-2">
+                        <span class="whitespace-nowrap mr-2 font-semibold">NOMBRE DE QUIEN SOLICITA:</span>
+                        <div id="p_nombre_solicita" class="pdf-field"></div>
+                    </div>
+                    <div class="flex items-end">
+                        <span class="whitespace-nowrap mr-2 font-semibold">FECHA:</span>
+                        <div id="p_fecha_solicita" class="pdf-field"></div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col items-center justify-end">
+                    <div class="w-full h-16 border-b border-black flex items-end justify-center relative">
+                        <img id="p_firma_cliente_img" src="" class="signature-img absolute bottom-0" alt="Firma Cliente">
+                    </div>
+                    <span class="font-bold mt-1">FIRMA</span>
+                </div>
+            </div>
+
+            <!-- Uso Exclusivo Empresa -->
+            <div class="border-t-2 border-dashed border-black pt-4">
+                <h3 class="bg-gray-200 font-bold p-1 border border-black text-center text-sm mb-4">USO EXCLUSIVO PINTURAS Y MAS, S.A.</h3>
+                
+                <div class="grid grid-cols-12 gap-4 text-sm mb-4">
+                    <div class="col-span-4 flex items-end">
+                        <span class="whitespace-nowrap mr-2 font-semibold">MONTO AUTORIZADO: Q.</span>
+                        <div id="p_monto_autorizado" class="pdf-field"></div>
+                    </div>
+                    <div class="col-span-4 flex items-end">
+                        <span class="whitespace-nowrap mr-2 font-semibold">DIAS DE CRÉDITO:</span>
+                        <div id="p_dias_autorizado" class="pdf-field"></div>
+                    </div>
+                    <div class="col-span-4 flex items-end">
+                        <span class="whitespace-nowrap mr-2 font-semibold">CÓDIGO DEL CLIENTE:</span>
+                        <div id="p_codigo_cliente" class="pdf-field"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-8 text-sm mt-6">
+                    <div>
+                        <div class="flex items-end mb-2">
+                            <span class="whitespace-nowrap mr-2 font-semibold">NOMBRE DE QUIEN AUTORIZA:</span>
+                            <div id="p_nombre_autoriza" class="pdf-field"></div>
+                        </div>
+                        <div class="flex items-end">
+                            <span class="whitespace-nowrap mr-2 font-semibold">FECHA AUTORIZACIÓN:</span>
+                            <div id="p_fecha_autoriza" class="pdf-field"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col items-center justify-end">
+                        <div class="w-full h-16 border-b border-black flex items-end justify-center relative">
+                            <img id="p_firma_empresa_img" src="" class="signature-img absolute bottom-0" alt="Firma Empresa">
+                        </div>
+                        <span class="font-bold mt-1">FIRMA</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL DE FIRMA -->
+    <div id="firma-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center hidden">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
+            <h3 class="text-lg font-bold mb-4 text-gray-800">Panel de Firma Digital</h3>
+            
+            <div class="border-2 border-dashed border-gray-400 rounded bg-gray-50 mb-4 cursor-crosshair relative">
+                <canvas id="firma-canvas" width="450" height="200" class="w-full touch-none"></canvas>
+            </div>
+            
+            <div class="flex justify-between">
+                <button type="button" onclick="limpiarFirma()" class="px-4 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200 font-medium">Limpiar</button>
+                <div class="space-x-2">
+                    <button type="button" onclick="cerrarFirma()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 font-medium">Cancelar</button>
+                    <button type="button" onclick="guardarFirma()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium">Guardar Firma</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SPINNER DE CARGA MIENTRAS SE GENERA EL PDF Y ENVIA CORREO -->
+    <div id="loading-overlay" class="fixed inset-0 bg-white bg-opacity-90 z-[60] flex flex-col items-center justify-center hidden">
+        <svg class="animate-spin h-10 w-10 text-blue-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p class="text-lg font-bold text-gray-700">Procesando documento y enviando correo...</p>
+        <p class="text-sm text-gray-500 mt-2">Por favor no cierre esta ventana.</p>
+    </div>
+
+    <script>
+        // --- Navegación entre pantallas y Wizard ---
+        let pasoActual = 1;
+        const totalPasos = 5;
+
+        function iniciarFormulario() {
+            document.getElementById('pantalla-inicio').classList.add('hidden');
+            document.getElementById('pantalla-formulario').classList.remove('hidden');
+            pasoActual = 1;
+            actualizarVistaPaso();
+        }
+
+        function cancelarFormulario() {
+            if(confirm("¿Estás seguro de salir? Se perderán los datos no guardados.")) {
+                document.getElementById('pantalla-formulario').classList.add('hidden');
+                document.getElementById('pantalla-inicio').classList.remove('hidden');
+                document.getElementById('main-form').reset();
+                limpiarDatosFirmas();
+            }
+        }
+
+        function actualizarVistaPaso() {
+            // Ocultar todos los pasos
+            for(let i=1; i<=totalPasos; i++) {
+                document.getElementById('step-' + i).classList.add('hidden');
+            }
+            // Mostrar paso actual
+            document.getElementById('step-' + pasoActual).classList.remove('hidden');
+            
+            // Actualizar indicador de texto
+            document.getElementById('step-indicator').innerText = `Paso ${pasoActual} de ${totalPasos}`;
+
+            // Actualizar botones
+            document.getElementById('btn-prev').classList.toggle('hidden', pasoActual === 1);
+            document.getElementById('btn-next').classList.toggle('hidden', pasoActual === totalPasos);
+            document.getElementById('btn-submit').classList.toggle('hidden', pasoActual !== totalPasos);
+        }
+
+        function nextStep() {
+            // Validar campos del paso actual
+            const currentSection = document.getElementById('step-' + pasoActual);
+            const inputs = currentSection.querySelectorAll('input[required], select[required], textarea[required]');
+            
+            let isValid = true;
+            for (let input of inputs) {
+                if (!input.checkValidity()) {
+                    input.reportValidity(); // Muestra el tooltip nativo del navegador
+                    isValid = false;
+                    return; // Detenemos en el primer error para que el usuario lo vea
+                }
+            }
+
+            // Validación manual de la primera firma en el paso 4
+            if (pasoActual === 4 && !document.getElementById('f_firma_cliente_data').value) {
+                alert("La firma del cliente es obligatoria para continuar al último paso.");
+                return;
+            }
+
+            // Avanzar
+            if (isValid && pasoActual < totalPasos) {
+                pasoActual++;
+                actualizarVistaPaso();
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function prevStep() {
+            if (pasoActual > 1) {
+                pasoActual--;
+                actualizarVistaPaso();
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function limpiarDatosFirmas() {
+            document.getElementById('f_firma_cliente_data').value = '';
+            document.getElementById('preview-firma-cliente').classList.add('hidden');
+            document.getElementById('txt-firma-cliente').style.display = 'block';
+            
+            document.getElementById('f_firma_empresa_data').value = '';
+            document.getElementById('preview-firma-empresa').classList.add('hidden');
+            document.getElementById('txt-firma-empresa').style.display = 'block';
+        }
+
+        // --- Lógica del Canvas (Firma) ---
+        const canvas = document.getElementById('firma-canvas');
+        const ctx = canvas.getContext('2d');
+        const modal = document.getElementById('firma-modal');
+        let currentSignatureTarget = '';
+        let isDrawing = false;
+        
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        function getCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getCoordinates(e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+            e.preventDefault(); 
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const pos = getCoordinates(e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            e.preventDefault();
+        }
+
+        function stopDrawing() { isDrawing = false; ctx.closePath(); }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        canvas.addEventListener('touchstart', startDrawing, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        canvas.addEventListener('touchend', stopDrawing);
+
+        function abrirFirma(target) {
+            currentSignatureTarget = target; 
+            modal.classList.remove('hidden');
+            limpiarFirma();
+            
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+        }
+
+        function cerrarFirma() { modal.classList.add('hidden'); }
+        function limpiarFirma() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+        function guardarFirma() {
+            const blankCanvas = document.createElement('canvas');
+            blankCanvas.width = canvas.width;
+            blankCanvas.height = canvas.height;
+            if (canvas.toDataURL() === blankCanvas.toDataURL()) {
+                alert("Por favor, realiza una firma antes de guardar.");
+                return;
+            }
+
+            const dataUrl = canvas.toDataURL("image/png");
+            
+            // Guardar en el input oculto del formulario
+            document.getElementById(`f_firma_${currentSignatureTarget}_data`).value = dataUrl;
+            
+            // Mostrar miniatura en el formulario
+            const preview = document.getElementById(`preview-firma-${currentSignatureTarget}`);
+            preview.src = dataUrl;
+            preview.classList.remove('hidden');
+            document.getElementById(`txt-firma-${currentSignatureTarget}`).style.display = 'none';
+
+            cerrarFirma();
+        }
+
+        // --- Procesamiento, PDF y Envio Office 365 ---
+        function procesarFormulario(e) {
+            e.preventDefault(); // Evitar envío tradicional de HTML
+
+            // Validar firma final de la empresa (paso 5)
+            if(!document.getElementById('f_firma_empresa_data').value) {
+                alert("La firma de la empresa es obligatoria para finalizar el proceso.");
+                return;
+            }
+
+            document.getElementById('loading-overlay').classList.remove('hidden');
+
+            // 1. Mapear datos del Formulario al Documento A4 oculto
+            const campos = [
+                'nombre_rs', 'nit', 'direccion', 'pais', 'municipio', 'latitud', 'departamento', 'longitud', 'tel_whatsapp',
+                'dir_negocio', 'tel_negocio', 'dir_entrega', 'tel_entrega', 'contacto_compras', 'tel_compras', 'email_compras', 'contacto_cobros', 'tel_cobros', 'email_cobros',
+                'ref1_nombre', 'ref1_tel', 'ref1_rel', 'ref2_nombre', 'ref2_tel', 'ref2_rel', 'ref3_nombre', 'ref3_tel', 'ref3_rel',
+                'dias_credito', 'nombre_solicita', 'monto_autorizado', 'dias_autorizado', 'codigo_cliente', 'nombre_autoriza'
+            ];
+
+            campos.forEach(campo => {
+                const formVal = document.getElementById(`f_${campo}`).value;
+                document.getElementById(`p_${campo}`).innerText = formVal;
+            });
+
+            // Formatear fechas para el PDF
+            const formatFecha = (id) => {
+                const f = new Date(document.getElementById(`f_${id}`).value + "T00:00:00");
+                return isNaN(f) ? "" : f.toLocaleDateString('es-ES');
+            };
+            document.getElementById('p_fecha_solicita').innerText = formatFecha('fecha_solicita');
+            document.getElementById('p_fecha_autoriza').innerText = formatFecha('fecha_autoriza');
+
+            // Insertar imágenes de firma en el A4
+            const imgCli = document.getElementById('p_firma_cliente_img');
+            imgCli.src = document.getElementById('f_firma_cliente_data').value;
+            imgCli.style.display = 'block';
+
+            const imgEmp = document.getElementById('p_firma_empresa_img');
+            imgEmp.src = document.getElementById('f_firma_empresa_data').value;
+            imgEmp.style.display = 'block';
+
+            // 2. Generar PDF (usamos un timeout ligero para permitir a la UI re-renderizar las firmas)
+            setTimeout(generarPDF, 300); 
+        }
+
+        function generarPDF() {
+            const element = document.getElementById('document-container');
+            const nitValue = document.getElementById('f_nit').value || 'documento';
+            const fileName = "Solicitud_Credito_" + nitValue + ".pdf";
+
+            const opt = {
+                margin:       0,
+                filename:     fileName,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // NUEVA LOGICA: Generamos el PDF una sola vez en Base64
+            html2pdf().set(opt).from(element).outputPdf('datauristring').then(function(pdfBase64) {
+                
+                // 1. Descargarlo localmente convirtiéndolo de Base64 a Blob (Súper rápido y no traba el navegador)
+                fetch(pdfBase64)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        a.download = fileName;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                    });
+
+                // 2. Proceder a enviarlo por correo (esto es lo que podría demorar)
+                enviarPorCorreoMecanismo(pdfBase64, fileName);
+            });
+        }
+
+        function enviarPorCorreoMecanismo(pdfBase64, fileName) {
+            
+            // Aumentamos el tiempo de espera a 20 segundos para evitar trabas
+            const emailTimeout = setTimeout(() => {
+                document.getElementById('loading-overlay').classList.add('hidden');
+                alert("El servidor de Office 365 tardó demasiado en responder o bloqueó la conexión silenciosamente.\n\nEl documento PDF ya se descargó en su computadora. Por favor, envíelo manualmente a a.gonzalez@grupoimade.com");
+                abrirCorreoManual();
+                resetearFormulario();
+            }, 20000);
+
+            // === CONFIGURACION DE CORREO ===
+            Email.send({
+                Host : "smtp.office365.com",
+                Username : "tecnologiadeinformacion@grupoimade.com",
+                Password : "ImadeTI-2025",
+                To : "a.gonzalez@grupoimade.com",
+                Cc : "h.reyes@grupoimade.com",
+                From : "tecnologiadeinformacion@grupoimade.com",
+                Subject : "Apertura de Codigo Credito - " + document.getElementById('f_nombre_rs').value,
+                Body : "Adjunto encontrará la nueva solicitud de código de crédito debidamente completada y firmada de manera digital.",
+                Attachments : [
+                    {
+                        name : fileName,
+                        data : pdfBase64
+                    }
+                ]
+            }).then(message => {
+                clearTimeout(emailTimeout); 
+                document.getElementById('loading-overlay').classList.add('hidden');
+                
+                if(message === "OK") {
+                    alert("¡El documento se descargó localmente y se envió correctamente a a.gonzalez e h.reyes!");
+                    resetearFormulario();
+                } else {
+                    // Si Office 365 lo rechaza (Error 535, etc), mostramos el motivo exacto
+                    alert("OFFICE 365 RECHAZÓ EL ENVÍO AUTOMÁTICO.\n\nMotivo devuelto por Microsoft:\n" + message + "\n\nNo se preocupe, EL PDF SE HA DESCARGADO EXITOSAMENTE en su computadora. Se abrirá su gestor de correos para que pueda adjuntarlo y enviarlo manualmente.");
+                    abrirCorreoManual();
+                    resetearFormulario();
+                }
+            }).catch(err => {
+                clearTimeout(emailTimeout);
+                document.getElementById('loading-overlay').classList.add('hidden');
+                alert("Error de conexión con el servidor de correos:\n" + err + "\n\nEl PDF se ha descargado. Por favor envíelo manualmente.");
+                abrirCorreoManual();
+                resetearFormulario();
+            });
+        }
+
+        // Nueva función de respaldo: Abre Outlook/Gmail local del usuario
+        function abrirCorreoManual() {
+            const subject = encodeURIComponent("Apertura de Codigo Credito - " + document.getElementById('f_nombre_rs').value);
+            const body = encodeURIComponent("Adjunto encontrará la solicitud de crédito.\n\n(POR FAVOR: Arrastre o adjunte aquí el PDF que se acaba de descargar automáticamente en su computadora).");
+            window.location.href = `mailto:a.gonzalez@grupoimade.com?cc=h.reyes@grupoimade.com&subject=${subject}&body=${body}`;
+        }
+
+        // Sustituye a finalizarProceso
+        function resetearFormulario() {
+            document.getElementById('main-form').reset();
+            limpiarDatosFirmas();
+            document.getElementById('pantalla-formulario').classList.add('hidden');
+            document.getElementById('pantalla-inicio').classList.remove('hidden');
+            pasoActual = 1;
+        }
+    </script>
+</body>
+</html>
