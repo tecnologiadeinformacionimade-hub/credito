@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud de Apertura de Código para Crédito</title>
+    <title>Solicitud de Apertura de Código para Crédito v1.2</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- html2pdf.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- SMTP.js -->
-    <script src="https://smtpjs.com/v3/smtp.js"></script>
 
     <style>
         body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -507,7 +505,7 @@
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
         <p class="text-lg font-bold text-gray-700">Procesando documento y enviando correo...</p>
-        <p class="text-sm text-gray-500 mt-2">Por favor no cierre esta ventana.</p>
+        <p class="text-sm text-gray-500 mt-2">Enviando a través del servidor API seguro.</p>
     </div>
 
     <script>
@@ -532,43 +530,33 @@
         }
 
         function actualizarVistaPaso() {
-            // Ocultar todos los pasos
             for(let i=1; i<=totalPasos; i++) {
                 document.getElementById('step-' + i).classList.add('hidden');
             }
-            // Mostrar paso actual
             document.getElementById('step-' + pasoActual).classList.remove('hidden');
-            
-            // Actualizar indicador de texto
             document.getElementById('step-indicator').innerText = `Paso ${pasoActual} de ${totalPasos}`;
-
-            // Actualizar botones
             document.getElementById('btn-prev').classList.toggle('hidden', pasoActual === 1);
             document.getElementById('btn-next').classList.toggle('hidden', pasoActual === totalPasos);
             document.getElementById('btn-submit').classList.toggle('hidden', pasoActual !== totalPasos);
         }
 
         function nextStep() {
-            // Validar campos del paso actual
             const currentSection = document.getElementById('step-' + pasoActual);
             const inputs = currentSection.querySelectorAll('input[required], select[required], textarea[required]');
-            
             let isValid = true;
             for (let input of inputs) {
                 if (!input.checkValidity()) {
-                    input.reportValidity(); // Muestra el tooltip nativo del navegador
+                    input.reportValidity();
                     isValid = false;
-                    return; // Detenemos en el primer error para que el usuario lo vea
+                    return; 
                 }
             }
 
-            // Validación manual de la primera firma en el paso 4
             if (pasoActual === 4 && !document.getElementById('f_firma_cliente_data').value) {
                 alert("La firma del cliente es obligatoria para continuar al último paso.");
                 return;
             }
 
-            // Avanzar
             if (isValid && pasoActual < totalPasos) {
                 pasoActual++;
                 actualizarVistaPaso();
@@ -643,7 +631,6 @@
             currentSignatureTarget = target; 
             modal.classList.remove('hidden');
             limpiarFirma();
-            
             const rect = canvas.getBoundingClientRect();
             canvas.width = rect.width;
             canvas.height = rect.height;
@@ -663,26 +650,19 @@
                 alert("Por favor, realiza una firma antes de guardar.");
                 return;
             }
-
             const dataUrl = canvas.toDataURL("image/png");
-            
-            // Guardar en el input oculto del formulario
             document.getElementById(`f_firma_${currentSignatureTarget}_data`).value = dataUrl;
-            
-            // Mostrar miniatura en el formulario
             const preview = document.getElementById(`preview-firma-${currentSignatureTarget}`);
             preview.src = dataUrl;
             preview.classList.remove('hidden');
             document.getElementById(`txt-firma-${currentSignatureTarget}`).style.display = 'none';
-
             cerrarFirma();
         }
 
-        // --- Procesamiento, PDF y Envio Office 365 ---
+        // --- Procesamiento, PDF y Envio V1.2 ---
         function procesarFormulario(e) {
-            e.preventDefault(); // Evitar envío tradicional de HTML
+            e.preventDefault(); 
 
-            // Validar firma final de la empresa (paso 5)
             if(!document.getElementById('f_firma_empresa_data').value) {
                 alert("La firma de la empresa es obligatoria para finalizar el proceso.");
                 return;
@@ -690,7 +670,6 @@
 
             document.getElementById('loading-overlay').classList.remove('hidden');
 
-            // 1. Mapear datos del Formulario al Documento A4 oculto
             const campos = [
                 'nombre_rs', 'nit', 'direccion', 'pais', 'municipio', 'latitud', 'departamento', 'longitud', 'tel_whatsapp',
                 'dir_negocio', 'tel_negocio', 'dir_entrega', 'tel_entrega', 'contacto_compras', 'tel_compras', 'email_compras', 'contacto_cobros', 'tel_cobros', 'email_cobros',
@@ -703,7 +682,6 @@
                 document.getElementById(`p_${campo}`).innerText = formVal;
             });
 
-            // Formatear fechas para el PDF
             const formatFecha = (id) => {
                 const f = new Date(document.getElementById(`f_${id}`).value + "T00:00:00");
                 return isNaN(f) ? "" : f.toLocaleDateString('es-ES');
@@ -711,7 +689,6 @@
             document.getElementById('p_fecha_solicita').innerText = formatFecha('fecha_solicita');
             document.getElementById('p_fecha_autoriza').innerText = formatFecha('fecha_autoriza');
 
-            // Insertar imágenes de firma en el A4
             const imgCli = document.getElementById('p_firma_cliente_img');
             imgCli.src = document.getElementById('f_firma_cliente_data').value;
             imgCli.style.display = 'block';
@@ -720,7 +697,6 @@
             imgEmp.src = document.getElementById('f_firma_empresa_data').value;
             imgEmp.style.display = 'block';
 
-            // 2. Generar PDF (usamos un timeout ligero para permitir a la UI re-renderizar las firmas)
             setTimeout(generarPDF, 300); 
         }
 
@@ -737,10 +713,9 @@
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // NUEVA LOGICA: Generamos el PDF una sola vez en Base64
             html2pdf().set(opt).from(element).outputPdf('datauristring').then(function(pdfBase64) {
                 
-                // 1. Descargarlo localmente convirtiéndolo de Base64 a Blob (Súper rápido y no traba el navegador)
+                // 1. Descarga Local Inmediata
                 fetch(pdfBase64)
                     .then(res => res.blob())
                     .then(blob => {
@@ -755,67 +730,71 @@
                         document.body.removeChild(a);
                     });
 
-                // 2. Proceder a enviarlo por correo (esto es lo que podría demorar)
-                enviarPorCorreoMecanismo(pdfBase64, fileName);
+                // 2. Proceder a enviar por la API FormSubmit
+                enviarPorApiWeb(pdfBase64, fileName);
             });
         }
 
-        function enviarPorCorreoMecanismo(pdfBase64, fileName) {
-            
-            // Aumentamos el tiempo de espera a 20 segundos para evitar trabas
-            const emailTimeout = setTimeout(() => {
-                document.getElementById('loading-overlay').classList.add('hidden');
-                alert("El servidor de Office 365 tardó demasiado en responder o bloqueó la conexión silenciosamente.\n\nEl documento PDF ya se descargó en su computadora. Por favor, envíelo manualmente a a.gonzalez@grupoimade.com");
-                abrirCorreoManual();
-                resetearFormulario();
-            }, 20000);
+        // Función que convierte Base64 a un objeto Archivo real (Blob) necesario para subir por API
+        function dataURItoBlob(dataURI) {
+            const parts = dataURI.split(',');
+            if(parts.length !== 2) return null;
+            const byteString = atob(parts[1]);
+            const mimeString = parts[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([ab], {type: mimeString});
+        }
 
-            // === CONFIGURACION DE CORREO ===
-            Email.send({
-                Host : "smtp.office365.com",
-                Username : "tecnologiadeinformacion@grupoimade.com",
-                Password : "ImadeTI-2025",
-                To : "a.gonzalez@grupoimade.com",
-                Cc : "h.reyes@grupoimade.com",
-                From : "tecnologiadeinformacion@grupoimade.com",
-                Subject : "Apertura de Codigo Credito - " + document.getElementById('f_nombre_rs').value,
-                Body : "Adjunto encontrará la nueva solicitud de código de crédito debidamente completada y firmada de manera digital.",
-                Attachments : [
-                    {
-                        name : fileName,
-                        data : pdfBase64
-                    }
-                ]
-            }).then(message => {
-                clearTimeout(emailTimeout); 
+        function enviarPorApiWeb(pdfBase64, fileName) {
+            
+            const pdfBlob = dataURItoBlob(pdfBase64);
+            const formData = new FormData();
+
+            const nombreEmpresa = document.getElementById('f_nombre_rs').value;
+
+            // Datos del Formulario a mostrar en el texto del correo
+            formData.append("Mensaje", "Se ha generado una nueva solicitud de crédito. Encuentre el documento PDF oficial adjunto.");
+            formData.append("Empresa Solicitante", nombreEmpresa);
+            formData.append("NIT", document.getElementById('f_nit').value);
+
+            // Configuraciones de destino para la API
+            formData.append("_subject", "Apertura de Codigo Credito - " + nombreEmpresa);
+            formData.append("_captcha", "false"); 
+            formData.append("_template", "table"); // Formato de tabla limpia para el texto
+
+            // Archivo adjunto PDF (El truco clave para la v1.2)
+            formData.append("Documento_Oficial_Adjunto", pdfBlob, fileName);
+
+            // Envío vía Fetch API usando formsubmit.co con la dirección principal actualizada
+            fetch("https://formsubmit.co/ajax/h.reyes@grupoimade.com", {
+                method: "POST",
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
                 document.getElementById('loading-overlay').classList.add('hidden');
                 
-                if(message === "OK") {
-                    alert("¡El documento se descargó localmente y se envió correctamente a a.gonzalez e h.reyes!");
+                if(data.success === "true" || data.success === true) {
+                    alert("¡ÉXITO! El PDF se ha enviado automáticamente a h.reyes.\n\nIMPORTANTE: Si es el primer envío, h.reyes recibirá un email para 'Activar' Formsubmit. ¡Solo debe darle clic una vez!");
                     resetearFormulario();
                 } else {
-                    // Si Office 365 lo rechaza (Error 535, etc), mostramos el motivo exacto
-                    alert("OFFICE 365 RECHAZÓ EL ENVÍO AUTOMÁTICO.\n\nMotivo devuelto por Microsoft:\n" + message + "\n\nNo se preocupe, EL PDF SE HA DESCARGADO EXITOSAMENTE en su computadora. Se abrirá su gestor de correos para que pueda adjuntarlo y enviarlo manualmente.");
-                    abrirCorreoManual();
-                    resetearFormulario();
+                    alert("Hubo un error del lado del servidor: " + (data.message || "Problema desconocido."));
                 }
-            }).catch(err => {
-                clearTimeout(emailTimeout);
+            })
+            .catch(err => {
                 document.getElementById('loading-overlay').classList.add('hidden');
-                alert("Error de conexión con el servidor de correos:\n" + err + "\n\nEl PDF se ha descargado. Por favor envíelo manualmente.");
-                abrirCorreoManual();
-                resetearFormulario();
+                console.error("Error en FormSubmit:", err);
+                alert("Error de conexión al enviar el correo. Sin embargo, el PDF ya fue descargado en su computadora.");
             });
         }
 
-        // Nueva función de respaldo: Abre Outlook/Gmail local del usuario
-        function abrirCorreoManual() {
-            const subject = encodeURIComponent("Apertura de Codigo Credito - " + document.getElementById('f_nombre_rs').value);
-            const body = encodeURIComponent("Adjunto encontrará la solicitud de crédito.\n\n(POR FAVOR: Arrastre o adjunte aquí el PDF que se acaba de descargar automáticamente en su computadora).");
-            window.location.href = `mailto:a.gonzalez@grupoimade.com?cc=h.reyes@grupoimade.com&subject=${subject}&body=${body}`;
-        }
-
-        // Sustituye a finalizarProceso
         function resetearFormulario() {
             document.getElementById('main-form').reset();
             limpiarDatosFirmas();
