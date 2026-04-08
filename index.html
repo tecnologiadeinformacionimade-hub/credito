@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud de Apertura de Código para Crédito v1.8</title>
+    <title>Solicitud de Apertura de Código para Crédito v1.9</title>
     <!-- Tailwind CSS para el formulario UI -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- html2pdf.js -->
@@ -19,18 +19,25 @@
         .g-input:focus { border-bottom: 2px solid #2563eb; margin-bottom: -1px; }
         .g-label { display: block; font-weight: 500; color: #374151; margin-bottom: 4px; font-size: 0.95rem; }
 
-        /* --- ESTILOS ESTRICTOS DEL PDF (100% IDÉNTICO A LA FOTO ORIGINAL) --- */
-        #pdf-template-wrapper { position: absolute; left: -9999px; top: 0; background: white; }
+        /* --- ESTILOS ESTRICTOS DEL PDF (Hoja Carta Exacta - Bug Congelamiento Solucionado) --- */
+        #pdf-template-wrapper { 
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            opacity: 0; 
+            pointer-events: none; 
+            z-index: -9999; 
+            background: white; 
+        }
         
         #document-container {
-            width: 790px;   
-            height: 1030px; /* Dimensiones súper estrictas para asegurar 1 hoja */
-            padding: 30px 40px; 
+            width: 8.5in;   /* Medida exacta de hoja carta (ancho) */
+            height: 11in;   /* Medida exacta de hoja carta (alto) */
+            padding: 0.35in 0.45in; /* Márgenes internos (Aprox 1cm) */
             background: white;
             font-family: Arial, Helvetica, sans-serif;
             color: black;
             box-sizing: border-box;
-            overflow: hidden;
         }
 
         .pdf-title-sec {
@@ -43,27 +50,27 @@
             margin-right: 4px; white-space: nowrap; font-weight: normal; color: #000;
         }
         
-        /* Contenedores de valores con recortes automáticos anti-desborde */
+        /* Contenedores de valores. Eliminados los 'overflow: hidden' que colgaban el sistema */
         .pdf-val {
             flex-grow: 1; border-bottom: 1.5px solid black; height: 16px; 
             font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: bold;
-            overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding-left: 5px;
+            padding-left: 5px;
         }
         .pdf-val-fixed {
             border-bottom: 1.5px solid black; height: 16px; 
             font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: bold;
-            overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding-left: 5px;
+            padding-left: 5px;
         }
 
         .pdf-table-ref {
             width: 100%; border-collapse: collapse; margin-top: 5px; margin-bottom: 10px; table-layout: fixed;
         }
         .pdf-table-ref th, .pdf-table-ref td {
-            border: 1.5px solid black; padding: 4px; text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+            border: 1.5px solid black; padding: 4px; text-align: center;
         }
         .pdf-table-ref th { font-size: 11px; font-weight: bold; background: white; }
         .pdf-table-ref td { height: 22px; font-family: 'Courier New', Courier, monospace; font-size: 12px; font-weight: bold; }
-        
+
         .pdf-note { font-size: 11px; margin-top: 10px; line-height: 1.4; text-align: justify; }
         
         .pdf-firma-area { display: flex; justify-content: space-between; margin-top: 25px; align-items: flex-end; }
@@ -89,7 +96,7 @@
             </button>
             
             <!-- INDICADOR DE VERSIÓN -->
-            <p class="text-xs font-semibold text-gray-400 mt-4 text-center">Versión 1.8</p>
+            <p class="text-xs font-semibold text-gray-400 mt-4 text-center">Versión 1.9 (Corrección de Bucles)</p>
         </div>
     </div>
 
@@ -647,7 +654,7 @@
             cerrarFirma();
         }
 
-        // --- Procesamiento, PDF y Envio V1.8 ---
+        // --- Procesamiento, PDF y Envio V1.9 ---
         function procesarFormulario(e) {
             e.preventDefault(); 
 
@@ -693,13 +700,13 @@
             const nitValue = document.getElementById('f_nit').value || 'documento';
             const fileName = "Solicitud_Credito_" + nitValue + ".pdf";
 
-            // V1.8 - CONFIGURACION 100% PIXEL PERFECT PARA EL NUEVO LAYOUT
+            // V1.9 - CONFIGURACION 100% CARTA
             const opt = {
                 margin:       0, 
                 filename:     fileName,
-                image:        { type: 'jpeg', quality: 1.0 },
+                image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true }, 
-                jsPDF:        { unit: 'px', format: [790, 1030], orientation: 'portrait' } 
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' } 
             };
 
             html2pdf().set(opt).from(element).outputPdf('datauristring').then(function(pdfBase64) {
@@ -719,6 +726,12 @@
                     });
 
                 enviarPorApiWeb(pdfBase64, fileName);
+                
+            }).catch(function(error) {
+                // SALVAVIDAS: Si el PDF falla, no se queda colgado
+                console.error("Error al generar PDF: ", error);
+                document.getElementById('loading-overlay').classList.add('hidden');
+                alert("Ocurrió un error al generar el archivo PDF. Intente usar un navegador más reciente o vacíe la caché.");
             });
         }
 
