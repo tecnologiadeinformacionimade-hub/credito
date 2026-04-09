@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud de Apertura de Código para Crédito v2.2</title>
+    <title>Solicitud de Apertura de Código para Crédito v2.3</title>
     <!-- Tailwind CSS para el formulario UI -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- html2pdf.js -->
@@ -22,14 +22,14 @@
         /* --- ESTILOS DEL PDF (CLONACIÓN EXACTA A LA IMAGEN) --- */
         #pdf-template-wrapper { 
             position: absolute; 
-            left: -9999px; 
-            top: -9999px; /* Oculto de forma segura */
+            left: -15000px; /* Escondido a la izquierda, NO arriba, para no romper el PDF */
+            top: 0; 
             background: white; 
         }
         
         #document-container {
             width: 816px; /* Ancho exacto de hoja Carta a 96dpi */
-            padding: 50px 55px; /* Márgenes internos generosos para que nada se salga */
+            padding: 50px 55px; /* Márgenes internos generosos */
             background: white;
             font-family: Arial, Helvetica, sans-serif;
             color: black;
@@ -66,6 +66,11 @@
         
         .pdf-important-box { border: 1px solid black; padding: 10px; font-weight: bold; text-align: justify; font-size: 9.5px; line-height: 1.3; margin-bottom: 20px;}
 
+        /* SECCIÓN 2DA PÁGINA */
+        .saltar-pagina {
+            page-break-before: always; /* Forzar salto de página */
+            padding-top: 20px;
+        }
         .pdf-uso-exclusivo { border: 1.5px solid black; padding: 25px; margin-top: 10px; height: 350px; }
         .signature-img { height: 40px; display: none; margin: 0 auto; object-fit: contain; }
     </style>
@@ -85,7 +90,7 @@
             </button>
             
             <!-- INDICADOR DE VERSIÓN -->
-            <p class="text-xs font-semibold text-gray-400 mt-4 text-center">Versión 2.2 (Diseño Clónico)</p>
+            <p class="text-xs font-semibold text-gray-400 mt-4 text-center">Versión 2.3 (Multihija Corregida)</p>
         </div>
     </div>
 
@@ -481,48 +486,48 @@
                 </tr>
             </table>
 
-            <!-- SALTO DE PÁGINA: LA SECCIÓN DE ABAJO VA EN OTRA HOJA -->
-            <div class="html2pdf__page-break"></div>
-
-            <!-- Módulo 5 (Uso Exclusivo - Página 2) -->
-            <div class="pdf-uso-exclusivo">
-                <div style="text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 40px;">USO EXCLUSIVO PINTURAS Y MAS, S.A.</div>
-                
-                <table class="pdf-tbl" style="margin-bottom: 30px;">
-                    <tr>
-                        <td class="pdf-lbl">MONTO AUTORIZADO:</td>
-                        <td class="pdf-lbl" style="padding-left: 5px;">Q.</td>
-                        <td class="pdf-val" style="width: 35%;" id="p_monto_autorizado"></td>
-                        <td class="pdf-lbl" style="padding-left: 40px;">FECHA AUTORIZACIÓN:</td>
-                        <td class="pdf-val" style="width: 35%;" id="p_fecha_autoriza"></td>
-                    </tr>
-                </table>
-                
-                <table class="pdf-tbl">
-                    <tr>
-                        <td class="pdf-lbl">DIAS DE CRÉDITO:</td>
-                        <td class="pdf-val" style="width: 40%;" id="p_dias_autorizado"></td>
-                        <td class="pdf-lbl" style="padding-left: 40px;">CÓDIGO DEL CLIENTE:</td>
-                        <td class="pdf-val" style="width: 40%;" id="p_codigo_cliente"></td>
-                    </tr>
-                </table>
-                
-                <table style="width: 100%; margin-top: 70px; border-collapse: collapse;">
-                    <tr>
-                        <td style="width: 50%; vertical-align: bottom; padding-right: 30px;">
-                            <table class="pdf-tbl">
-                                <tr>
-                                    <td class="pdf-lbl">NOMBRE DE QUIEN AUTORIZA:</td>
-                                    <td class="pdf-val" id="p_nombre_autoriza"></td>
-                                </tr>
-                            </table>
-                        </td>
-                        <td style="width: 50%; text-align: center; vertical-align: bottom;">
-                            <img id="p_firma_empresa_img" class="signature-img">
-                            <div style="border-top: 1px solid black; width: 80%; margin: 0 auto; padding-top: 4px; font-size: 11px; font-weight: bold;">FIRMA</div>
-                        </td>
-                    </tr>
-                </table>
+            <!-- LA SECCIÓN DE ABAJO VA EN OTRA HOJA GRACIAS AL SALTAR-PAGINA -->
+            <div class="saltar-pagina">
+                <!-- Módulo 5 (Uso Exclusivo - Página 2) -->
+                <div class="pdf-uso-exclusivo">
+                    <div style="text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 40px;">USO EXCLUSIVO PINTURAS Y MAS, S.A.</div>
+                    
+                    <table class="pdf-tbl" style="margin-bottom: 30px;">
+                        <tr>
+                            <td class="pdf-lbl">MONTO AUTORIZADO:</td>
+                            <td class="pdf-lbl" style="padding-left: 5px;">Q.</td>
+                            <td class="pdf-val" style="width: 35%;" id="p_monto_autorizado"></td>
+                            <td class="pdf-lbl" style="padding-left: 40px;">FECHA AUTORIZACIÓN:</td>
+                            <td class="pdf-val" style="width: 35%;" id="p_fecha_autoriza"></td>
+                        </tr>
+                    </table>
+                    
+                    <table class="pdf-tbl">
+                        <tr>
+                            <td class="pdf-lbl">DIAS DE CRÉDITO:</td>
+                            <td class="pdf-val" style="width: 40%;" id="p_dias_autorizado"></td>
+                            <td class="pdf-lbl" style="padding-left: 40px;">CÓDIGO DEL CLIENTE:</td>
+                            <td class="pdf-val" style="width: 40%;" id="p_codigo_cliente"></td>
+                        </tr>
+                    </table>
+                    
+                    <table style="width: 100%; margin-top: 70px; border-collapse: collapse;">
+                        <tr>
+                            <td style="width: 50%; vertical-align: bottom; padding-right: 30px;">
+                                <table class="pdf-tbl">
+                                    <tr>
+                                        <td class="pdf-lbl">NOMBRE DE QUIEN AUTORIZA:</td>
+                                        <td class="pdf-val" id="p_nombre_autoriza"></td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td style="width: 50%; text-align: center; vertical-align: bottom;">
+                                <img id="p_firma_empresa_img" class="signature-img">
+                                <div style="border-top: 1px solid black; width: 80%; margin: 0 auto; padding-top: 4px; font-size: 11px; font-weight: bold;">FIRMA</div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
             </div>
 
         </div>
@@ -716,7 +721,7 @@
             cerrarFirma();
         }
 
-        // --- Procesamiento, PDF y Envio V2.2 ---
+        // --- Procesamiento, PDF y Envio V2.3 ---
         function procesarFormulario(e) {
             e.preventDefault(); 
 
@@ -762,13 +767,14 @@
             const nitValue = document.getElementById('f_nit').value || 'documento';
             const fileName = "Solicitud_Credito_" + nitValue + ".pdf";
 
-            // V2.2 - MÁRGENES ESTÁNDAR CARTA PARA COMPENSAR ESPACIOS
+            // V2.3 - MÁRGENES ESTÁNDAR + SALTO DE PÁGINA FORZADO
             const opt = {
                 margin:       [0.4, 0.4, 0.4, 0.4], 
                 filename:     fileName,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true, logging: false }, 
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' } 
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
+                pagebreak:    { mode: 'css', before: '.saltar-pagina' }
             };
 
             const fallbackTimeout = setTimeout(() => {
