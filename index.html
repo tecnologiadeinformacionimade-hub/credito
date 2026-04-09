@@ -1,1467 +1,609 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud de Apertura de Código para Crédito — Grupo imade</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        /* ===================== RESET & BASE ===================== */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        :root {
-            --azul: #1a3fa8;
-            --azul-oscuro: #102580;
-            --azul-claro: #e8edfb;
-            --azul-borde: #c3cef5;
-            --acento: #2563eb;
-            --gris-fondo: #f4f6fb;
-            --gris-texto: #374151;
-            --gris-claro: #9ca3af;
-            --rojo: #dc2626;
-            --verde: #16a34a;
-            --blanco: #ffffff;
-            --sombra: 0 4px 24px rgba(26,63,168,0.10);
-            --radio: 12px;
-        }
-
-        html { scroll-behavior: smooth; }
-
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: var(--gris-fondo);
-            color: var(--gris-texto);
-            min-height: 100vh;
-        }
-
-        /* ===================== PANTALLA INICIO ===================== */
-        #pantalla-inicio {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #0f1f6e 0%, #1a3fa8 50%, #2563eb 100%);
-            padding: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        #pantalla-inicio::before {
-            content: '';
-            position: absolute;
-            width: 600px; height: 600px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.04);
-            top: -200px; right: -100px;
-        }
-        #pantalla-inicio::after {
-            content: '';
-            position: absolute;
-            width: 400px; height: 400px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.04);
-            bottom: -150px; left: -80px;
-        }
-
-        .inicio-card {
-            background: white;
-            border-radius: 20px;
-            padding: 48px 40px;
-            max-width: 460px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 24px 80px rgba(0,0,0,0.25);
-            position: relative;
-            z-index: 1;
-        }
-
-        .logo-svg {
-            height: 52px;
-            margin: 0 auto 28px;
-            display: block;
-        }
-
-        .inicio-titulo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--azul-oscuro);
-            line-height: 1.3;
-            margin-bottom: 10px;
-        }
-
-        .inicio-desc {
-            font-size: 0.9rem;
-            color: var(--gris-claro);
-            line-height: 1.6;
-            margin-bottom: 32px;
-        }
-
-        .btn-primary {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--azul);
-            color: white;
-            font-family: 'DM Sans', sans-serif;
-            font-weight: 600;
-            font-size: 0.95rem;
-            padding: 14px 32px;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-            width: 100%;
-            justify-content: center;
-            transition: background 0.2s, transform 0.15s;
-            letter-spacing: 0.02em;
-        }
-        .btn-primary:hover { background: var(--azul-oscuro); transform: translateY(-1px); }
-        .btn-primary:active { transform: translateY(0); }
-
-        .version-tag {
-            margin-top: 20px;
-            font-size: 0.72rem;
-            color: #c0c8d8;
-            font-family: 'DM Mono', monospace;
-        }
-
-        /* ===================== PANTALLA FORMULARIO ===================== */
-        #pantalla-formulario { display: none; min-height: 100vh; padding: 24px 16px 60px; }
-
-        .form-wrapper { max-width: 780px; margin: 0 auto; }
-
-        /* Header del formulario */
-        .form-header {
-            background: white;
-            border-radius: var(--radio);
-            padding: 28px 32px;
-            margin-bottom: 20px;
-            box-shadow: var(--sombra);
-            border-top: 5px solid var(--azul);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .form-header-left { display: flex; flex-direction: column; gap: 6px; }
-        .form-header-left h1 { font-size: 1.25rem; font-weight: 700; color: var(--azul-oscuro); }
-        .form-header-left p { font-size: 0.8rem; color: var(--rojo); }
-
-        /* Barra de progreso */
-        .progress-bar-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; min-width: 180px; }
-        .step-label { font-size: 0.78rem; font-weight: 600; color: var(--azul); font-family: 'DM Mono', monospace; }
-        .progress-track { width: 180px; height: 6px; background: var(--azul-borde); border-radius: 99px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--azul); border-radius: 99px; transition: width 0.4s ease; }
-
-        /* Sección de formulario */
-        .form-section {
-            background: white;
-            border-radius: var(--radio);
-            padding: 32px;
-            margin-bottom: 20px;
-            box-shadow: var(--sombra);
-            animation: fadeInUp 0.3s ease;
-        }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(12px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        .section-title {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--azul-oscuro);
-            margin-bottom: 24px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid var(--azul-claro);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .section-num {
-            background: var(--azul);
-            color: white;
-            width: 26px; height: 26px;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-
-        /* Grid de campos */
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
-        .col-2 { grid-column: span 2; }
-        .col-3 { grid-column: span 3; }
-
-        @media (max-width: 600px) {
-            .grid-2, .grid-3 { grid-template-columns: 1fr; }
-            .col-2, .col-3 { grid-column: span 1; }
-        }
-
-        /* Campos */
-        .field { display: flex; flex-direction: column; gap: 5px; }
-
-        .field label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--gris-texto);
-            letter-spacing: 0.01em;
-        }
-
-        .field label .req { color: var(--rojo); margin-left: 2px; }
-
-        .field input, .field select {
-            border: 1.5px solid #dde3f0;
-            border-radius: 8px;
-            padding: 10px 14px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 0.9rem;
-            color: var(--gris-texto);
-            background: white;
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            width: 100%;
-        }
-
-        .field input:focus, .field select:focus {
-            border-color: var(--acento);
-            box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
-        }
-
-        .field input::placeholder { color: #bfc9de; }
-
-        /* Sub-sección */
-        .sub-section {
-            background: var(--gris-fondo);
-            border-radius: 10px;
-            padding: 18px;
-            margin-top: 20px;
-        }
-
-        .sub-section-label {
-            font-size: 0.78rem;
-            font-weight: 700;
-            color: var(--azul);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin-bottom: 14px;
-        }
-
-        /* Ref rows */
-        .ref-row {
-            display: grid;
-            grid-template-columns: 2fr 1.2fr 1fr;
-            gap: 14px;
-            margin-bottom: 14px;
-            padding-bottom: 14px;
-            border-bottom: 1px solid var(--azul-borde);
-        }
-        .ref-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-
-        @media (max-width: 600px) { .ref-row { grid-template-columns: 1fr; } }
-
-        /* Condiciones box */
-        .condiciones-box {
-            background: var(--azul-claro);
-            border: 1px solid var(--azul-borde);
-            border-radius: 10px;
-            padding: 16px 20px;
-            margin: 20px 0;
-        }
-        .condiciones-box p { font-size: 0.82rem; font-weight: 600; color: var(--azul-oscuro); margin-bottom: 8px; }
-        .condiciones-box ul { padding-left: 18px; }
-        .condiciones-box li { font-size: 0.8rem; color: var(--gris-texto); margin-bottom: 4px; }
-
-        /* Firma */
-        .firma-wrap {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .firma-label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--gris-texto);
-            width: 100%;
-            text-align: center;
-        }
-
-        .firma-area {
-            width: 100%;
-            height: 100px;
-            border: 2px dashed #bfc9de;
-            border-radius: 10px;
-            background: var(--gris-fondo);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transition: border-color 0.2s, background 0.2s;
-        }
-
-        .firma-area:hover { border-color: var(--acento); background: var(--azul-claro); }
-
-        .firma-area span {
-            font-size: 0.8rem;
-            color: var(--gris-claro);
-            pointer-events: none;
-        }
-
-        .firma-area img {
-            position: absolute;
-            inset: 0;
-            width: 100%; height: 100%;
-            object-fit: contain;
-            display: none;
-        }
-
-        /* Sección empresa (gris) */
-        .empresa-section {
-            background: #f0f4ff;
-            border: 2px solid var(--azul-borde);
-        }
-
-        /* Botones de navegación */
-        .form-nav {
-            background: white;
-            border-radius: var(--radio);
-            padding: 20px 32px;
-            box-shadow: var(--sombra);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .btn-cancel {
-            background: none;
-            border: 1.5px solid #e0e4ed;
-            color: var(--rojo);
-            font-family: 'DM Sans', sans-serif;
-            font-weight: 600;
-            font-size: 0.88rem;
-            padding: 10px 22px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .btn-cancel:hover { background: #fff0f0; }
-
-        .btn-nav-right { display: flex; gap: 10px; }
-
-        .btn-prev {
-            background: white;
-            border: 1.5px solid var(--azul-borde);
-            color: var(--azul);
-            font-family: 'DM Sans', sans-serif;
-            font-weight: 600;
-            font-size: 0.88rem;
-            padding: 10px 22px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .btn-prev:hover { background: var(--azul-claro); }
-        .btn-prev.hidden { display: none; }
-
-        .btn-next {
-            background: var(--azul);
-            color: white;
-            border: none;
-            font-family: 'DM Sans', sans-serif;
-            font-weight: 600;
-            font-size: 0.9rem;
-            padding: 11px 28px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.15s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .btn-next:hover { background: var(--azul-oscuro); }
-        .btn-next.hidden { display: none; }
-
-        .btn-submit {
-            background: var(--verde);
-            color: white;
-            border: none;
-            font-family: 'DM Sans', sans-serif;
-            font-weight: 700;
-            font-size: 0.9rem;
-            padding: 11px 28px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .btn-submit:hover { background: #15803d; }
-        .btn-submit.hidden { display: none; }
-
-        /* ===================== MODAL FIRMA ===================== */
-        #firma-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(15,25,70,0.65);
-            z-index: 9000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        #firma-modal.open { display: flex; }
-
-        .modal-card {
-            background: white;
-            border-radius: 16px;
-            padding: 28px;
-            width: 100%;
-            max-width: 480px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-
-        .modal-card h3 {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--azul-oscuro);
-            margin-bottom: 16px;
-            text-align: center;
-        }
-
-        #firma-canvas {
-            width: 100%;
-            border: 2px solid #dde3f0;
-            border-radius: 10px;
-            background: #fafbff;
-            cursor: crosshair;
-            display: block;
-            touch-action: none;
-        }
-
-        .modal-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 14px;
-        }
-
-        .btn-clear {
-            background: #fff0f0;
-            color: var(--rojo);
-            border: none;
-            font-family: 'DM Sans', sans-serif;
-            font-weight: 600;
-            font-size: 0.85rem;
-            padding: 9px 18px;
-            border-radius: 7px;
-            cursor: pointer;
-        }
-
-        .btn-cancel-modal {
-            background: var(--gris-fondo);
-            color: var(--gris-texto);
-            border: none;
-            font-family: 'DM Sans', sans-serif;
-            font-weight: 500;
-            font-size: 0.85rem;
-            padding: 9px 18px;
-            border-radius: 7px;
-            cursor: pointer;
-            margin-right: 8px;
-        }
-
-        .btn-save-firma {
-            background: var(--azul);
-            color: white;
-            border: none;
-            font-family: 'DM Sans', sans-serif;
-            font-weight: 600;
-            font-size: 0.85rem;
-            padding: 9px 20px;
-            border-radius: 7px;
-            cursor: pointer;
-        }
-
-        /* ===================== OVERLAY CARGA ===================== */
-        #loading-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(255,255,255,0.94);
-            z-index: 9999;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 16px;
-        }
-        #loading-overlay.open { display: flex; }
-
-        .spinner {
-            width: 48px; height: 48px;
-            border: 4px solid var(--azul-borde);
-            border-top-color: var(--azul);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .loading-txt { font-weight: 700; color: var(--azul-oscuro); font-size: 1rem; }
-        .loading-sub { font-size: 0.82rem; color: var(--gris-claro); text-align: center; max-width: 260px; }
-
-        /* ===================== PLANTILLA PDF (OCULTA) ===================== */
-        #pdf-template-wrapper {
-            position: absolute;
-            left: -99999px;
-            top: 0;
-            background: white;
-        }
-
-        #document-container {
-            width: 816px;
-            padding: 46px 52px;
-            background: white;
-            font-family: Arial, Helvetica, sans-serif;
-            color: #111;
-            box-sizing: border-box;
-        }
-
-        .pdf-sec-title {
-            font-size: 11.5px;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-top: 20px;
-            margin-bottom: 8px;
-            letter-spacing: 0.04em;
-        }
-
-        .pdf-tbl { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px; }
-        .pdf-tbl td { padding: 3px 0; vertical-align: bottom; }
-        .pdf-lbl { width: 1%; white-space: nowrap; padding-right: 5px; font-weight: normal; }
-
-        .pdf-val {
-            border-bottom: 1.5px solid #111;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 11.5px;
-            font-weight: bold;
-            padding-left: 5px;
-            color: #111;
-        }
-
-        .pdf-ref-tbl { width: 100%; border-collapse: collapse; text-align: center; margin-top: 5px; margin-bottom: 18px; }
-        .pdf-ref-tbl th, .pdf-ref-tbl td { border: 1.5px solid #111; padding: 5px; }
-        .pdf-ref-tbl th { font-size: 11px; font-weight: bold; }
-        .pdf-ref-tbl td { height: 22px; font-family: 'Courier New', Courier, monospace; font-size: 11px; font-weight: bold; }
-
-        .pdf-nota { font-size: 9.5px; margin-top: 8px; line-height: 1.4; text-align: justify; }
-
-        .pdf-importante {
-            border: 1px solid #111;
-            padding: 9px;
-            font-weight: bold;
-            text-align: justify;
-            font-size: 9px;
-            line-height: 1.3;
-            margin-bottom: 18px;
-            margin-top: 10px;
-        }
-
-        .saltar-pagina { page-break-before: always; padding-top: 20px; }
-
-        .pdf-uso-exclusivo {
-            border: 1.5px solid #111;
-            padding: 24px;
-            margin-top: 10px;
-            min-height: 340px;
-        }
-
-        .pdf-firma-img { height: 38px; display: none; margin: 0 auto; object-fit: contain; }
-    </style>
-</head>
-<body>
-
-<!-- ======================== PANTALLA INICIO ======================== -->
-<div id="pantalla-inicio">
-    <div class="inicio-card">
-        <!-- Logo SVG inline de Grupo imade -->
-        <svg class="logo-svg" viewBox="0 0 220 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="18" cy="18" r="14" fill="#1a3fa8"/>
-            <circle cx="18" cy="18" r="8" fill="white"/>
-            <circle cx="18" cy="18" r="4" fill="#1a3fa8"/>
-            <text x="38" y="26" font-family="Arial" font-size="22" font-weight="900" fill="#1a3fa8" letter-spacing="-0.5">GRUPO</text>
-            <text x="38" y="50" font-family="Arial" font-size="28" font-weight="900" fill="#1a3fa8" letter-spacing="-1">imade</text>
-        </svg>
-
-        <h1 class="inicio-titulo">Solicitud de Apertura<br>de Código para Crédito</h1>
-        <p class="inicio-desc">Complete todos los campos para procesar su solicitud. El formulario generará automáticamente el PDF oficial y lo enviará al departamento correspondiente.</p>
-
-        <button class="btn-primary" onclick="iniciarFormulario()">
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-            Llenar Formulario
-        </button>
-
-        <p class="version-tag">v2.3 — Grupo imade · Pinturas y Más, S.A.</p>
-    </div>
-</div>
-
-<!-- ======================== PANTALLA FORMULARIO ======================== -->
-<div id="pantalla-formulario">
-    <div class="form-wrapper">
-
-        <!-- Header -->
-        <div class="form-header">
-            <div class="form-header-left">
-                <h1>Solicitud de Apertura de Código para Crédito</h1>
-                <p>* Los campos marcados son obligatorios</p>
-            </div>
-            <div class="progress-bar-wrap">
-                <span class="step-label" id="step-label">Paso 1 de 5</span>
-                <div class="progress-track">
-                    <div class="progress-fill" id="progress-fill" style="width: 20%;"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- PASO 1: Datos de Facturación -->
-        <div id="step-1" class="form-section">
-            <div class="section-title"><span class="section-num">1</span> Datos de Facturación</div>
-            <div class="grid-2">
-                <div class="field col-2">
-                    <label>Nombre o Razón Social <span class="req">*</span></label>
-                    <input type="text" id="f_nombre_rs" maxlength="70" required placeholder="Nombre completo o razón social">
-                </div>
-                <div class="field">
-                    <label>N.I.T. <span class="req">*</span></label>
-                    <input type="text" id="f_nit" maxlength="20" required placeholder="0000000-0">
-                </div>
-                <div class="field">
-                    <label>Teléfono con WhatsApp <span class="req">*</span></label>
-                    <input type="text" id="f_tel_whatsapp" maxlength="25" required placeholder="+502 0000-0000">
-                </div>
-                <div class="field col-2">
-                    <label>Dirección <span class="req">*</span></label>
-                    <input type="text" id="f_direccion" maxlength="90" required placeholder="Calle, Zona, Colonia">
-                </div>
-                <div class="field">
-                    <label>País <span class="req">*</span></label>
-                    <input type="text" id="f_pais" maxlength="30" required placeholder="Guatemala">
-                </div>
-                <div class="field">
-                    <label>Departamento <span class="req">*</span></label>
-                    <input type="text" id="f_departamento" maxlength="30" required placeholder="Guatemala">
-                </div>
-                <div class="field">
-                    <label>Municipio <span class="req">*</span></label>
-                    <input type="text" id="f_municipio" maxlength="30" required placeholder="Guatemala">
-                </div>
-                <div class="field">
-                    <label>Latitud <span class="req">*</span></label>
-                    <input type="text" id="f_latitud" maxlength="20" required placeholder="14.6349">
-                </div>
-                <!-- invisible spacer to align longitud -->
-                <div class="field" style="grid-column: 1 / span 1; display:none;" id="lat-spacer"></div>
-                <div class="field">
-                    <label>Longitud <span class="req">*</span></label>
-                    <input type="text" id="f_longitud" maxlength="20" required placeholder="-90.5069">
-                </div>
-            </div>
-        </div>
-
-        <!-- PASO 2: Información General -->
-        <div id="step-2" class="form-section" style="display:none;">
-            <div class="section-title"><span class="section-num">2</span> Información General</div>
-            <div class="grid-2">
-                <div class="field col-2">
-                    <label>Dirección del Negocio <span class="req">*</span></label>
-                    <input type="text" id="f_dir_negocio" maxlength="90" required placeholder="Dirección del negocio">
-                </div>
-                <div class="field col-2">
-                    <label>Teléfonos del Negocio <span class="req">*</span></label>
-                    <input type="text" id="f_tel_negocio" maxlength="30" required placeholder="2233-0000">
-                </div>
-                <div class="field col-2">
-                    <label>Dirección de Entrega <span class="req">*</span></label>
-                    <input type="text" id="f_dir_entrega" maxlength="90" required placeholder="Dirección de entrega (si es diferente)">
-                </div>
-                <div class="field col-2">
-                    <label>Teléfonos de Entrega <span class="req">*</span></label>
-                    <input type="text" id="f_tel_entrega" maxlength="30" required placeholder="2233-0000">
-                </div>
-            </div>
-
-            <div class="sub-section">
-                <div class="sub-section-label">Contacto de Compras</div>
-                <div class="grid-3">
-                    <div class="field">
-                        <label>Nombre <span class="req">*</span></label>
-                        <input type="text" id="f_contacto_compras" maxlength="50" required placeholder="Nombre completo">
-                    </div>
-                    <div class="field">
-                        <label>Teléfono <span class="req">*</span></label>
-                        <input type="text" id="f_tel_compras" maxlength="25" required placeholder="2233-0000">
-                    </div>
-                    <div class="field">
-                        <label>E-mail <span class="req">*</span></label>
-                        <input type="email" id="f_email_compras" maxlength="60" required placeholder="correo@empresa.com">
-                    </div>
-                </div>
-            </div>
-
-            <div class="sub-section" style="margin-top: 12px;">
-                <div class="sub-section-label">Contacto de Cobros</div>
-                <div class="grid-3">
-                    <div class="field">
-                        <label>Nombre <span class="req">*</span></label>
-                        <input type="text" id="f_contacto_cobros" maxlength="50" required placeholder="Nombre completo">
-                    </div>
-                    <div class="field">
-                        <label>Teléfono <span class="req">*</span></label>
-                        <input type="text" id="f_tel_cobros" maxlength="25" required placeholder="2233-0000">
-                    </div>
-                    <div class="field">
-                        <label>E-mail <span class="req">*</span></label>
-                        <input type="email" id="f_email_cobros" maxlength="60" required placeholder="correo@empresa.com">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- PASO 3: Referencias Comerciales -->
-        <div id="step-3" class="form-section" style="display:none;">
-            <div class="section-title"><span class="section-num">3</span> Referencias Comerciales</div>
-            <p style="font-size:0.82rem; color:var(--gris-claro); margin-bottom: 18px;">Proporcione 3 referencias comerciales de empresas o personas con quienes tenga relación comercial.</p>
-
-            <div class="sub-section-label" style="font-size:0.75rem; color:var(--azul); text-transform:uppercase; letter-spacing:0.06em; font-weight:700; margin-bottom: 10px;">Referencia 1</div>
-            <div class="ref-row">
-                <div class="field"><label>Nombre <span class="req">*</span></label><input type="text" id="f_ref1_nombre" maxlength="50" required placeholder="Nombre o empresa"></div>
-                <div class="field"><label>Teléfonos <span class="req">*</span></label><input type="text" id="f_ref1_tel" maxlength="25" required placeholder="2233-0000"></div>
-                <div class="field"><label>Relación <span class="req">*</span></label><input type="text" id="f_ref1_rel" maxlength="30" required placeholder="Proveedor / Cliente..."></div>
-            </div>
-
-            <div class="sub-section-label" style="font-size:0.75rem; color:var(--azul); text-transform:uppercase; letter-spacing:0.06em; font-weight:700; margin-bottom: 10px; margin-top:16px;">Referencia 2</div>
-            <div class="ref-row">
-                <div class="field"><label>Nombre <span class="req">*</span></label><input type="text" id="f_ref2_nombre" maxlength="50" required placeholder="Nombre o empresa"></div>
-                <div class="field"><label>Teléfonos <span class="req">*</span></label><input type="text" id="f_ref2_tel" maxlength="25" required placeholder="2233-0000"></div>
-                <div class="field"><label>Relación <span class="req">*</span></label><input type="text" id="f_ref2_rel" maxlength="30" required placeholder="Proveedor / Cliente..."></div>
-            </div>
-
-            <div class="sub-section-label" style="font-size:0.75rem; color:var(--azul); text-transform:uppercase; letter-spacing:0.06em; font-weight:700; margin-bottom: 10px; margin-top:16px;">Referencia 3</div>
-            <div class="ref-row" style="border-bottom: none; margin-bottom:0; padding-bottom:0;">
-                <div class="field"><label>Nombre <span class="req">*</span></label><input type="text" id="f_ref3_nombre" maxlength="50" required placeholder="Nombre o empresa"></div>
-                <div class="field"><label>Teléfonos <span class="req">*</span></label><input type="text" id="f_ref3_tel" maxlength="25" required placeholder="2233-0000"></div>
-                <div class="field"><label>Relación <span class="req">*</span></label><input type="text" id="f_ref3_rel" maxlength="30" required placeholder="Proveedor / Cliente..."></div>
-            </div>
-        </div>
-
-        <!-- PASO 4: Crédito y Firma Cliente -->
-        <div id="step-4" class="form-section" style="display:none;">
-            <div class="section-title"><span class="section-num">4</span> Límite de Crédito y Aceptación</div>
-
-            <div class="grid-2">
-                <div class="field">
-                    <label>Límite de Crédito Solicitado (Q.) <span class="req">*</span></label>
-                    <input type="text" id="f_limite_credito" maxlength="15" required placeholder="50,000.00">
-                </div>
-                <div class="field">
-                    <label>Días de Crédito Solicitados <span class="req">*</span></label>
-                    <input type="number" id="f_dias_credito" min="1" max="9999" required placeholder="30">
-                </div>
-            </div>
-
-            <div class="condiciones-box">
-                <p>Condiciones al aceptar:</p>
-                <ul>
-                    <li>Hacer efectivos sus pagos el día de vencimiento del crédito.</li>
-                    <li>Todo pago con cheque a nombre de PINTURAS Y MAS, S.A.</li>
-                    <li>Todo pago se respalda únicamente con Recibo de Caja.</li>
-                    <li>Cheque rechazado genera cobro administrativo de Q100.00.</li>
-                    <li>Cualquier cambio de dirección o datos debe comunicarse inmediatamente.</li>
-                </ul>
-            </div>
-
-            <div class="grid-2" style="align-items: end;">
-                <div>
-                    <div class="field" style="margin-bottom: 14px;">
-                        <label>Nombre de quien solicita <span class="req">*</span></label>
-                        <input type="text" id="f_nombre_solicita" maxlength="50" required placeholder="Nombre completo">
-                    </div>
-                    <div class="field">
-                        <label>Fecha <span class="req">*</span></label>
-                        <input type="date" id="f_fecha_solicita" required>
-                    </div>
-                </div>
-                <div class="firma-wrap">
-                    <span class="firma-label">Firma del Cliente <span style="color:var(--rojo)">*</span></span>
-                    <div class="firma-area" id="firma-area-cliente" onclick="abrirFirma('cliente')">
-                        <span id="txt-firma-cliente">Toque aquí para firmar</span>
-                        <img id="preview-firma-cliente" src="" alt="firma">
-                    </div>
-                    <input type="hidden" id="f_firma_cliente_data">
-                </div>
-            </div>
-        </div>
-
-        <!-- PASO 5: Uso Exclusivo Empresa -->
-        <div id="step-5" class="form-section empresa-section" style="display:none;">
-            <div class="section-title"><span class="section-num">5</span> Uso Exclusivo — Pinturas y Más, S.A.</div>
-            <p style="font-size: 0.8rem; color: var(--azul); background: white; border-radius: 6px; padding: 8px 12px; margin-bottom: 20px; border: 1px solid var(--azul-borde);">Esta sección es completada por el personal autorizado de la empresa.</p>
-
-            <div class="grid-3">
-                <div class="field">
-                    <label>Monto Autorizado (Q.) <span class="req">*</span></label>
-                    <input type="number" step="0.01" id="f_monto_autorizado" min="0" required placeholder="10000.00">
-                </div>
-                <div class="field">
-                    <label>Días de Crédito <span class="req">*</span></label>
-                    <input type="number" id="f_dias_autorizado" min="1" max="9999" required placeholder="30">
-                </div>
-                <div class="field">
-                    <label>Código de Cliente <span class="req">*</span></label>
-                    <input type="text" id="f_codigo_cliente" maxlength="20" required placeholder="01011">
-                </div>
-            </div>
-
-            <div class="grid-2" style="align-items: end; margin-top: 20px;">
-                <div>
-                    <div class="field" style="margin-bottom: 14px;">
-                        <label>Nombre de quien autoriza <span class="req">*</span></label>
-                        <input type="text" id="f_nombre_autoriza" maxlength="50" required placeholder="Nombre del autorizador">
-                    </div>
-                    <div class="field">
-                        <label>Fecha de Autorización <span class="req">*</span></label>
-                        <input type="date" id="f_fecha_autoriza" required>
-                    </div>
-                </div>
-                <div class="firma-wrap">
-                    <span class="firma-label">Firma Empresa <span style="color:var(--rojo)">*</span></span>
-                    <div class="firma-area" id="firma-area-empresa" onclick="abrirFirma('empresa')">
-                        <span id="txt-firma-empresa">Toque aquí para firmar</span>
-                        <img id="preview-firma-empresa" src="" alt="firma">
-                    </div>
-                    <input type="hidden" id="f_firma_empresa_data">
-                </div>
-            </div>
-        </div>
-
-        <!-- Navegación -->
-        <div class="form-nav">
-            <button type="button" class="btn-cancel" onclick="cancelarFormulario()">✕ Cancelar y Salir</button>
-            <div class="btn-nav-right">
-                <button type="button" class="btn-prev hidden" id="btn-prev" onclick="prevStep()">← Anterior</button>
-                <button type="button" class="btn-next" id="btn-next" onclick="nextStep()">Siguiente →</button>
-                <button type="button" class="btn-submit hidden" id="btn-submit" onclick="procesarFormulario()">✓ Finalizar y Generar PDF</button>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-<!-- ======================== MODAL FIRMA ======================== -->
-<div id="firma-modal">
-    <div class="modal-card">
-        <h3 id="modal-firma-titulo">Firma Digital</h3>
-        <canvas id="firma-canvas" width="420" height="180"></canvas>
-        <div class="modal-actions">
-            <button class="btn-clear" onclick="limpiarFirma()">↺ Limpiar</button>
-            <div>
-                <button class="btn-cancel-modal" onclick="cerrarFirma()">Cancelar</button>
-                <button class="btn-save-firma" onclick="guardarFirma()">Guardar Firma</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ======================== LOADING OVERLAY ======================== -->
-<div id="loading-overlay">
-    <div class="spinner"></div>
-    <p class="loading-txt">Generando documento PDF...</p>
-    <p class="loading-sub">Por favor espere, esto tardará unos segundos.</p>
-</div>
-
-<!-- ======================== PLANTILLA PDF (OCULTA) ======================== -->
-<div id="pdf-template-wrapper">
-    <div id="document-container">
-
-        <!-- Encabezado PDF -->
-        <table style="width:100%; margin-bottom: 22px; border-collapse:collapse;">
-            <tr>
-                <td style="width:22%; vertical-align: middle;">
-                    <svg viewBox="0 0 140 42" width="120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="14" cy="14" r="11" fill="#1a3fa8"/>
-                        <circle cx="14" cy="14" r="6" fill="white"/>
-                        <circle cx="14" cy="14" r="3" fill="#1a3fa8"/>
-                        <text x="30" y="18" font-family="Arial" font-size="11" font-weight="900" fill="#1a3fa8" letter-spacing="-0.3">GRUPO</text>
-                        <text x="30" y="34" font-family="Arial" font-size="16" font-weight="900" fill="#1a3fa8" letter-spacing="-0.5">imade</text>
-                    </svg>
-                </td>
-                <td style="text-align: center; vertical-align: middle; font-size: 15px; font-weight: bold; letter-spacing: 0.4px;">
-                    SOLICITUD DE APERTURA DE CÓDIGO PARA CRÉDITO
-                </td>
-            </tr>
-        </table>
-
-        <!-- DATOS DE FACTURACIÓN -->
-        <div class="pdf-sec-title">DATOS DE FACTURACIÓN</div>
-
-        <table class="pdf-tbl">
-            <tr>
-                <td class="pdf-lbl">Nombre o Rs:</td>
-                <td class="pdf-val" style="width:58%;" id="p_nombre_rs"></td>
-                <td class="pdf-lbl" style="padding-left:18px;">N.I.T.:</td>
-                <td class="pdf-val" style="width:32%;" id="p_nit"></td>
-            </tr>
-        </table>
-
-        <table class="pdf-tbl">
-            <tr>
-                <td class="pdf-lbl">Dirección:</td>
-                <td class="pdf-val" style="width:48%;" id="p_direccion"></td>
-                <td class="pdf-lbl" style="padding-left:18px;">País:</td>
-                <td class="pdf-val" style="width:38%;" id="p_pais"></td>
-            </tr>
-        </table>
-
-        <table class="pdf-tbl">
-            <tr>
-                <td class="pdf-lbl">Municipio:</td>
-                <td class="pdf-val" style="width:48%;" id="p_municipio"></td>
-                <td class="pdf-lbl" style="padding-left:18px;">Coordenadas Latitud:</td>
-                <td class="pdf-val" style="width:38%;" id="p_latitud"></td>
-            </tr>
-        </table>
-
-        <table class="pdf-tbl">
-            <tr>
-                <td class="pdf-lbl">Departamento:</td>
-                <td class="pdf-val" style="width:48%;" id="p_departamento"></td>
-                <td class="pdf-lbl" style="padding-left:18px;">Longitud:</td>
-                <td class="pdf-val" style="width:38%;" id="p_longitud"></td>
-            </tr>
-        </table>
-
-        <table class="pdf-tbl">
-            <tr>
-                <td class="pdf-lbl">Teléfono con WhatsApp:</td>
-                <td class="pdf-val" id="p_tel_whatsapp"></td>
-            </tr>
-        </table>
-
-        <!-- INFORMACIÓN GENERAL -->
-        <div class="pdf-sec-title" style="margin-top:22px;">INFORMACIÓN GENERAL</div>
-
-        <table class="pdf-tbl">
-            <tr>
-                <td class="pdf-lbl">Dirección del Negocio:</td>
-                <td class="pdf-val" style="width:62%;" id="p_dir_negocio"></td>
-                <td class="pdf-lbl" style="padding-left:18px;">Teléfonos:</td>
-                <td class="pdf-val" style="width:28%;" id="p_tel_negocio"></td>
-            </tr>
-        </table>
-
-        <table class="pdf-tbl">
-            <tr>
-                <td class="pdf-lbl">Dirección de Entrega:</td>
-                <td class="pdf-val" style="width:62%;" id="p_dir_entrega"></td>
-                <td class="pdf-lbl" style="padding-left:18px;">Teléfonos:</td>
-                <td class="pdf-val" style="width:28%;" id="p_tel_entrega"></td>
-            </tr>
-        </table>
-
-        <table class="pdf-tbl">
-            <tr>
-                <td class="pdf-lbl">Contacto Compras:</td>
-                <td class="pdf-val" style="width:32%;" id="p_contacto_compras"></td>
-                <td class="pdf-lbl" style="padding-left:18px;">Teléfonos:</td>
-                <td class="pdf-val" style="width:22%;" id="p_tel_compras"></td>
-                <td class="pdf-lbl" style="padding-left:18px;">E-mail:</td>
-                <td class="pdf-val" style="width:30%;" id="p_email_compras"></td>
-            </tr>
-        </table>
-
-        <table class="pdf-tbl">
-            <tr>
-                <td class="pdf-lbl">Contacto Cobros:</td>
-                <td class="pdf-val" style="width:32%;" id="p_contacto_cobros"></td>
-                <td class="pdf-lbl" style="padding-left:18px;">Teléfonos:</td>
-                <td class="pdf-val" style="width:22%;" id="p_tel_cobros"></td>
-                <td class="pdf-lbl" style="padding-left:18px;">E-mail:</td>
-                <td class="pdf-val" style="width:30%;" id="p_email_cobros"></td>
-            </tr>
-        </table>
-
-        <!-- REFERENCIAS COMERCIALES -->
-        <div class="pdf-sec-title" style="margin-top:22px;">REFERENCIAS COMERCIALES</div>
-        <table class="pdf-ref-tbl">
-            <tr>
-                <th style="width:40%;">NOMBRE</th>
-                <th style="width:30%;">TELÉFONOS</th>
-                <th style="width:30%;">RELACIÓN</th>
-            </tr>
-            <tr><td id="p_ref1_nombre"></td><td id="p_ref1_tel"></td><td id="p_ref1_rel"></td></tr>
-            <tr><td id="p_ref2_nombre"></td><td id="p_ref2_tel"></td><td id="p_ref2_rel"></td></tr>
-            <tr><td id="p_ref3_nombre"></td><td id="p_ref3_tel"></td><td id="p_ref3_rel"></td></tr>
-        </table>
-
-        <!-- LÍMITE DE CRÉDITO -->
-        <table class="pdf-tbl" style="margin-top:18px; margin-bottom:4px;">
-            <tr>
-                <td style="font-weight:bold; font-size:12px; white-space:nowrap; padding-right:5px;">LIMITE DE CREDITO:</td>
-                <td class="pdf-val" style="width:30%; text-align:center;" id="p_limite_credito"></td>
-                <td style="padding-left:30px; font-weight:bold; font-size:12px; white-space:nowrap; padding-right:5px;">DIAS CREDITO:</td>
-                <td class="pdf-val" style="width:22%; text-align:center;" id="p_dias_credito"></td>
-                <td></td>
-            </tr>
-        </table>
-
-        <div class="pdf-nota">
-            <b>Nota:</b> Si el crédito solicitado es concedido, deberá cumplir con las siguientes condiciones:<br>
-            1. Hacer efectivos sus pagos el día de vencimiento del crédito.<br>
-            2. Todo pago con cheque, debe hacerlo a nombre de la empresa (PINTURAS Y MAS, S.A.).<br>
-            3. Todo pago se respalda únicamente con Recibo de Caja de PINTURAS Y MAS, S.A.<br>
-            4. Todo cheque rechazado genera un cobro Administrativo de Q100.00.<br>
-            5. Cualquier cambio de dirección, teléfono u otro dato de esta solicitud, debe comunicarlo inmediatamente.
-        </div>
-
-        <div class="pdf-importante">
-            IMPORTANTE: Favor llenar este formulario, imprimirlo y adjuntar fotocopia de patente de comercio (cuando aplique), RTU y fotocopia del DPI del representante legal de la empresa, recibo de luz o agua y fotografías del negocio.
-        </div>
-
-        <!-- Firmas cliente -->
-        <table style="width:100%; margin-top:30px; border-collapse:collapse;">
-            <tr>
-                <td style="width:50%; vertical-align:bottom; padding-right:28px;">
-                    <table class="pdf-tbl">
-                        <tr>
-                            <td class="pdf-lbl">NOMBRE DE QUIEN SOLICITA:</td>
-                            <td class="pdf-val" id="p_nombre_solicita"></td>
-                        </tr>
-                        <tr>
-                            <td class="pdf-lbl" style="padding-top:18px;">FECHA:</td>
-                            <td class="pdf-val" id="p_fecha_solicita"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td style="width:50%; text-align:center; vertical-align:bottom;">
-                    <img id="p_firma_cliente_img" class="pdf-firma-img">
-                    <div style="border-top:1px solid black; width:65%; margin: 4px auto 0; padding-top:4px; font-size:11px; font-weight:bold;">FIRMA</div>
-                </td>
-            </tr>
-        </table>
-
-        <!-- PÁGINA 2 — USO EXCLUSIVO -->
-        <div class="saltar-pagina">
-            <div class="pdf-uso-exclusivo">
-                <div style="text-align:center; font-weight:bold; font-size:14px; margin-bottom:36px;">USO EXCLUSIVO PINTURAS Y MAS, S.A.</div>
-
-                <table class="pdf-tbl" style="margin-bottom:28px;">
-                    <tr>
-                        <td class="pdf-lbl">MONTO AUTORIZADO:</td>
-                        <td class="pdf-lbl" style="padding-left:4px; padding-right:0;">Q.</td>
-                        <td class="pdf-val" style="width:32%;" id="p_monto_autorizado"></td>
-                        <td class="pdf-lbl" style="padding-left:36px;">FECHA AUTORIZACIÓN:</td>
-                        <td class="pdf-val" style="width:32%;" id="p_fecha_autoriza"></td>
-                    </tr>
-                </table>
-
-                <table class="pdf-tbl">
-                    <tr>
-                        <td class="pdf-lbl">DIAS DE CRÉDITO:</td>
-                        <td class="pdf-val" style="width:38%;" id="p_dias_autorizado"></td>
-                        <td class="pdf-lbl" style="padding-left:36px;">CÓDIGO DEL CLIENTE:</td>
-                        <td class="pdf-val" style="width:38%;" id="p_codigo_cliente"></td>
-                    </tr>
-                </table>
-
-                <table style="width:100%; margin-top:65px; border-collapse:collapse;">
-                    <tr>
-                        <td style="width:50%; vertical-align:bottom; padding-right:28px;">
-                            <table class="pdf-tbl">
-                                <tr>
-                                    <td class="pdf-lbl">NOMBRE DE QUIEN AUTORIZA:</td>
-                                    <td class="pdf-val" id="p_nombre_autoriza"></td>
-                                </tr>
-                            </table>
-                        </td>
-                        <td style="width:50%; text-align:center; vertical-align:bottom;">
-                            <img id="p_firma_empresa_img" class="pdf-firma-img">
-                            <div style="border-top:1px solid black; width:75%; margin:4px auto 0; padding-top:4px; font-size:11px; font-weight:bold;">FIRMA</div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-<script>
-/* ============================================================
-   NAVEGACIÓN WIZARD
-   ============================================================ */
-let pasoActual = 1;
-const TOTAL_PASOS = 5;
-
-function iniciarFormulario() {
-    document.getElementById('pantalla-inicio').style.display = 'none';
-    document.getElementById('pantalla-formulario').style.display = 'block';
-    pasoActual = 1;
-    actualizarVistaPaso();
-    window.scrollTo(0, 0);
-}
-
-function cancelarFormulario() {
-    if (!confirm('¿Desea salir? Se perderán los datos no guardados.')) return;
-    document.getElementById('pantalla-formulario').style.display = 'none';
-    document.getElementById('pantalla-inicio').style.display = 'flex';
-    document.querySelectorAll('input[type="text"], input[type="email"], input[type="number"], input[type="date"]').forEach(i => i.value = '');
-    limpiarDatosFirmas();
-    pasoActual = 1;
-}
-
-function actualizarVistaPaso() {
-    for (let i = 1; i <= TOTAL_PASOS; i++) {
-        const el = document.getElementById('step-' + i);
-        if (el) el.style.display = (i === pasoActual) ? 'block' : 'none';
+import React, { useState, useEffect, useRef } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, collection, onSnapshot, doc, setDoc, updateDoc } from 'firebase/firestore';
+import { CheckCircle2, Clock, ChevronRight, ArrowLeft, PenTool, LogOut, User, ShieldCheck } from 'lucide-react';
+
+// ============================================================
+// CONFIGURACIÓN DE FIREBASE (Reglas Estrictas del Entorno)
+// ============================================================
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'grupo-imade-creditos';
+
+// ============================================================
+// COMPONENTE: PAD DE FIRMA
+// ============================================================
+const SignaturePad = ({ onSave, onCancel, title }) => {
+  const canvasRef = useRef(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      canvas.width = canvas.parentElement.clientWidth - 40;
+      canvas.height = 180;
+      const ctx = canvas.getContext('2d');
+      ctx.strokeStyle = '#1a3fa8';
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
     }
-    document.getElementById('step-label').textContent = `Paso ${pasoActual} de ${TOTAL_PASOS}`;
-    document.getElementById('progress-fill').style.width = ((pasoActual / TOTAL_PASOS) * 100) + '%';
+  }, []);
 
-    const btnPrev = document.getElementById('btn-prev');
-    const btnNext = document.getElementById('btn-next');
-    const btnSubmit = document.getElementById('btn-submit');
+  const startDrawing = (e) => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    ctx.beginPath();
+    ctx.moveTo(clientX - rect.left, clientY - rect.top);
+    setIsDrawing(true);
+  };
 
-    btnPrev.classList.toggle('hidden', pasoActual === 1);
-    btnNext.classList.toggle('hidden', pasoActual === TOTAL_PASOS);
-    btnSubmit.classList.toggle('hidden', pasoActual !== TOTAL_PASOS);
-}
+  const draw = (e) => {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    ctx.lineTo(clientX - rect.left, clientY - rect.top);
+    ctx.stroke();
+  };
 
-function nextStep() {
-    // Validar campos requeridos del paso actual
-    const seccion = document.getElementById('step-' + pasoActual);
-    const inputs = seccion.querySelectorAll('input[required], select[required]');
-    for (let inp of inputs) {
-        if (!inp.checkValidity()) {
-            inp.reportValidity();
-            return;
-        }
-    }
-    // Validar firma en paso 4
-    if (pasoActual === 4 && !document.getElementById('f_firma_cliente_data').value) {
-        alert('La firma del cliente es obligatoria para continuar.');
-        return;
-    }
-    if (pasoActual < TOTAL_PASOS) {
-        pasoActual++;
-        actualizarVistaPaso();
-        window.scrollTo(0, 0);
-    }
-}
+  const stopDrawing = () => {
+    setIsDrawing(false);
+  };
 
-function prevStep() {
-    if (pasoActual > 1) {
-        pasoActual--;
-        actualizarVistaPaso();
-        window.scrollTo(0, 0);
-    }
-}
-
-/* ============================================================
-   CANVAS DE FIRMA
-   ============================================================ */
-const canvas  = document.getElementById('firma-canvas');
-const ctx     = canvas.getContext('2d');
-let isDrawing = false;
-let firmaTarget = '';
-
-ctx.strokeStyle = '#111111';
-ctx.lineWidth   = 2.5;
-ctx.lineCap     = 'round';
-ctx.lineJoin    = 'round';
-
-function getPosicion(e) {
-    const rect  = canvas.getBoundingClientRect();
-    const scaleX = canvas.width  / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const src    = e.touches ? e.touches[0] : e;
-    return {
-        x: (src.clientX - rect.left) * scaleX,
-        y: (src.clientY - rect.top)  * scaleY
-    };
-}
-
-canvas.addEventListener('mousedown',  e => { isDrawing=true; ctx.beginPath(); const p=getPosicion(e); ctx.moveTo(p.x,p.y); });
-canvas.addEventListener('mousemove',  e => { if(!isDrawing) return; const p=getPosicion(e); ctx.lineTo(p.x,p.y); ctx.stroke(); });
-canvas.addEventListener('mouseup',    () => { isDrawing=false; ctx.closePath(); });
-canvas.addEventListener('mouseleave', () => { isDrawing=false; });
-canvas.addEventListener('touchstart', e => { e.preventDefault(); isDrawing=true; ctx.beginPath(); const p=getPosicion(e); ctx.moveTo(p.x,p.y); }, { passive:false });
-canvas.addEventListener('touchmove',  e => { e.preventDefault(); if(!isDrawing) return; const p=getPosicion(e); ctx.lineTo(p.x,p.y); ctx.stroke(); }, { passive:false });
-canvas.addEventListener('touchend',   () => { isDrawing=false; ctx.closePath(); });
-
-function abrirFirma(target) {
-    firmaTarget = target;
-    document.getElementById('modal-firma-titulo').textContent = target === 'cliente' ? 'Firma del Cliente' : 'Firma de la Empresa';
-    document.getElementById('firma-modal').classList.add('open');
-    limpiarFirma();
-    // Redimensionar canvas al contenedor
-    const rect = canvas.parentNode.getBoundingClientRect();
-    canvas.width  = Math.min(rect.width, 420);
-    canvas.height = 180;
-    ctx.strokeStyle = '#111111';
-    ctx.lineWidth   = 2.5;
-    ctx.lineCap     = 'round';
-    ctx.lineJoin    = 'round';
-}
-
-function cerrarFirma() {
-    document.getElementById('firma-modal').classList.remove('open');
-}
-
-function limpiarFirma() {
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
+  };
 
-function guardarFirma() {
-    // Verificar que el canvas no esté vacío
+  const saveSignature = () => {
+    const canvas = canvasRef.current;
     const blank = document.createElement('canvas');
-    blank.width  = canvas.width;
+    blank.width = canvas.width;
     blank.height = canvas.height;
     if (canvas.toDataURL() === blank.toDataURL()) {
-        alert('Por favor realice una firma antes de guardar.');
-        return;
+      alert('Por favor realice su firma.');
+      return;
     }
-    const dataUrl = canvas.toDataURL('image/png');
-    document.getElementById('f_firma_' + firmaTarget + '_data').value = dataUrl;
+    onSave(canvas.toDataURL('image/png'));
+  };
 
-    const preview = document.getElementById('preview-firma-' + firmaTarget);
-    preview.src = dataUrl;
-    preview.style.display = 'block';
-    document.getElementById('txt-firma-' + firmaTarget).style.display = 'none';
-    cerrarFirma();
-}
+  return (
+    <div className="fixed inset-0 bg-[#0f1946]/80 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl">
+        <h3 className="text-lg font-bold text-[#102580] mb-4 text-center">{title}</h3>
+        <canvas
+          ref={canvasRef}
+          className="border-2 border-[#dde3f0] rounded-xl bg-[#fafbff] cursor-crosshair touch-none w-full mb-4"
+          onMouseDown={startDrawing}
+          onMouseMove={draw}
+          onMouseUp={stopDrawing}
+          onMouseLeave={stopDrawing}
+          onTouchStart={startDrawing}
+          onTouchMove={draw}
+          onTouchEnd={stopDrawing}
+        />
+        <div className="flex justify-between items-center">
+          <button onClick={clearCanvas} className="text-red-500 bg-red-50 px-4 py-2 rounded-lg font-medium text-sm hover:bg-red-100 transition-colors">
+            Limpiar
+          </button>
+          <div className="flex gap-2">
+            <button onClick={onCancel} className="text-gray-600 bg-gray-100 px-4 py-2 rounded-lg font-medium text-sm hover:bg-gray-200 transition-colors">
+              Cancelar
+            </button>
+            <button onClick={saveSignature} className="text-white bg-[#1a3fa8] px-4 py-2 rounded-lg font-medium text-sm hover:bg-[#102580] transition-colors">
+              Guardar Firma
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-function limpiarDatosFirmas() {
-    ['cliente','empresa'].forEach(t => {
-        document.getElementById('f_firma_' + t + '_data').value = '';
-        const img = document.getElementById('preview-firma-' + t);
-        img.src = ''; img.style.display = 'none';
-        document.getElementById('txt-firma-' + t).style.display = 'block';
-    });
-}
+// ============================================================
+// APLICACIÓN PRINCIPAL
+// ============================================================
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null); // 'client' | 'admin'
+  const [applications, setApplications] = useState([]);
+  
+  // Vistas: 'selectRole', 'clientForm', 'clientSuccess', 'adminDash', 'adminReview'
+  const [currentView, setCurrentView] = useState('selectRole'); 
+  const [selectedApp, setSelectedApp] = useState(null);
 
-/* ============================================================
-   GENERAR PDF Y ENVIAR
-   ============================================================ */
-function procesarFormulario() {
-    // Validar firma empresa
-    if (!document.getElementById('f_firma_empresa_data').value) {
-        alert('La firma de la empresa es obligatoria.');
-        return;
-    }
-    // Validar todos los campos del paso 5
-    const s5 = document.getElementById('step-5');
-    const inputs = s5.querySelectorAll('input[required]');
-    for (let inp of inputs) {
-        if (!inp.checkValidity()) { inp.reportValidity(); return; }
-    }
-
-    document.getElementById('loading-overlay').classList.add('open');
-
-    // Llenar plantilla PDF
-    const campos = [
-        'nombre_rs','nit','direccion','pais','municipio','latitud','departamento','longitud','tel_whatsapp',
-        'dir_negocio','tel_negocio','dir_entrega','tel_entrega',
-        'contacto_compras','tel_compras','email_compras',
-        'contacto_cobros','tel_cobros','email_cobros',
-        'ref1_nombre','ref1_tel','ref1_rel',
-        'ref2_nombre','ref2_tel','ref2_rel',
-        'ref3_nombre','ref3_tel','ref3_rel',
-        'limite_credito','dias_credito','nombre_solicita',
-        'monto_autorizado','dias_autorizado','codigo_cliente','nombre_autoriza'
-    ];
-
-    campos.forEach(c => {
-        const el = document.getElementById('p_' + c);
-        if (el) el.textContent = document.getElementById('f_' + c)?.value || '';
-    });
-
-    // Fechas
-    function formatFecha(id) {
-        const v = document.getElementById('f_' + id)?.value;
-        if (!v) return '';
-        const [y,m,d] = v.split('-');
-        return `${d}/${m}/${y}`;
-    }
-    document.getElementById('p_fecha_solicita').textContent = formatFecha('fecha_solicita');
-    document.getElementById('p_fecha_autoriza').textContent  = formatFecha('fecha_autoriza');
-
-    // Firmas
-    const imgCli = document.getElementById('p_firma_cliente_img');
-    imgCli.src = document.getElementById('f_firma_cliente_data').value;
-    imgCli.style.display = 'block';
-
-    const imgEmp = document.getElementById('p_firma_empresa_img');
-    imgEmp.src = document.getElementById('f_firma_empresa_data').value;
-    imgEmp.style.display = 'block';
-
-    // Esperar render y generar
-    setTimeout(generarPDF, 400);
-}
-
-function generarPDF() {
-    const nit      = document.getElementById('f_nit').value || 'documento';
-    const fileName = 'Solicitud_Credito_' + nit + '.pdf';
-    const element  = document.getElementById('document-container');
-
-    const opt = {
-        margin:      [0.4, 0.4, 0.4, 0.4],
-        filename:    fileName,
-        image:       { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
-        jsPDF:       { unit: 'in', format: 'letter', orientation: 'portrait' },
-        pagebreak:   { mode: 'css', before: '.saltar-pagina' }
-    };
-
-    const timeoutId = setTimeout(() => {
-        document.getElementById('loading-overlay').classList.remove('open');
-        alert('El proceso tardó demasiado. Intente de nuevo.');
-    }, 20000);
-
-    html2pdf().set(opt).from(element).outputPdf('datauristring')
-        .then(pdfBase64 => {
-            clearTimeout(timeoutId);
-
-            // Descargar el PDF localmente
-            fetch(pdfBase64)
-                .then(r => r.blob())
-                .then(blob => {
-                    const url = URL.createObjectURL(blob);
-                    const a   = document.createElement('a');
-                    a.href = url;
-                    a.download = fileName;
-                    a.style.display = 'none';
-                    document.body.appendChild(a);
-                    a.click();
-                    URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                });
-
-            // Enviar por email via formsubmit
-            enviarPorEmail(pdfBase64, fileName);
-        })
-        .catch(err => {
-            clearTimeout(timeoutId);
-            console.error(err);
-            document.getElementById('loading-overlay').classList.remove('open');
-            alert('Error al generar el PDF. Verifique su conexión y vuelva a intentar.');
-        });
-}
-
-function dataURItoBlob(dataURI) {
-    const parts      = dataURI.split(',');
-    if (parts.length !== 2) return null;
-    const byteString = atob(parts[1]);
-    const mimeString = parts[0].split(':')[1].split(';')[0];
-    const ab         = new ArrayBuffer(byteString.length);
-    const ia         = new Uint8Array(ab);
-    for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
-    return new Blob([ab], { type: mimeString });
-}
-
-function enviarPorEmail(pdfBase64, fileName) {
-    const pdfBlob = dataURItoBlob(pdfBase64);
-    const empresa = document.getElementById('f_nombre_rs').value;
-    const nit     = document.getElementById('f_nit').value;
-
-    const iframeName = 'iframe_submit_' + Date.now();
-    const iframe     = document.createElement('iframe');
-    iframe.name      = iframeName;
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-
-    let enviado = false;
-
-    iframe.onload = function() {
-        if (enviado) {
-            document.getElementById('loading-overlay').classList.remove('open');
-            alert('✅ ¡PDF generado y enviado exitosamente!\n\nEl documento fue enviado a h.reyes@grupoimade.com\n\nTambién se descargó en su dispositivo.');
-            resetearFormulario();
-            setTimeout(() => {
-                if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
-                const f = document.getElementById('__form_hidden__');
-                if (f && f.parentNode) f.parentNode.removeChild(f);
-            }, 1000);
+  // Autenticación de Firebase (REGLA 3)
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
         }
+      } catch (error) {
+        console.error("Error auth:", error);
+      }
     };
+    initAuth();
+    const unsubscribe = onAuthStateChanged(auth, setUser);
+    return () => unsubscribe();
+  }, []);
 
-    const form      = document.createElement('form');
-    form.id         = '__form_hidden__';
-    form.action     = 'https://formsubmit.co/h.reyes@grupoimade.com';
-    form.method     = 'POST';
-    form.enctype    = 'multipart/form-data';
-    form.target     = iframeName;
-    form.style.display = 'none';
+  // Sincronización con Firestore (REGLAS 1 y 2)
+  useEffect(() => {
+    if (!user) return;
+    
+    // Obtenemos TODAS las solicitudes públicas (sin where/orderBy para cumplir Regla 2)
+    const appsRef = collection(db, 'artifacts', appId, 'public', 'data', 'credit_requests');
+    
+    const unsubscribe = onSnapshot(appsRef, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      // Ordenamiento en memoria (Regla 2)
+      data.sort((a, b) => b.createdAt - a.createdAt);
+      setApplications(data);
+    }, (error) => console.error("Firestore error:", error));
 
-    const add = (name, value) => {
-        const i = document.createElement('input');
-        i.type  = 'hidden';
-        i.name  = name;
-        i.value = value;
-        form.appendChild(i);
-    };
+    return () => unsubscribe();
+  }, [user]);
 
-    add('_subject',  'Apertura de Código Crédito — ' + empresa);
-    add('_captcha',  'false');
-    add('_template', 'table');
-    add('_next',     window.location.href);
-    add('Empresa',   empresa);
-    add('NIT',       nit);
-    add('Mensaje',   'Nueva solicitud de crédito generada. Ver PDF adjunto.');
+  // Selección de Rol (Simulación de login)
+  const handleSelectRole = (selectedRole) => {
+    setRole(selectedRole);
+    setCurrentView(selectedRole === 'client' ? 'clientForm' : 'adminDash');
+  };
 
-    const fileInput    = document.createElement('input');
-    fileInput.type     = 'file';
-    fileInput.name     = 'Documento_PDF';
-    const file         = new File([pdfBlob], fileName, { type: 'application/pdf' });
-    const dt           = new DataTransfer();
-    dt.items.add(file);
-    fileInput.files    = dt.files;
-    form.appendChild(fileInput);
+  const logout = () => {
+    setRole(null);
+    setCurrentView('selectRole');
+    setSelectedApp(null);
+  };
 
-    document.body.appendChild(form);
-    enviado = true;
-    form.submit();
+  // ============================================================
+  // PANTALLA: SELECCIÓN DE ROL
+  // ============================================================
+  if (currentView === 'selectRole') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0f1f6e] via-[#1a3fa8] to-[#2563eb] flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl p-10 max-w-md w-full shadow-2xl text-center">
+          <div className="flex justify-center mb-6">
+            <svg viewBox="0 0 220 60" className="h-12 w-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="18" cy="18" r="14" fill="#1a3fa8"/>
+              <circle cx="18" cy="18" r="8" fill="white"/>
+              <circle cx="18" cy="18" r="4" fill="#1a3fa8"/>
+              <text x="38" y="26" fontFamily="Arial" fontSize="22" fontWeight="900" fill="#1a3fa8" letterSpacing="-0.5">GRUPO</text>
+              <text x="38" y="50" fontFamily="Arial" fontSize="28" fontWeight="900" fill="#1a3fa8" letterSpacing="-1">imade</text>
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-[#102580] mb-2">Portal de Créditos</h1>
+          <p className="text-gray-500 text-sm mb-8">Seleccione su perfil para ingresar al sistema</p>
+          
+          <div className="flex flex-col gap-4">
+            <button 
+              onClick={() => handleSelectRole('client')}
+              className="flex items-center justify-center gap-3 w-full bg-blue-50 text-[#1a3fa8] border border-blue-100 p-4 rounded-xl hover:bg-[#1a3fa8] hover:text-white transition-all font-semibold"
+            >
+              <User size={20} /> Soy Cliente (Solicitante)
+            </button>
+            <button 
+              onClick={() => handleSelectRole('admin')}
+              className="flex items-center justify-center gap-3 w-full bg-slate-50 text-slate-700 border border-slate-200 p-4 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold"
+            >
+              <ShieldCheck size={20} /> Personal Autorizado (Admin)
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-    // Fallback en caso de timeout de red
-    setTimeout(() => {
-        if (document.getElementById('loading-overlay').classList.contains('open')) {
-            document.getElementById('loading-overlay').classList.remove('open');
-            alert('✅ PDF descargado en su dispositivo.\n\n(El envío por correo puede estar pendiente si hay problemas de red.)');
-            resetearFormulario();
-            if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
-            if (form.parentNode) form.parentNode.removeChild(form);
-        }
-    }, 12000);
+  // ============================================================
+  // PANTALLA: FORMULARIO CLIENTE
+  // ============================================================
+  if (role === 'client' && currentView === 'clientForm') {
+    return <ClientFormPanel 
+              db={db} 
+              appId={appId} 
+              onSuccess={() => setCurrentView('clientSuccess')} 
+              onLogout={logout} 
+            />;
+  }
+
+  if (role === 'client' && currentView === 'clientSuccess') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-lg text-center">
+          <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-[#102580] mb-2">¡Solicitud Enviada!</h2>
+          <p className="text-gray-600 mb-6 text-sm">
+            Su solicitud de código de crédito ha sido enviada a la nube exitosamente. Nuestro personal autorizado la revisará pronto.
+          </p>
+          <button 
+            onClick={logout}
+            className="bg-[#1a3fa8] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#102580] transition w-full"
+          >
+            Volver al Inicio
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ============================================================
+  // PANTALLA: DASHBOARD ADMIN
+  // ============================================================
+  if (role === 'admin' && currentView === 'adminDash') {
+    const pendingApps = applications.filter(a => a.status === 'pending');
+    const approvedApps = applications.filter(a => a.status === 'approved');
+
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+        <div className="max-w-5xl mx-auto">
+          <header className="flex justify-between items-center mb-8 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+            <div>
+              <h1 className="text-xl font-bold text-[#102580]">Panel Administrativo</h1>
+              <p className="text-sm text-gray-500">Autorización de Créditos</p>
+            </div>
+            <button onClick={logout} className="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors text-sm font-medium">
+              <LogOut size={16} /> Salir
+            </button>
+          </header>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+             <div className="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-amber-400">
+               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Solicitudes Pendientes</h3>
+               <p className="text-3xl font-bold text-[#102580]">{pendingApps.length}</p>
+             </div>
+             <div className="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-green-500">
+               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Créditos Aprobados</h3>
+               <p className="text-3xl font-bold text-[#102580]">{approvedApps.length}</p>
+             </div>
+          </div>
+
+          <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <Clock size={20} className="text-amber-500"/> Bandeja de Pendientes
+          </h2>
+          
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            {pendingApps.length === 0 ? (
+              <div className="p-8 text-center text-gray-500">No hay solicitudes pendientes en este momento.</div>
+            ) : (
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-100 text-xs uppercase text-gray-500 tracking-wider">
+                    <th className="p-4 font-semibold">Cliente / Empresa</th>
+                    <th className="p-4 font-semibold">NIT</th>
+                    <th className="p-4 font-semibold">Monto Solicitado</th>
+                    <th className="p-4 font-semibold text-right">Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pendingApps.map(app => (
+                    <tr key={app.id} className="border-b border-gray-50 hover:bg-blue-50/50 transition-colors">
+                      <td className="p-4 font-medium text-gray-800">{app.clientData.nombre}</td>
+                      <td className="p-4 text-gray-600">{app.clientData.nit}</td>
+                      <td className="p-4 text-[#1a3fa8] font-semibold">Q. {app.clientData.limiteSolicitado}</td>
+                      <td className="p-4 text-right">
+                        <button 
+                          onClick={() => { setSelectedApp(app); setCurrentView('adminReview'); }}
+                          className="inline-flex items-center gap-1 text-sm bg-blue-100 text-[#1a3fa8] px-3 py-1.5 rounded-lg hover:bg-blue-200 font-medium transition"
+                        >
+                          Revisar <ChevronRight size={16}/>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ============================================================
+  // PANTALLA: REVISIÓN ADMIN (PASO 5)
+  // ============================================================
+  if (role === 'admin' && currentView === 'adminReview' && selectedApp) {
+    return <AdminReviewPanel 
+              application={selectedApp} 
+              db={db}
+              appId={appId}
+              onBack={() => { setSelectedApp(null); setCurrentView('adminDash'); }} 
+            />;
+  }
+
+  return null;
 }
 
-function resetearFormulario() {
-    document.querySelectorAll('input[type="text"], input[type="email"], input[type="number"], input[type="date"]').forEach(i => i.value = '');
-    limpiarDatosFirmas();
-    document.getElementById('pantalla-formulario').style.display = 'none';
-    document.getElementById('pantalla-inicio').style.display     = 'flex';
-    pasoActual = 1;
+// ============================================================
+// COMPONENTE SECUNDARIO: FORMULARIO DEL CLIENTE
+// ============================================================
+function ClientFormPanel({ db, appId, onSuccess, onLogout }) {
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({
+    nombre: '', nit: '', telefono: '', direccion: '', municipio: '', departamento: '',
+    limiteSolicitado: '', diasSolicitados: '', nombreSolicita: '', fecha: new Date().toISOString().split('T')[0]
+  });
+  const [signature, setSignature] = useState(null);
+  const [showSignPad, setShowSignPad] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const submitForm = async () => {
+    if (!signature) { alert("Debe proporcionar su firma antes de enviar."); return; }
+    setIsSubmitting(true);
+    
+    try {
+      const docRef = doc(collection(db, 'artifacts', appId, 'public', 'data', 'credit_requests'));
+      await setDoc(docRef, {
+        status: 'pending',
+        clientData: formData,
+        clientSignature: signature,
+        createdAt: Date.now(),
+        adminData: null
+      });
+      onSuccess();
+    } catch (error) {
+      console.error("Error al guardar:", error);
+      alert("Hubo un error al enviar la solicitud.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#f4f6fb] p-4 md:p-8">
+      <div className="max-w-3xl mx-auto">
+        <header className="flex justify-between items-center mb-6 bg-white p-6 rounded-2xl shadow-sm border-t-4 border-[#1a3fa8]">
+          <div>
+            <h1 className="text-xl font-bold text-[#102580]">Solicitud de Crédito</h1>
+            <p className="text-xs text-blue-600 font-mono mt-1">Paso {step} de 2 (Vista Cliente)</p>
+          </div>
+          <button onClick={onLogout} className="text-gray-400 hover:text-red-500"><LogOut size={20}/></button>
+        </header>
+
+        <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8">
+          {step === 1 && (
+            <div className="animate-in fade-in slide-in-from-bottom-4">
+              <h2 className="text-lg font-bold text-[#102580] mb-4 border-b pb-2">1. Datos Básicos de Facturación</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre o Razón Social *</label>
+                  <input type="text" name="nombre" value={formData.nombre} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all" required/>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">N.I.T. *</label>
+                  <input type="text" name="nit" value={formData.nit} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all" required/>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Teléfono Principal *</label>
+                  <input type="text" name="telefono" value={formData.telefono} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all" required/>
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Dirección Completa *</label>
+                  <input type="text" name="direccion" value={formData.direccion} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all" required/>
+                </div>
+              </div>
+
+              <div className="mt-8 flex justify-end">
+                <button 
+                  onClick={() => {
+                    if(!formData.nombre || !formData.nit) { alert("Llene los campos obligatorios"); return;}
+                    setStep(2);
+                  }} 
+                  className="bg-[#1a3fa8] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#102580] transition flex items-center gap-2"
+                >
+                  Siguiente <ChevronRight size={18}/>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="animate-in fade-in slide-in-from-bottom-4">
+              <h2 className="text-lg font-bold text-[#102580] mb-4 border-b pb-2">2. Condiciones y Aceptación</h2>
+              <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
+                 <p className="text-sm font-bold text-[#102580] mb-2">Condiciones al aceptar:</p>
+                 <ul className="text-xs text-gray-600 list-disc pl-4 space-y-1">
+                   <li>Hacer efectivos sus pagos el día de vencimiento.</li>
+                   <li>Todo pago con cheque a nombre de PINTURAS Y MAS, S.A.</li>
+                   <li>Cheque rechazado genera cobro de Q100.00.</li>
+                 </ul>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Límite Solicitado (Q.) *</label>
+                  <input type="number" name="limiteSolicitado" value={formData.limiteSolicitado} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all"/>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Días de Crédito *</label>
+                  <input type="number" name="diasSolicitados" value={formData.diasSolicitados} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all"/>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre quien solicita *</label>
+                  <input type="text" name="nombreSolicita" value={formData.nombreSolicita} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all"/>
+                </div>
+              </div>
+
+              <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:bg-gray-50 transition" onClick={() => setShowSignPad(true)}>
+                {signature ? (
+                  <img src={signature} alt="Firma" className="h-20 mx-auto object-contain" />
+                ) : (
+                  <div className="text-gray-400 flex flex-col items-center gap-2">
+                    <PenTool size={24}/>
+                    <span className="text-sm font-medium">Toque aquí para firmar</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-8 flex justify-between items-center">
+                <button onClick={() => setStep(1)} className="text-gray-500 font-medium px-4 py-2 hover:bg-gray-100 rounded-lg transition">Atrás</button>
+                <button 
+                  onClick={submitForm} 
+                  disabled={isSubmitting}
+                  className="bg-green-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-green-700 transition flex items-center gap-2 disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Enviando...' : 'Enviar a Revisión'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {showSignPad && (
+        <SignaturePad 
+          title="Firma del Cliente"
+          onCancel={() => setShowSignPad(false)} 
+          onSave={(sig) => { setSignature(sig); setShowSignPad(false); }} 
+        />
+      )}
+    </div>
+  );
 }
-</script>
-</body>
-</html>
+
+// ============================================================
+// COMPONENTE SECUNDARIO: PANEL DE REVISIÓN ADMIN
+// ============================================================
+function AdminReviewPanel({ application, db, appId, onBack }) {
+  const [adminData, setAdminData] = useState({ montoAutorizado: '', diasAutorizados: '', codigoCliente: '', nombreAutoriza: '' });
+  const [adminSignature, setAdminSignature] = useState(null);
+  const [showSignPad, setShowSignPad] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+
+  const c = application.clientData;
+
+  const handleChange = (e) => setAdminData({ ...adminData, [e.target.name]: e.target.value });
+
+  const approveApplication = async () => {
+    if (!adminData.montoAutorizado || !adminData.codigoCliente || !adminSignature) {
+      alert("Complete los datos de autorización y la firma.");
+      return;
+    }
+    setIsApproving(true);
+    try {
+      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'credit_requests', application.id);
+      await updateDoc(docRef, {
+        status: 'approved',
+        adminData: adminData,
+        adminSignature: adminSignature,
+        approvedAt: Date.now()
+      });
+      alert("¡Crédito aprobado exitosamente!");
+      onBack();
+    } catch (error) {
+      console.error(error);
+      alert("Error al aprobar.");
+    } finally {
+      setIsApproving(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <div className="max-w-4xl mx-auto">
+        <button onClick={onBack} className="flex items-center gap-2 text-[#1a3fa8] font-semibold mb-6 hover:underline">
+          <ArrowLeft size={18} /> Volver al Panel
+        </button>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Columna Izquierda: Datos del Cliente (Solo Lectura) */}
+          <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h2 className="text-lg font-bold text-[#102580] mb-4 border-b pb-2">Información del Solicitante</h2>
+            
+            <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
+              <div><span className="block text-gray-500 font-medium">Empresa</span><span className="font-semibold text-gray-900">{c.nombre}</span></div>
+              <div><span className="block text-gray-500 font-medium">NIT</span><span className="font-semibold text-gray-900">{c.nit}</span></div>
+              <div><span className="block text-gray-500 font-medium">Teléfono</span><span className="font-semibold text-gray-900">{c.telefono}</span></div>
+              <div><span className="block text-gray-500 font-medium">Dirección</span><span className="font-semibold text-gray-900">{c.direccion}</span></div>
+            </div>
+
+            <div className="mt-6 bg-blue-50/50 rounded-xl p-4 border border-blue-100">
+              <h3 className="text-xs font-bold text-blue-800 uppercase tracking-wider mb-3">Condiciones Solicitadas</h3>
+              <div className="flex gap-8">
+                <div><span className="block text-gray-500 text-xs">Monto</span><span className="font-bold text-lg text-[#102580]">Q. {c.limiteSolicitado}</span></div>
+                <div><span className="block text-gray-500 text-xs">Plazo</span><span className="font-bold text-lg text-[#102580]">{c.diasSolicitados} Días</span></div>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <span className="block text-gray-500 text-xs font-medium mb-2">Firma del Solicitante:</span>
+              <img src={application.clientSignature} alt="Firma Cliente" className="h-16 object-contain border-b border-gray-200 px-4" />
+              <span className="block text-xs text-gray-400 mt-1">{c.nombreSolicita}</span>
+            </div>
+          </div>
+
+          {/* Columna Derecha: Panel de Aprobación (Paso 5) */}
+          <div className="bg-[#f0f4ff] rounded-2xl p-6 shadow-sm border-2 border-[#c3cef5]">
+            <h2 className="text-lg font-bold text-[#102580] mb-1">Uso Exclusivo</h2>
+            <p className="text-xs text-[#1a3fa8] mb-6">Autorización de imade</p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Monto Autorizado (Q.)</label>
+                <input type="number" name="montoAutorizado" value={adminData.montoAutorizado} onChange={handleChange} className="w-full border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-[#2563eb] focus:ring-1 ring-[#2563eb]"/>
+              </div>
+              <div className="flex gap-4">
+                <div className="w-1/2">
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Días</label>
+                  <input type="number" name="diasAutorizados" value={adminData.diasAutorizados} onChange={handleChange} className="w-full border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-[#2563eb] focus:ring-1 ring-[#2563eb]"/>
+                </div>
+                <div className="w-1/2">
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Cód. Cliente</label>
+                  <input type="text" name="codigoCliente" value={adminData.codigoCliente} onChange={handleChange} className="w-full border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-[#2563eb] focus:ring-1 ring-[#2563eb]"/>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Autorizado por:</label>
+                <input type="text" name="nombreAutoriza" value={adminData.nombreAutoriza} onChange={handleChange} className="w-full border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-[#2563eb] focus:ring-1 ring-[#2563eb]"/>
+              </div>
+
+              <div className="border border-dashed border-[#c3cef5] bg-white rounded-xl p-3 text-center cursor-pointer hover:bg-blue-50 transition mt-4" onClick={() => setShowSignPad(true)}>
+                {adminSignature ? (
+                  <img src={adminSignature} alt="Firma Admin" className="h-12 mx-auto object-contain" />
+                ) : (
+                  <span className="text-xs font-medium text-[#1a3fa8]">Toque para firmar</span>
+                )}
+              </div>
+
+              <button 
+                onClick={approveApplication}
+                disabled={isApproving}
+                className="w-full bg-green-600 text-white py-3 rounded-xl font-bold mt-6 hover:bg-green-700 transition shadow-lg shadow-green-600/20 disabled:opacity-60"
+              >
+                {isApproving ? 'Procesando...' : '✓ Aprobar Crédito'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {showSignPad && (
+        <SignaturePad 
+          title="Firma de Autorización"
+          onCancel={() => setShowSignPad(false)} 
+          onSave={(sig) => { setAdminSignature(sig); setShowSignPad(false); }} 
+        />
+      )}
+    </div>
+  );
+}
