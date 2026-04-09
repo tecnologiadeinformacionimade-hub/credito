@@ -1,609 +1,573 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, collection, onSnapshot, doc, setDoc, updateDoc } from 'firebase/firestore';
-import { CheckCircle2, Clock, ChevronRight, ArrowLeft, PenTool, LogOut, User, ShieldCheck } from 'lucide-react';
-
-// ============================================================
-// CONFIGURACIÓN DE FIREBASE (Reglas Estrictas del Entorno)
-// ============================================================
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'grupo-imade-creditos';
-
-// ============================================================
-// COMPONENTE: PAD DE FIRMA
-// ============================================================
-const SignaturePad = ({ onSave, onCancel, title }) => {
-  const canvasRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (canvas) {
-      canvas.width = canvas.parentElement.clientWidth - 40;
-      canvas.height = 180;
-      const ctx = canvas.getContext('2d');
-      ctx.strokeStyle = '#1a3fa8';
-      ctx.lineWidth = 2.5;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-    }
-  }, []);
-
-  const startDrawing = (e) => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    
-    ctx.beginPath();
-    ctx.moveTo(clientX - rect.left, clientY - rect.top);
-    setIsDrawing(true);
-  };
-
-  const draw = (e) => {
-    if (!isDrawing) return;
-    e.preventDefault();
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    
-    ctx.lineTo(clientX - rect.left, clientY - rect.top);
-    ctx.stroke();
-  };
-
-  const stopDrawing = () => {
-    setIsDrawing(false);
-  };
-
-  const clearCanvas = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  };
-
-  const saveSignature = () => {
-    const canvas = canvasRef.current;
-    const blank = document.createElement('canvas');
-    blank.width = canvas.width;
-    blank.height = canvas.height;
-    if (canvas.toDataURL() === blank.toDataURL()) {
-      alert('Por favor realice su firma.');
-      return;
-    }
-    onSave(canvas.toDataURL('image/png'));
-  };
-
-  return (
-    <div className="fixed inset-0 bg-[#0f1946]/80 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl">
-        <h3 className="text-lg font-bold text-[#102580] mb-4 text-center">{title}</h3>
-        <canvas
-          ref={canvasRef}
-          className="border-2 border-[#dde3f0] rounded-xl bg-[#fafbff] cursor-crosshair touch-none w-full mb-4"
-          onMouseDown={startDrawing}
-          onMouseMove={draw}
-          onMouseUp={stopDrawing}
-          onMouseLeave={stopDrawing}
-          onTouchStart={startDrawing}
-          onTouchMove={draw}
-          onTouchEnd={stopDrawing}
-        />
-        <div className="flex justify-between items-center">
-          <button onClick={clearCanvas} className="text-red-500 bg-red-50 px-4 py-2 rounded-lg font-medium text-sm hover:bg-red-100 transition-colors">
-            Limpiar
-          </button>
-          <div className="flex gap-2">
-            <button onClick={onCancel} className="text-gray-600 bg-gray-100 px-4 py-2 rounded-lg font-medium text-sm hover:bg-gray-200 transition-colors">
-              Cancelar
-            </button>
-            <button onClick={saveSignature} className="text-white bg-[#1a3fa8] px-4 py-2 rounded-lg font-medium text-sm hover:bg-[#102580] transition-colors">
-              Guardar Firma
-            </button>
-          </div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Créditos — Grupo imade</title>
+    <!-- Tailwind CSS para el diseño -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React y ReactDOM para la interfaz -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel para compilar React en el navegador -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-[#f4f6fb]">
+    <div id="root">
+        <!-- Pantalla de carga inicial mientras se cargan las librerías -->
+        <div style="display: flex; height: 100vh; align-items: center; justify-content: center; flex-direction: column; gap: 1rem;">
+            <div style="width: 48px; height: 48px; border: 4px solid #c3cef5; border-top-color: #1a3fa8; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+            <p style="font-family: sans-serif; color: #102580; font-weight: bold;">Cargando Portal de Créditos...</p>
         </div>
-      </div>
     </div>
-  );
-};
 
-// ============================================================
-// APLICACIÓN PRINCIPAL
-// ============================================================
-export default function App() {
-  const [user, setUser] = useState(null);
-  const [role, setRole] = useState(null); // 'client' | 'admin'
-  const [applications, setApplications] = useState([]);
-  
-  // Vistas: 'selectRole', 'clientForm', 'clientSuccess', 'adminDash', 'adminReview'
-  const [currentView, setCurrentView] = useState('selectRole'); 
-  const [selectedApp, setSelectedApp] = useState(null);
+    <!-- Módulo de Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-  // Autenticación de Firebase (REGLA 3)
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
+        // Exponemos Firebase de forma global para que React pueda usarlo
+        window.FirebaseAPI = {
+            initializeApp, getAuth, signInAnonymously, onAuthStateChanged,
+            getFirestore, collection, onSnapshot, doc, setDoc, updateDoc
+        };
+        window.dispatchEvent(new Event('firebase-ready'));
+    </script>
+
+    <!-- Código Principal de la Aplicación -->
+    <script type="text/babel">
+        const startReactApp = () => {
+            const { useState, useEffect, useRef } = React;
+            const { 
+                initializeApp, getAuth, signInAnonymously, onAuthStateChanged, 
+                getFirestore, collection, onSnapshot, doc, setDoc, updateDoc 
+            } = window.FirebaseAPI;
+
+            // ============================================================
+            // ⚠️ IMPORTANTE: COLOCA AQUÍ TU CONFIGURACIÓN DE FIREBASE ⚠️
+            // ============================================================
+            const firebaseConfig = {
+                // apiKey: "TU_API_KEY",
+                // authDomain: "TU_DOMINIO.firebaseapp.com",
+                // projectId: "TU_PROJECT_ID",
+                // storageBucket: "TU_BUCKET.appspot.com",
+                // messagingSenderId: "TU_SENDER_ID",
+                // appId: "TU_APP_ID"
+            };
+
+            // Inicializar Firebase
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            const appId = 'grupo-imade-creditos';
+
+            // ============================================================
+            // ICONOS (Reemplazando lucide-react por SVGs nativos)
+            // ============================================================
+            const Icons = {
+                User: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+                ShieldCheck: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>,
+                LogOut: ({size=16}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+                CheckCircle2: ({size=64, className=""}) => <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>,
+                Clock: ({size=20, className=""}) => <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+                ChevronRight: ({size=18}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>,
+                ArrowLeft: ({size=18}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>,
+                PenTool: ({size=24}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19 7-7 3 3-7 7-3-3z"/><path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="m2 2 7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+            };
+
+            // ============================================================
+            // COMPONENTE: PAD DE FIRMA
+            // ============================================================
+            const SignaturePad = ({ onSave, onCancel, title }) => {
+                const canvasRef = useRef(null);
+                const [isDrawing, setIsDrawing] = useState(false);
+
+                useEffect(() => {
+                    const canvas = canvasRef.current;
+                    if (canvas) {
+                        canvas.width = canvas.parentElement.clientWidth - 40;
+                        canvas.height = 180;
+                        const ctx = canvas.getContext('2d');
+                        ctx.strokeStyle = '#1a3fa8';
+                        ctx.lineWidth = 2.5;
+                        ctx.lineCap = 'round';
+                        ctx.lineJoin = 'round';
+                    }
+                }, []);
+
+                const startDrawing = (e) => {
+                    const canvas = canvasRef.current;
+                    const ctx = canvas.getContext('2d');
+                    const rect = canvas.getBoundingClientRect();
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    ctx.beginPath();
+                    ctx.moveTo(clientX - rect.left, clientY - rect.top);
+                    setIsDrawing(true);
+                };
+
+                const draw = (e) => {
+                    if (!isDrawing) return;
+                    e.preventDefault();
+                    const canvas = canvasRef.current;
+                    const ctx = canvas.getContext('2d');
+                    const rect = canvas.getBoundingClientRect();
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    ctx.lineTo(clientX - rect.left, clientY - rect.top);
+                    ctx.stroke();
+                };
+
+                const stopDrawing = () => setIsDrawing(false);
+
+                const clearCanvas = () => {
+                    const canvas = canvasRef.current;
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                };
+
+                const saveSignature = () => {
+                    const canvas = canvasRef.current;
+                    const blank = document.createElement('canvas');
+                    blank.width = canvas.width;
+                    blank.height = canvas.height;
+                    if (canvas.toDataURL() === blank.toDataURL()) {
+                        alert('Por favor realice su firma.');
+                        return;
+                    }
+                    onSave(canvas.toDataURL('image/png'));
+                };
+
+                return (
+                    <div className="fixed inset-0 bg-[#0f1946]/80 z-50 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl">
+                            <h3 className="text-lg font-bold text-[#102580] mb-4 text-center">{title}</h3>
+                            <canvas
+                                ref={canvasRef}
+                                className="border-2 border-[#dde3f0] rounded-xl bg-[#fafbff] cursor-crosshair touch-none w-full mb-4"
+                                onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={stopDrawing} onMouseLeave={stopDrawing}
+                                onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={stopDrawing}
+                            />
+                            <div className="flex justify-between items-center">
+                                <button onClick={clearCanvas} className="text-red-500 bg-red-50 px-4 py-2 rounded-lg font-medium text-sm hover:bg-red-100 transition-colors">
+                                    Limpiar
+                                </button>
+                                <div className="flex gap-2">
+                                    <button onClick={onCancel} className="text-gray-600 bg-gray-100 px-4 py-2 rounded-lg font-medium text-sm hover:bg-gray-200 transition-colors">Cancelar</button>
+                                    <button onClick={saveSignature} className="text-white bg-[#1a3fa8] px-4 py-2 rounded-lg font-medium text-sm hover:bg-[#102580] transition-colors">Guardar Firma</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            // ============================================================
+            // COMPONENTE: FORMULARIO CLIENTE
+            // ============================================================
+            function ClientFormPanel({ onSuccess, onLogout }) {
+                const [step, setStep] = useState(1);
+                const [formData, setFormData] = useState({
+                    nombre: '', nit: '', telefono: '', direccion: '', municipio: '', departamento: '',
+                    limiteSolicitado: '', diasSolicitados: '', nombreSolicita: '', fecha: new Date().toISOString().split('T')[0]
+                });
+                const [signature, setSignature] = useState(null);
+                const [showSignPad, setShowSignPad] = useState(false);
+                const [isSubmitting, setIsSubmitting] = useState(false);
+
+                const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+
+                const submitForm = async () => {
+                    if (!signature) { alert("Debe proporcionar su firma antes de enviar."); return; }
+                    setIsSubmitting(true);
+                    try {
+                        const docRef = doc(collection(db, 'artifacts', appId, 'public', 'data', 'credit_requests'));
+                        await setDoc(docRef, {
+                            status: 'pending',
+                            clientData: formData,
+                            clientSignature: signature,
+                            createdAt: Date.now(),
+                            adminData: null
+                        });
+                        onSuccess();
+                    } catch (error) {
+                        console.error("Error al guardar:", error);
+                        alert("Hubo un error al enviar la solicitud. Asegúrese de haber configurado Firebase.");
+                    } finally {
+                        setIsSubmitting(false);
+                    }
+                };
+
+                return (
+                    <div className="min-h-screen bg-[#f4f6fb] p-4 md:p-8">
+                        <div className="max-w-3xl mx-auto">
+                            <header className="flex justify-between items-center mb-6 bg-white p-6 rounded-2xl shadow-sm border-t-4 border-[#1a3fa8]">
+                                <div>
+                                    <h1 className="text-xl font-bold text-[#102580]">Solicitud de Crédito</h1>
+                                    <p className="text-xs text-blue-600 font-mono mt-1">Paso {step} de 2 (Vista Cliente)</p>
+                                </div>
+                                <button onClick={onLogout} className="text-gray-400 hover:text-red-500 flex gap-2 items-center text-sm font-medium">
+                                    <Icons.LogOut size={18}/> Salir
+                                </button>
+                            </header>
+
+                            <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8">
+                                {step === 1 && (
+                                    <div>
+                                        <h2 className="text-lg font-bold text-[#102580] mb-4 border-b pb-2">1. Datos Básicos de Facturación</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="col-span-2">
+                                                <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre o Razón Social *</label>
+                                                <input type="text" name="nombre" value={formData.nombre} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all" required/>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-semibold text-gray-700 mb-1">N.I.T. *</label>
+                                                <input type="text" name="nit" value={formData.nit} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all" required/>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-semibold text-gray-700 mb-1">Teléfono Principal *</label>
+                                                <input type="text" name="telefono" value={formData.telefono} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all" required/>
+                                            </div>
+                                            <div className="col-span-2">
+                                                <label className="block text-sm font-semibold text-gray-700 mb-1">Dirección Completa *</label>
+                                                <input type="text" name="direccion" value={formData.direccion} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all" required/>
+                                            </div>
+                                        </div>
+                                        <div className="mt-8 flex justify-end">
+                                            <button onClick={() => { if(!formData.nombre || !formData.nit) { alert("Llene los campos obligatorios"); return;} setStep(2); }} className="bg-[#1a3fa8] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#102580] transition flex items-center gap-2">
+                                                Siguiente <Icons.ChevronRight size={18}/>
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {step === 2 && (
+                                    <div>
+                                        <h2 className="text-lg font-bold text-[#102580] mb-4 border-b pb-2">2. Condiciones y Aceptación</h2>
+                                        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
+                                            <p className="text-sm font-bold text-[#102580] mb-2">Condiciones al aceptar:</p>
+                                            <ul className="text-xs text-gray-600 list-disc pl-4 space-y-1">
+                                                <li>Hacer efectivos sus pagos el día de vencimiento.</li>
+                                                <li>Todo pago con cheque a nombre de PINTURAS Y MAS, S.A.</li>
+                                                <li>Cheque rechazado genera cobro de Q100.00.</li>
+                                            </ul>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                            <div>
+                                                <label className="block text-sm font-semibold text-gray-700 mb-1">Límite Solicitado (Q.) *</label>
+                                                <input type="number" name="limiteSolicitado" value={formData.limiteSolicitado} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all"/>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-semibold text-gray-700 mb-1">Días de Crédito *</label>
+                                                <input type="number" name="diasSolicitados" value={formData.diasSolicitados} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all"/>
+                                            </div>
+                                            <div className="col-span-1 md:col-span-2">
+                                                <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre quien solicita *</label>
+                                                <input type="text" name="nombreSolicita" value={formData.nombreSolicita} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all"/>
+                                            </div>
+                                        </div>
+
+                                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:bg-gray-50 transition" onClick={() => setShowSignPad(true)}>
+                                            {signature ? (
+                                                <img src={signature} alt="Firma" className="h-20 mx-auto object-contain" />
+                                            ) : (
+                                                <div className="text-gray-400 flex flex-col items-center gap-2">
+                                                    <Icons.PenTool size={24}/>
+                                                    <span className="text-sm font-medium">Toque aquí para firmar</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="mt-8 flex justify-between items-center">
+                                            <button onClick={() => setStep(1)} className="text-gray-500 font-medium px-4 py-2 hover:bg-gray-100 rounded-lg transition">Atrás</button>
+                                            <button onClick={submitForm} disabled={isSubmitting} className="bg-green-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-green-700 transition flex items-center gap-2 disabled:opacity-50">
+                                                {isSubmitting ? 'Enviando...' : 'Enviar a Revisión'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {showSignPad && (
+                            <SignaturePad title="Firma del Cliente" onCancel={() => setShowSignPad(false)} onSave={(sig) => { setSignature(sig); setShowSignPad(false); }} />
+                        )}
+                    </div>
+                );
+            }
+
+            // ============================================================
+            // COMPONENTE: PANEL DE REVISIÓN ADMIN
+            // ============================================================
+            function AdminReviewPanel({ application, onBack }) {
+                const [adminData, setAdminData] = useState({ montoAutorizado: '', diasAutorizados: '', codigoCliente: '', nombreAutoriza: '' });
+                const [adminSignature, setAdminSignature] = useState(null);
+                const [showSignPad, setShowSignPad] = useState(false);
+                const [isApproving, setIsApproving] = useState(false);
+
+                const c = application.clientData;
+                const handleChange = (e) => setAdminData({ ...adminData, [e.target.name]: e.target.value });
+
+                const approveApplication = async () => {
+                    if (!adminData.montoAutorizado || !adminData.codigoCliente || !adminSignature) {
+                        alert("Complete los datos de autorización y la firma."); return;
+                    }
+                    setIsApproving(true);
+                    try {
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'credit_requests', application.id);
+                        await updateDoc(docRef, { status: 'approved', adminData, adminSignature, approvedAt: Date.now() });
+                        alert("¡Crédito aprobado exitosamente!");
+                        onBack();
+                    } catch (error) {
+                        console.error(error); alert("Error al aprobar.");
+                    } finally {
+                        setIsApproving(false);
+                    }
+                };
+
+                return (
+                    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+                        <div className="max-w-4xl mx-auto">
+                            <button onClick={onBack} className="flex items-center gap-2 text-[#1a3fa8] font-semibold mb-6 hover:underline">
+                                <Icons.ArrowLeft size={18} /> Volver al Panel
+                            </button>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                {/* Datos del Cliente */}
+                                <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                                    <h2 className="text-lg font-bold text-[#102580] mb-4 border-b pb-2">Información del Solicitante</h2>
+                                    <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
+                                        <div><span className="block text-gray-500 font-medium">Empresa</span><span className="font-semibold text-gray-900">{c.nombre}</span></div>
+                                        <div><span className="block text-gray-500 font-medium">NIT</span><span className="font-semibold text-gray-900">{c.nit}</span></div>
+                                        <div><span className="block text-gray-500 font-medium">Teléfono</span><span className="font-semibold text-gray-900">{c.telefono}</span></div>
+                                        <div><span className="block text-gray-500 font-medium">Dirección</span><span className="font-semibold text-gray-900">{c.direccion}</span></div>
+                                    </div>
+                                    <div className="mt-6 bg-blue-50/50 rounded-xl p-4 border border-blue-100">
+                                        <h3 className="text-xs font-bold text-blue-800 uppercase tracking-wider mb-3">Condiciones Solicitadas</h3>
+                                        <div className="flex gap-8">
+                                            <div><span className="block text-gray-500 text-xs">Monto</span><span className="font-bold text-lg text-[#102580]">Q. {c.limiteSolicitado}</span></div>
+                                            <div><span className="block text-gray-500 text-xs">Plazo</span><span className="font-bold text-lg text-[#102580]">{c.diasSolicitados} Días</span></div>
+                                        </div>
+                                    </div>
+                                    <div className="mt-6">
+                                        <span className="block text-gray-500 text-xs font-medium mb-2">Firma del Solicitante:</span>
+                                        <img src={application.clientSignature} alt="Firma Cliente" className="h-16 object-contain border-b border-gray-200 px-4" />
+                                        <span className="block text-xs text-gray-400 mt-1">{c.nombreSolicita}</span>
+                                    </div>
+                                </div>
+
+                                {/* Panel de Autorización */}
+                                <div className="bg-[#f0f4ff] rounded-2xl p-6 shadow-sm border-2 border-[#c3cef5]">
+                                    <h2 className="text-lg font-bold text-[#102580] mb-1">Uso Exclusivo</h2>
+                                    <p className="text-xs text-[#1a3fa8] mb-6">Autorización de imade</p>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">Monto Autorizado (Q.)</label>
+                                            <input type="number" name="montoAutorizado" value={adminData.montoAutorizado} onChange={handleChange} className="w-full border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-[#2563eb] focus:ring-1 ring-[#2563eb]"/>
+                                        </div>
+                                        <div className="flex gap-4">
+                                            <div className="w-1/2">
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Días</label>
+                                                <input type="number" name="diasAutorizados" value={adminData.diasAutorizados} onChange={handleChange} className="w-full border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-[#2563eb] focus:ring-1 ring-[#2563eb]"/>
+                                            </div>
+                                            <div className="w-1/2">
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Cód. Cliente</label>
+                                                <input type="text" name="codigoCliente" value={adminData.codigoCliente} onChange={handleChange} className="w-full border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-[#2563eb] focus:ring-1 ring-[#2563eb]"/>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">Autorizado por:</label>
+                                            <input type="text" name="nombreAutoriza" value={adminData.nombreAutoriza} onChange={handleChange} className="w-full border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-[#2563eb] focus:ring-1 ring-[#2563eb]"/>
+                                        </div>
+                                        <div className="border border-dashed border-[#c3cef5] bg-white rounded-xl p-3 text-center cursor-pointer hover:bg-blue-50 transition mt-4" onClick={() => setShowSignPad(true)}>
+                                            {adminSignature ? (
+                                                <img src={adminSignature} alt="Firma Admin" className="h-12 mx-auto object-contain" />
+                                            ) : (
+                                                <span className="text-xs font-medium text-[#1a3fa8]">Toque para firmar</span>
+                                            )}
+                                        </div>
+                                        <button onClick={approveApplication} disabled={isApproving} className="w-full bg-green-600 text-white py-3 rounded-xl font-bold mt-6 hover:bg-green-700 transition shadow-lg shadow-green-600/20 disabled:opacity-60">
+                                            {isApproving ? 'Procesando...' : '✓ Aprobar Crédito'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {showSignPad && (
+                            <SignaturePad title="Firma de Autorización" onCancel={() => setShowSignPad(false)} onSave={(sig) => { setAdminSignature(sig); setShowSignPad(false); }} />
+                        )}
+                    </div>
+                );
+            }
+
+            // ============================================================
+            // APLICACIÓN PRINCIPAL
+            // ============================================================
+            function App() {
+                const [user, setUser] = useState(null);
+                const [role, setRole] = useState(null);
+                const [applications, setApplications] = useState([]);
+                const [currentView, setCurrentView] = useState('selectRole'); 
+                const [selectedApp, setSelectedApp] = useState(null);
+
+                useEffect(() => {
+                    const initAuth = async () => {
+                        try { await signInAnonymously(auth); } 
+                        catch (error) { console.error("Error auth:", error); }
+                    };
+                    initAuth();
+                    const unsubscribe = onAuthStateChanged(auth, setUser);
+                    return () => unsubscribe();
+                }, []);
+
+                useEffect(() => {
+                    if (!user) return;
+                    // Advertencia si la base de datos no está configurada
+                    try {
+                        const appsRef = collection(db, 'artifacts', appId, 'public', 'data', 'credit_requests');
+                        const unsubscribe = onSnapshot(appsRef, (snapshot) => {
+                            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                            data.sort((a, b) => b.createdAt - a.createdAt);
+                            setApplications(data);
+                        }, (error) => console.warn("Esperando conexión a Firestore válida..."));
+                        return () => unsubscribe();
+                    } catch(e) { console.warn("Firebase no configurado correctamente todavía."); }
+                }, [user]);
+
+                const handleSelectRole = (selectedRole) => {
+                    setRole(selectedRole);
+                    setCurrentView(selectedRole === 'client' ? 'clientForm' : 'adminDash');
+                };
+
+                const logout = () => { setRole(null); setCurrentView('selectRole'); setSelectedApp(null); };
+
+                if (currentView === 'selectRole') {
+                    return (
+                        <div className="min-h-screen bg-gradient-to-br from-[#0f1f6e] via-[#1a3fa8] to-[#2563eb] flex items-center justify-center p-4">
+                            <div className="bg-white rounded-3xl p-10 max-w-md w-full shadow-2xl text-center">
+                                <div className="flex justify-center mb-6">
+                                    <svg viewBox="0 0 220 60" className="h-12 w-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="18" cy="18" r="14" fill="#1a3fa8"/>
+                                        <circle cx="18" cy="18" r="8" fill="white"/>
+                                        <circle cx="18" cy="18" r="4" fill="#1a3fa8"/>
+                                        <text x="38" y="26" fontFamily="Arial" fontSize="22" fontWeight="900" fill="#1a3fa8" letterSpacing="-0.5">GRUPO</text>
+                                        <text x="38" y="50" fontFamily="Arial" fontSize="28" fontWeight="900" fill="#1a3fa8" letterSpacing="-1">imade</text>
+                                    </svg>
+                                </div>
+                                <h1 className="text-2xl font-bold text-[#102580] mb-2">Portal de Créditos</h1>
+                                <p className="text-gray-500 text-sm mb-8">Seleccione su perfil para ingresar al sistema</p>
+                                <div className="flex flex-col gap-4">
+                                    <button onClick={() => handleSelectRole('client')} className="flex items-center justify-center gap-3 w-full bg-blue-50 text-[#1a3fa8] border border-blue-100 p-4 rounded-xl hover:bg-[#1a3fa8] hover:text-white transition-all font-semibold">
+                                        <Icons.User size={20} /> Soy Cliente (Solicitante)
+                                    </button>
+                                    <button onClick={() => handleSelectRole('admin')} className="flex items-center justify-center gap-3 w-full bg-slate-50 text-slate-700 border border-slate-200 p-4 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold">
+                                        <Icons.ShieldCheck size={20} /> Personal Autorizado (Admin)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+
+                if (role === 'client' && currentView === 'clientForm') return <ClientFormPanel onSuccess={() => setCurrentView('clientSuccess')} onLogout={logout} />;
+                
+                if (role === 'client' && currentView === 'clientSuccess') {
+                    return (
+                        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+                            <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-lg text-center">
+                                <Icons.CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                                <h2 className="text-2xl font-bold text-[#102580] mb-2">¡Solicitud Enviada!</h2>
+                                <p className="text-gray-600 mb-6 text-sm">Su solicitud ha sido enviada a la nube. Nuestro personal la revisará pronto.</p>
+                                <button onClick={logout} className="bg-[#1a3fa8] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#102580] transition w-full">Volver al Inicio</button>
+                            </div>
+                        </div>
+                    );
+                }
+
+                if (role === 'admin' && currentView === 'adminDash') {
+                    const pendingApps = applications.filter(a => a.status === 'pending');
+                    const approvedApps = applications.filter(a => a.status === 'approved');
+
+                    return (
+                        <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+                            <div className="max-w-5xl mx-auto">
+                                <header className="flex justify-between items-center mb-8 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                                    <div>
+                                        <h1 className="text-xl font-bold text-[#102580]">Panel Administrativo</h1>
+                                        <p className="text-sm text-gray-500">Autorización de Créditos</p>
+                                    </div>
+                                    <button onClick={logout} className="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors text-sm font-medium">
+                                        <Icons.LogOut size={16} /> Salir
+                                    </button>
+                                </header>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                                    <div className="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-amber-400">
+                                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Solicitudes Pendientes</h3>
+                                        <p className="text-3xl font-bold text-[#102580]">{pendingApps.length}</p>
+                                    </div>
+                                    <div className="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-green-500">
+                                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Créditos Aprobados</h3>
+                                        <p className="text-3xl font-bold text-[#102580]">{approvedApps.length}</p>
+                                    </div>
+                                </div>
+                                <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                    <Icons.Clock size={20} className="text-amber-500"/> Bandeja de Pendientes
+                                </h2>
+                                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                                    {pendingApps.length === 0 ? (
+                                        <div className="p-8 text-center text-gray-500">No hay solicitudes pendientes en este momento.</div>
+                                    ) : (
+                                        <table className="w-full text-left border-collapse">
+                                            <thead>
+                                                <tr className="bg-gray-50 border-b border-gray-100 text-xs uppercase text-gray-500 tracking-wider">
+                                                    <th className="p-4 font-semibold">Cliente / Empresa</th>
+                                                    <th className="p-4 font-semibold">NIT</th>
+                                                    <th className="p-4 font-semibold">Monto Solicitado</th>
+                                                    <th className="p-4 font-semibold text-right">Acción</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {pendingApps.map(app => (
+                                                    <tr key={app.id} className="border-b border-gray-50 hover:bg-blue-50/50 transition-colors">
+                                                        <td className="p-4 font-medium text-gray-800">{app.clientData.nombre}</td>
+                                                        <td className="p-4 text-gray-600">{app.clientData.nit}</td>
+                                                        <td className="p-4 text-[#1a3fa8] font-semibold">Q. {app.clientData.limiteSolicitado}</td>
+                                                        <td className="p-4 text-right">
+                                                            <button onClick={() => { setSelectedApp(app); setCurrentView('adminReview'); }} className="inline-flex items-center gap-1 text-sm bg-blue-100 text-[#1a3fa8] px-3 py-1.5 rounded-lg hover:bg-blue-200 font-medium transition">
+                                                                Revisar <Icons.ChevronRight size={16}/>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+
+                if (role === 'admin' && currentView === 'adminReview' && selectedApp) return <AdminReviewPanel application={selectedApp} onBack={() => { setSelectedApp(null); setCurrentView('adminDash'); }} />;
+
+                return null;
+            }
+
+            // Renderizar la aplicación
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(<App />);
+        };
+
+        // Escuchar cuando Firebase termina de cargar los módulos y luego iniciar React
+        if (window.FirebaseAPI) {
+            startReactApp();
         } else {
-          await signInAnonymously(auth);
+            window.addEventListener('firebase-ready', startReactApp);
         }
-      } catch (error) {
-        console.error("Error auth:", error);
-      }
-    };
-    initAuth();
-    const unsubscribe = onAuthStateChanged(auth, setUser);
-    return () => unsubscribe();
-  }, []);
-
-  // Sincronización con Firestore (REGLAS 1 y 2)
-  useEffect(() => {
-    if (!user) return;
-    
-    // Obtenemos TODAS las solicitudes públicas (sin where/orderBy para cumplir Regla 2)
-    const appsRef = collection(db, 'artifacts', appId, 'public', 'data', 'credit_requests');
-    
-    const unsubscribe = onSnapshot(appsRef, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      // Ordenamiento en memoria (Regla 2)
-      data.sort((a, b) => b.createdAt - a.createdAt);
-      setApplications(data);
-    }, (error) => console.error("Firestore error:", error));
-
-    return () => unsubscribe();
-  }, [user]);
-
-  // Selección de Rol (Simulación de login)
-  const handleSelectRole = (selectedRole) => {
-    setRole(selectedRole);
-    setCurrentView(selectedRole === 'client' ? 'clientForm' : 'adminDash');
-  };
-
-  const logout = () => {
-    setRole(null);
-    setCurrentView('selectRole');
-    setSelectedApp(null);
-  };
-
-  // ============================================================
-  // PANTALLA: SELECCIÓN DE ROL
-  // ============================================================
-  if (currentView === 'selectRole') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0f1f6e] via-[#1a3fa8] to-[#2563eb] flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl p-10 max-w-md w-full shadow-2xl text-center">
-          <div className="flex justify-center mb-6">
-            <svg viewBox="0 0 220 60" className="h-12 w-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="18" cy="18" r="14" fill="#1a3fa8"/>
-              <circle cx="18" cy="18" r="8" fill="white"/>
-              <circle cx="18" cy="18" r="4" fill="#1a3fa8"/>
-              <text x="38" y="26" fontFamily="Arial" fontSize="22" fontWeight="900" fill="#1a3fa8" letterSpacing="-0.5">GRUPO</text>
-              <text x="38" y="50" fontFamily="Arial" fontSize="28" fontWeight="900" fill="#1a3fa8" letterSpacing="-1">imade</text>
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold text-[#102580] mb-2">Portal de Créditos</h1>
-          <p className="text-gray-500 text-sm mb-8">Seleccione su perfil para ingresar al sistema</p>
-          
-          <div className="flex flex-col gap-4">
-            <button 
-              onClick={() => handleSelectRole('client')}
-              className="flex items-center justify-center gap-3 w-full bg-blue-50 text-[#1a3fa8] border border-blue-100 p-4 rounded-xl hover:bg-[#1a3fa8] hover:text-white transition-all font-semibold"
-            >
-              <User size={20} /> Soy Cliente (Solicitante)
-            </button>
-            <button 
-              onClick={() => handleSelectRole('admin')}
-              className="flex items-center justify-center gap-3 w-full bg-slate-50 text-slate-700 border border-slate-200 p-4 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold"
-            >
-              <ShieldCheck size={20} /> Personal Autorizado (Admin)
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ============================================================
-  // PANTALLA: FORMULARIO CLIENTE
-  // ============================================================
-  if (role === 'client' && currentView === 'clientForm') {
-    return <ClientFormPanel 
-              db={db} 
-              appId={appId} 
-              onSuccess={() => setCurrentView('clientSuccess')} 
-              onLogout={logout} 
-            />;
-  }
-
-  if (role === 'client' && currentView === 'clientSuccess') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-lg text-center">
-          <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-[#102580] mb-2">¡Solicitud Enviada!</h2>
-          <p className="text-gray-600 mb-6 text-sm">
-            Su solicitud de código de crédito ha sido enviada a la nube exitosamente. Nuestro personal autorizado la revisará pronto.
-          </p>
-          <button 
-            onClick={logout}
-            className="bg-[#1a3fa8] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#102580] transition w-full"
-          >
-            Volver al Inicio
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ============================================================
-  // PANTALLA: DASHBOARD ADMIN
-  // ============================================================
-  if (role === 'admin' && currentView === 'adminDash') {
-    const pendingApps = applications.filter(a => a.status === 'pending');
-    const approvedApps = applications.filter(a => a.status === 'approved');
-
-    return (
-      <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-        <div className="max-w-5xl mx-auto">
-          <header className="flex justify-between items-center mb-8 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-            <div>
-              <h1 className="text-xl font-bold text-[#102580]">Panel Administrativo</h1>
-              <p className="text-sm text-gray-500">Autorización de Créditos</p>
-            </div>
-            <button onClick={logout} className="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors text-sm font-medium">
-              <LogOut size={16} /> Salir
-            </button>
-          </header>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-             <div className="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-amber-400">
-               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Solicitudes Pendientes</h3>
-               <p className="text-3xl font-bold text-[#102580]">{pendingApps.length}</p>
-             </div>
-             <div className="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-green-500">
-               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Créditos Aprobados</h3>
-               <p className="text-3xl font-bold text-[#102580]">{approvedApps.length}</p>
-             </div>
-          </div>
-
-          <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <Clock size={20} className="text-amber-500"/> Bandeja de Pendientes
-          </h2>
-          
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            {pendingApps.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">No hay solicitudes pendientes en este momento.</div>
-            ) : (
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-gray-50 border-b border-gray-100 text-xs uppercase text-gray-500 tracking-wider">
-                    <th className="p-4 font-semibold">Cliente / Empresa</th>
-                    <th className="p-4 font-semibold">NIT</th>
-                    <th className="p-4 font-semibold">Monto Solicitado</th>
-                    <th className="p-4 font-semibold text-right">Acción</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pendingApps.map(app => (
-                    <tr key={app.id} className="border-b border-gray-50 hover:bg-blue-50/50 transition-colors">
-                      <td className="p-4 font-medium text-gray-800">{app.clientData.nombre}</td>
-                      <td className="p-4 text-gray-600">{app.clientData.nit}</td>
-                      <td className="p-4 text-[#1a3fa8] font-semibold">Q. {app.clientData.limiteSolicitado}</td>
-                      <td className="p-4 text-right">
-                        <button 
-                          onClick={() => { setSelectedApp(app); setCurrentView('adminReview'); }}
-                          className="inline-flex items-center gap-1 text-sm bg-blue-100 text-[#1a3fa8] px-3 py-1.5 rounded-lg hover:bg-blue-200 font-medium transition"
-                        >
-                          Revisar <ChevronRight size={16}/>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ============================================================
-  // PANTALLA: REVISIÓN ADMIN (PASO 5)
-  // ============================================================
-  if (role === 'admin' && currentView === 'adminReview' && selectedApp) {
-    return <AdminReviewPanel 
-              application={selectedApp} 
-              db={db}
-              appId={appId}
-              onBack={() => { setSelectedApp(null); setCurrentView('adminDash'); }} 
-            />;
-  }
-
-  return null;
-}
-
-// ============================================================
-// COMPONENTE SECUNDARIO: FORMULARIO DEL CLIENTE
-// ============================================================
-function ClientFormPanel({ db, appId, onSuccess, onLogout }) {
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    nombre: '', nit: '', telefono: '', direccion: '', municipio: '', departamento: '',
-    limiteSolicitado: '', diasSolicitados: '', nombreSolicita: '', fecha: new Date().toISOString().split('T')[0]
-  });
-  const [signature, setSignature] = useState(null);
-  const [showSignPad, setShowSignPad] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const submitForm = async () => {
-    if (!signature) { alert("Debe proporcionar su firma antes de enviar."); return; }
-    setIsSubmitting(true);
-    
-    try {
-      const docRef = doc(collection(db, 'artifacts', appId, 'public', 'data', 'credit_requests'));
-      await setDoc(docRef, {
-        status: 'pending',
-        clientData: formData,
-        clientSignature: signature,
-        createdAt: Date.now(),
-        adminData: null
-      });
-      onSuccess();
-    } catch (error) {
-      console.error("Error al guardar:", error);
-      alert("Hubo un error al enviar la solicitud.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-[#f4f6fb] p-4 md:p-8">
-      <div className="max-w-3xl mx-auto">
-        <header className="flex justify-between items-center mb-6 bg-white p-6 rounded-2xl shadow-sm border-t-4 border-[#1a3fa8]">
-          <div>
-            <h1 className="text-xl font-bold text-[#102580]">Solicitud de Crédito</h1>
-            <p className="text-xs text-blue-600 font-mono mt-1">Paso {step} de 2 (Vista Cliente)</p>
-          </div>
-          <button onClick={onLogout} className="text-gray-400 hover:text-red-500"><LogOut size={20}/></button>
-        </header>
-
-        <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8">
-          {step === 1 && (
-            <div className="animate-in fade-in slide-in-from-bottom-4">
-              <h2 className="text-lg font-bold text-[#102580] mb-4 border-b pb-2">1. Datos Básicos de Facturación</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre o Razón Social *</label>
-                  <input type="text" name="nombre" value={formData.nombre} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all" required/>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">N.I.T. *</label>
-                  <input type="text" name="nit" value={formData.nit} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all" required/>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Teléfono Principal *</label>
-                  <input type="text" name="telefono" value={formData.telefono} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all" required/>
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Dirección Completa *</label>
-                  <input type="text" name="direccion" value={formData.direccion} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all" required/>
-                </div>
-              </div>
-
-              <div className="mt-8 flex justify-end">
-                <button 
-                  onClick={() => {
-                    if(!formData.nombre || !formData.nit) { alert("Llene los campos obligatorios"); return;}
-                    setStep(2);
-                  }} 
-                  className="bg-[#1a3fa8] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#102580] transition flex items-center gap-2"
-                >
-                  Siguiente <ChevronRight size={18}/>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {step === 2 && (
-            <div className="animate-in fade-in slide-in-from-bottom-4">
-              <h2 className="text-lg font-bold text-[#102580] mb-4 border-b pb-2">2. Condiciones y Aceptación</h2>
-              <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
-                 <p className="text-sm font-bold text-[#102580] mb-2">Condiciones al aceptar:</p>
-                 <ul className="text-xs text-gray-600 list-disc pl-4 space-y-1">
-                   <li>Hacer efectivos sus pagos el día de vencimiento.</li>
-                   <li>Todo pago con cheque a nombre de PINTURAS Y MAS, S.A.</li>
-                   <li>Cheque rechazado genera cobro de Q100.00.</li>
-                 </ul>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Límite Solicitado (Q.) *</label>
-                  <input type="number" name="limiteSolicitado" value={formData.limiteSolicitado} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all"/>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Días de Crédito *</label>
-                  <input type="number" name="diasSolicitados" value={formData.diasSolicitados} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all"/>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre quien solicita *</label>
-                  <input type="text" name="nombreSolicita" value={formData.nombreSolicita} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-3 outline-none focus:border-[#2563eb] focus:ring-2 ring-blue-100 transition-all"/>
-                </div>
-              </div>
-
-              <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:bg-gray-50 transition" onClick={() => setShowSignPad(true)}>
-                {signature ? (
-                  <img src={signature} alt="Firma" className="h-20 mx-auto object-contain" />
-                ) : (
-                  <div className="text-gray-400 flex flex-col items-center gap-2">
-                    <PenTool size={24}/>
-                    <span className="text-sm font-medium">Toque aquí para firmar</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-8 flex justify-between items-center">
-                <button onClick={() => setStep(1)} className="text-gray-500 font-medium px-4 py-2 hover:bg-gray-100 rounded-lg transition">Atrás</button>
-                <button 
-                  onClick={submitForm} 
-                  disabled={isSubmitting}
-                  className="bg-green-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-green-700 transition flex items-center gap-2 disabled:opacity-50"
-                >
-                  {isSubmitting ? 'Enviando...' : 'Enviar a Revisión'}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {showSignPad && (
-        <SignaturePad 
-          title="Firma del Cliente"
-          onCancel={() => setShowSignPad(false)} 
-          onSave={(sig) => { setSignature(sig); setShowSignPad(false); }} 
-        />
-      )}
-    </div>
-  );
-}
-
-// ============================================================
-// COMPONENTE SECUNDARIO: PANEL DE REVISIÓN ADMIN
-// ============================================================
-function AdminReviewPanel({ application, db, appId, onBack }) {
-  const [adminData, setAdminData] = useState({ montoAutorizado: '', diasAutorizados: '', codigoCliente: '', nombreAutoriza: '' });
-  const [adminSignature, setAdminSignature] = useState(null);
-  const [showSignPad, setShowSignPad] = useState(false);
-  const [isApproving, setIsApproving] = useState(false);
-
-  const c = application.clientData;
-
-  const handleChange = (e) => setAdminData({ ...adminData, [e.target.name]: e.target.value });
-
-  const approveApplication = async () => {
-    if (!adminData.montoAutorizado || !adminData.codigoCliente || !adminSignature) {
-      alert("Complete los datos de autorización y la firma.");
-      return;
-    }
-    setIsApproving(true);
-    try {
-      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'credit_requests', application.id);
-      await updateDoc(docRef, {
-        status: 'approved',
-        adminData: adminData,
-        adminSignature: adminSignature,
-        approvedAt: Date.now()
-      });
-      alert("¡Crédito aprobado exitosamente!");
-      onBack();
-    } catch (error) {
-      console.error(error);
-      alert("Error al aprobar.");
-    } finally {
-      setIsApproving(false);
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-4xl mx-auto">
-        <button onClick={onBack} className="flex items-center gap-2 text-[#1a3fa8] font-semibold mb-6 hover:underline">
-          <ArrowLeft size={18} /> Volver al Panel
-        </button>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Columna Izquierda: Datos del Cliente (Solo Lectura) */}
-          <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h2 className="text-lg font-bold text-[#102580] mb-4 border-b pb-2">Información del Solicitante</h2>
-            
-            <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
-              <div><span className="block text-gray-500 font-medium">Empresa</span><span className="font-semibold text-gray-900">{c.nombre}</span></div>
-              <div><span className="block text-gray-500 font-medium">NIT</span><span className="font-semibold text-gray-900">{c.nit}</span></div>
-              <div><span className="block text-gray-500 font-medium">Teléfono</span><span className="font-semibold text-gray-900">{c.telefono}</span></div>
-              <div><span className="block text-gray-500 font-medium">Dirección</span><span className="font-semibold text-gray-900">{c.direccion}</span></div>
-            </div>
-
-            <div className="mt-6 bg-blue-50/50 rounded-xl p-4 border border-blue-100">
-              <h3 className="text-xs font-bold text-blue-800 uppercase tracking-wider mb-3">Condiciones Solicitadas</h3>
-              <div className="flex gap-8">
-                <div><span className="block text-gray-500 text-xs">Monto</span><span className="font-bold text-lg text-[#102580]">Q. {c.limiteSolicitado}</span></div>
-                <div><span className="block text-gray-500 text-xs">Plazo</span><span className="font-bold text-lg text-[#102580]">{c.diasSolicitados} Días</span></div>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <span className="block text-gray-500 text-xs font-medium mb-2">Firma del Solicitante:</span>
-              <img src={application.clientSignature} alt="Firma Cliente" className="h-16 object-contain border-b border-gray-200 px-4" />
-              <span className="block text-xs text-gray-400 mt-1">{c.nombreSolicita}</span>
-            </div>
-          </div>
-
-          {/* Columna Derecha: Panel de Aprobación (Paso 5) */}
-          <div className="bg-[#f0f4ff] rounded-2xl p-6 shadow-sm border-2 border-[#c3cef5]">
-            <h2 className="text-lg font-bold text-[#102580] mb-1">Uso Exclusivo</h2>
-            <p className="text-xs text-[#1a3fa8] mb-6">Autorización de imade</p>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">Monto Autorizado (Q.)</label>
-                <input type="number" name="montoAutorizado" value={adminData.montoAutorizado} onChange={handleChange} className="w-full border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-[#2563eb] focus:ring-1 ring-[#2563eb]"/>
-              </div>
-              <div className="flex gap-4">
-                <div className="w-1/2">
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Días</label>
-                  <input type="number" name="diasAutorizados" value={adminData.diasAutorizados} onChange={handleChange} className="w-full border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-[#2563eb] focus:ring-1 ring-[#2563eb]"/>
-                </div>
-                <div className="w-1/2">
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Cód. Cliente</label>
-                  <input type="text" name="codigoCliente" value={adminData.codigoCliente} onChange={handleChange} className="w-full border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-[#2563eb] focus:ring-1 ring-[#2563eb]"/>
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">Autorizado por:</label>
-                <input type="text" name="nombreAutoriza" value={adminData.nombreAutoriza} onChange={handleChange} className="w-full border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:border-[#2563eb] focus:ring-1 ring-[#2563eb]"/>
-              </div>
-
-              <div className="border border-dashed border-[#c3cef5] bg-white rounded-xl p-3 text-center cursor-pointer hover:bg-blue-50 transition mt-4" onClick={() => setShowSignPad(true)}>
-                {adminSignature ? (
-                  <img src={adminSignature} alt="Firma Admin" className="h-12 mx-auto object-contain" />
-                ) : (
-                  <span className="text-xs font-medium text-[#1a3fa8]">Toque para firmar</span>
-                )}
-              </div>
-
-              <button 
-                onClick={approveApplication}
-                disabled={isApproving}
-                className="w-full bg-green-600 text-white py-3 rounded-xl font-bold mt-6 hover:bg-green-700 transition shadow-lg shadow-green-600/20 disabled:opacity-60"
-              >
-                {isApproving ? 'Procesando...' : '✓ Aprobar Crédito'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {showSignPad && (
-        <SignaturePad 
-          title="Firma de Autorización"
-          onCancel={() => setShowSignPad(false)} 
-          onSave={(sig) => { setAdminSignature(sig); setShowSignPad(false); }} 
-        />
-      )}
-    </div>
-  );
-}
+    </script>
+</body>
+</html>
