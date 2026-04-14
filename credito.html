@@ -336,7 +336,6 @@ canvas { user-select: none; -webkit-user-select: none; }
   <div class="top-header">
     <div class="header-brand">
       <div class="logo-box">
-        <!-- AQUÍ VA EL LOGO: Se ajustará a sus proporciones nativas en el PDF -->
         <img id="brandLogo" src="logo.png" alt="Logo" onerror="fallbackLogo(this)">
       </div>
       <div class="header-text">
@@ -629,7 +628,7 @@ canvas { user-select: none; -webkit-user-select: none; }
     </div>
   </div>
 
-  <!-- ═══════════════════════════ STEP 4: FIRMA SOLICITANTE (AHORA FINAL) ═══════════════════════════ -->
+  <!-- ═══════════════════════════ STEP 4: FIRMA SOLICITANTE ═══════════════════════════ -->
   <div class="section-panel" id="panel4">
     <p class="section-title">Firma del Solicitante</p>
     <p class="section-desc">Firme electrónicamente para validar la solicitud.</p>
@@ -674,9 +673,10 @@ canvas { user-select: none; -webkit-user-select: none; }
       </div>
       <div class="nav-bar-right">
         <span class="step-indicator">Paso 5 de 5</span>
-        <button class="btn btn-success" onclick="attemptGeneratePDF()">
+        <!-- Botón modificado para interceptar y guardar datos -->
+        <button class="btn btn-success" onclick="attemptSaveAndGeneratePDF()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Generar Documento PDF
+          Enviar Solicitud y Generar PDF
         </button>
       </div>
     </div>
@@ -718,19 +718,19 @@ canvas { user-select: none; -webkit-user-select: none; }
 <div id="toastBox"></div>
 
 <script>
-// ────────────────────────────────────────────────────────
-// LOGO FALLBACK (Evitar error si logo.png no existe visualmente)
-// ────────────────────────────────────────────────────────
+// =========================================================================
+// ¡IMPORTANTE! PEGA AQUÍ LA URL QUE TE DIO GOOGLE APPS SCRIPT
+// =========================================================================
+const SCRIPT_URL = "URL_DE_TU_GOOGLE_APPS_SCRIPT_AQUI"; 
+// =========================================================================
+
 function fallbackLogo(img) {
   img.onerror = null;
   img.src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgNjAiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNmZmYiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjMUIyQjZCIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjM1ZW0iPkxPR08gQVFVSTwvdGV4dD48L3N2Zz4=";
 }
 
-// ────────────────────────────────────────────────────────
-// NAVEGACIÓN Y VALIDACIÓN
-// ────────────────────────────────────────────────────────
 let currentStep = 0;
-const TOTAL_STEPS = 5; // Cambiado a 5 pasos
+const TOTAL_STEPS = 5;
 
 function attemptGoStep(targetStep) {
   if (targetStep > currentStep) {
@@ -764,7 +764,7 @@ function validateStep(stepIndex) {
   }
 
   if (!isValid) {
-    showToast('Debe completar TODOS los campos de esta sección para continuar.', 'error');
+    showToast('Debe completar TODOS los campos para continuar.', 'error');
     return false;
   }
   return true;
@@ -805,9 +805,6 @@ function setDefaults() {
 }
 setDefaults();
 
-// ────────────────────────────────────────────────────────
-// GEOLOCALIZACIÓN
-// ────────────────────────────────────────────────────────
 function getAutoLocation() {
   if (navigator.geolocation) {
     showToast('Obteniendo coordenadas GPS...', 'info');
@@ -818,7 +815,7 @@ function getAutoLocation() {
       document.getElementById('longitud').classList.remove('error-input');
       showToast('Ubicación agregada correctamente', 'success');
     }, function(error) {
-      showToast('Error al obtener GPS. Permita el acceso o ingrese manualmente.', 'error');
+      showToast('Error al obtener GPS. Ingrese manualmente.', 'error');
       document.getElementById('latitud').removeAttribute('readonly');
       document.getElementById('longitud').removeAttribute('readonly');
     });
@@ -827,9 +824,6 @@ function getAutoLocation() {
   }
 }
 
-// ────────────────────────────────────────────────────────
-// PANEL DE FIRMA
-// ────────────────────────────────────────────────────────
 let activeSigTarget = null;
 let sigDrawing = false;
 let sigCtx = null;
@@ -967,9 +961,6 @@ function saveSig() {
 }
 initCanvas();
 
-// ────────────────────────────────────────────────────────
-// TOASTS
-// ────────────────────────────────────────────────────────
 function showToast(msg, type = 'success') {
   const box = document.getElementById('toastBox');
   const t = document.createElement('div');
@@ -983,9 +974,6 @@ function showToast(msg, type = 'success') {
   }, 3500);
 }
 
-// ────────────────────────────────────────────────────────
-// LECTURA DE CAMPOS
-// ────────────────────────────────────────────────────────
 function g(id) { return document.getElementById(id)?.value?.trim() || ''; }
 function gDate(id) {
   const val = document.getElementById(id)?.value;
@@ -1000,19 +988,50 @@ function formatMoney(id) {
 }
 
 // ────────────────────────────────────────────────────────
-// GENERADOR PDF CORPORATIVO
+// NUEVO METODO DE GUARDADO EN LA NUBE
 // ────────────────────────────────────────────────────────
-function attemptGeneratePDF() {
-  if(!validateStep(4)) return; // Validar paso 4 (firma)
-  generatePDF();
+async function attemptSaveAndGeneratePDF() {
+  if(!validateStep(4)) return; // Validar paso de firma (ahora paso 4)
+  
+  showToast('Guardando datos en la nube...', 'info');
+
+  // Recolectamos todos los inputs dinámicamente
+  const formPayload = { Tipo: "Crédito" };
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    // Excluimos campos vacíos o sin ID y las firmas
+    if(el.id && el.id.trim() !== '' && !el.id.startsWith('sig')) {
+      formPayload[el.id] = el.value.trim();
+    }
+  });
+
+  if (SCRIPT_URL !== "URL_DE_TU_GOOGLE_APPS_SCRIPT_AQUI") {
+      try {
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors', // Evita problemas de CORS al enviar
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formPayload)
+        });
+        showToast('Datos sincronizados con éxito', 'success');
+      } catch (e) {
+        console.error("Error al guardar en Sheets:", e);
+        showToast('Error de conexión, pero se generará el PDF', 'error');
+      }
+  } else {
+      showToast('Advertencia: Base de datos no configurada (Generando PDF local)', 'orange');
+  }
+
+  // Despues de enviar (o fallar el envío), procedemos con el PDF
+  setTimeout(generatePDF, 500);
 }
 
+// ────────────────────────────────────────────────────────
+// GENERADOR PDF CORPORATIVO
+// ────────────────────────────────────────────────────────
 async function generatePDF() {
   const { jsPDF } = window.jspdf;
   if (!jsPDF) { showToast('Librería PDF no cargada. Verifique internet.', 'error'); return; }
   
-  showToast('Procesando Documento PDF...', 'info');
-
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
   const PW = doc.internal.pageSize.getWidth();
   const PH = doc.internal.pageSize.getHeight();
@@ -1041,7 +1060,7 @@ async function generatePDF() {
       doc.addPage();
       y = M + 4;
       fill(...C.navy);
-      doc.rect(0, 0, PW, 4, 'F'); // Decoración top
+      doc.rect(0, 0, PW, 4, 'F'); 
     }
   }
 
@@ -1063,19 +1082,12 @@ async function generatePDF() {
     doc.text(label.toUpperCase(), x, y);
     font(value ? 'normal' : 'italic', 9);
     rgb(...(value ? C.black : C.muted));
-    
-    // Si el valor está vacío no imprimiremos 'N/A', sino que lo dejaremos en blanco
-    // Esto es vital para la sección de Uso Exclusivo
     const safeVal = value || ''; 
-    
     doc.text(safeVal, x, y + 4.5, { maxWidth: width - 2 });
     draw(...C.border); lw(0.2);
     doc.line(x, y + 6, x + width - 2, y + 6);
   }
 
-  // ─────────────────────────────────────────────
-  // 1. OBTENER Y DIBUJAR LOGO.PNG AUTOMÁTICAMENTE
-  // ─────────────────────────────────────────────
   const imgEl = document.getElementById('brandLogo');
   let logoData = null;
   let logoW = 0, logoH = 0;
@@ -1087,7 +1099,6 @@ async function generatePDF() {
     const ctx = c.getContext('2d');
     ctx.drawImage(imgEl, 0, 0);
     logoData = c.toDataURL('image/png');
-    
     const aspect = c.width / c.height;
     logoH = 16;
     logoW = logoH * aspect;
@@ -1096,7 +1107,7 @@ async function generatePDF() {
       logoH = logoW / aspect;
     }
   } catch (e) {
-    console.log("No se pudo cargar logo.png por bloqueos de seguridad. Se usará cabecera texto.");
+    console.log("No logo loaded");
   }
 
   if (logoData) {
@@ -1105,40 +1116,27 @@ async function generatePDF() {
     font('bold', 14); rgb(...C.navy); doc.text("GRUPO IMADE", M, y + 8);
   }
 
-  font('bold', 12);
-  rgb(...C.navy);
+  font('bold', 12); rgb(...C.navy);
   doc.text('SOLICITUD DE CRÉDITO', PW - M, y + 6, { align: 'right' });
-  font('normal', 8);
-  rgb(...C.muted);
+  font('normal', 8); rgb(...C.muted);
   doc.text(`Pinturas y Más, S.A. | Fecha: ${new Date().toLocaleDateString('es-GT')}`, PW - M, y + 12, { align: 'right' });
   
   y += Math.max(logoH, 14) + 10;
   draw(...C.sky); lw(0.5); doc.line(M, y-4, PW-M, y-4);
 
-  // ─────────────────────────────────────────────
-  // 2. DATOS DE FACTURACIÓN
-  // ─────────────────────────────────────────────
   sectionTitle('1. Datos de Facturación');
-  drawField('Nombre o Razón Social', g('nombreRs'), M, CW);
-  y += 12;
+  drawField('Nombre o Razón Social', g('nombreRs'), M, CW); y += 12;
   const col2 = CW / 2;
   drawField('N.I.T.', g('nit'), M, col2);
-  drawField('Teléfono con WhatsApp', g('telefonoWA'), M + col2, col2);
-  y += 12;
-  drawField('Dirección Fiscal', g('direccionFiscal'), M, CW);
-  y += 12;
+  drawField('Teléfono con WhatsApp', g('telefonoWA'), M + col2, col2); y += 12;
+  drawField('Dirección Fiscal', g('direccionFiscal'), M, CW); y += 12;
   const col3 = CW / 3;
   drawField('País', g('pais'), M, col3);
   drawField('Departamento', g('departamento'), M + col3, col3);
-  drawField('Municipio', g('municipio'), M + col3 * 2, col3);
-  y += 12;
+  drawField('Municipio', g('municipio'), M + col3 * 2, col3); y += 12;
   drawField('Coordenada Latitud', g('latitud'), M, col2);
-  drawField('Coordenada Longitud', g('longitud'), M + col2, col2);
-  y += 14;
+  drawField('Coordenada Longitud', g('longitud'), M + col2, col2); y += 14;
 
-  // ─────────────────────────────────────────────
-  // 3. INFORMACIÓN DEL NEGOCIO
-  // ─────────────────────────────────────────────
   checkY(40);
   sectionTitle('2. Información General del Negocio');
   drawField('Dirección del Negocio', g('dirNegocio'), M, CW); y += 12;
@@ -1154,12 +1152,8 @@ async function generatePDF() {
   drawField('Tel. Cobros', g('telCobros'), M + col3, col3);
   drawField('E-mail Cobros', g('emailCobros'), M + col3 * 2, col3); y += 16;
 
-  // ─────────────────────────────────────────────
-  // 4. REFERENCIAS COMERCIALES
-  // ─────────────────────────────────────────────
   checkY(45);
   sectionTitle('3. Referencias Comerciales');
-  
   fill(240, 245, 250); doc.rect(M, y, CW, 6, 'F');
   font('bold', 7); rgb(...C.navy);
   doc.text('NOMBRE / EMPRESA', M + 2, y + 4);
@@ -1183,9 +1177,6 @@ async function generatePDF() {
   });
   y += 10;
 
-  // ─────────────────────────────────────────────
-  // 5. LÍMITE DE CRÉDITO Y CONDICIONES
-  // ─────────────────────────────────────────────
   checkY(50);
   sectionTitle('4. Límite de Crédito Solicitado');
   drawField('Monto Solicitado (Q.)', formatMoney('limiteCredito'), M, col2);
@@ -1207,14 +1198,10 @@ async function generatePDF() {
   conds.forEach(c => { doc.text(c, M + 4, condY); condY += 4; });
   y += 36;
 
-  // ─────────────────────────────────────────────
-  // 6. FIRMA SOLICITANTE
-  // ─────────────────────────────────────────────
   checkY(60);
   sectionTitle('5. Aceptación y Firma del Solicitante');
   drawField('Nombre de quien solicita', g('nombreSolicita'), M, col2);
-  drawField('Fecha de firma', gDate('fechaSolicitud'), M + col2, col2);
-  y += 14;
+  drawField('Fecha de firma', gDate('fechaSolicitud'), M + col2, col2); y += 14;
 
   font('bold', 8); rgb(...C.muted); doc.text('FIRMA DEL SOLICITANTE', M + (col2/2), y, {align: 'center'});
   draw(...C.border); lw(0.5); doc.rect(M, y + 2, col2 - 10, 26, 'S');
@@ -1224,14 +1211,8 @@ async function generatePDF() {
   }
   y += 36;
 
-  // ─────────────────────────────────────────────
-  // 7. AUTORIZACIÓN (USO INTERNO - SE IMPRIME EN BLANCO)
-  // ─────────────────────────────────────────────
   checkY(65);
   sectionTitle('6. Uso Exclusivo Administración');
-  
-  // Todos estos campos al no existir en la UI, se imprimirán las líneas pero sin contenido textual 
-  // ya que drawField ahora respeta y dibuja strings vacíos de forma limpia.
   drawField('Monto Autorizado (Q.)', '', M, col2);
   drawField('Fecha de Autorización', '', M + col2, col2); y += 12;
   drawField('Días de Crédito', '', M, col2);
@@ -1241,9 +1222,6 @@ async function generatePDF() {
   font('bold', 8); rgb(...C.muted); doc.text('FIRMA AUTORIZANTE', M + (col2/2), y, {align: 'center'});
   draw(...C.border); lw(0.5); doc.rect(M, y + 2, col2 - 10, 26, 'S');
 
-  // ─────────────────────────────────────────────
-  // PAGINACIÓN AUTOMÁTICA AL FINAL
-  // ─────────────────────────────────────────────
   const totalPages = doc.internal.getNumberOfPages();
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
@@ -1252,7 +1230,6 @@ async function generatePDF() {
     fill(...C.navy); doc.rect(0, PH - 3, PW, 3, 'F');
   }
 
-  // DESCARGA
   const filePrefix = (g('nombreRs') || 'Cliente_Nuevo').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
   doc.save(`Solicitud_Credito_${filePrefix}.pdf`);
   showToast('Documento PDF generado y descargado con éxito', 'success');
