@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Apertura de Cliente (Contado) · Grupo Imade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Importando jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* ─── RESET Y VARIABLES ─── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --navy: #1B2B6B;
+  --navy-dark: #0F1A45;
+  --sky: #4AB3E8;
+  --sky-light: #E8F6FD;
+  --sky-mid: #C2E5F7;
+  --white: #FFFFFF;
+  --bg: #EEF2F8;
+  --surface: #FFFFFF;
+  --border: #D8E2EF;
+  --border-focus: #4AB3E8;
+  --text: #0F1A45;
+  --text-2: #3A4A6B;
+  --muted: #8494B2;
+  --green: #22C55E;
+  --green-soft: #DCFCE7;
+  --orange: #F97316;
+  --orange-soft: #FFF7ED;
+  --red: #EF4444;
+  --red-soft: #FEF2F2;
+  --shadow-sm: 0 1px 4px rgba(27,43,107,0.07);
+  --shadow-md: 0 4px 20px rgba(27,43,107,0.10);
+  --shadow-lg: 0 8px 40px rgba(27,43,107,0.14);
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 20px;
+  --font: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+html,body {
+  min-height: 100%;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(27,43,107,0.15);border-radius:4px}
+
+.wrap {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px 16px 80px;
+}
+
+/* ─── TOP HEADER ─── */
+.top-header {
+  background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 60%, #2C4A9E 100%);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 28px;
+  box-shadow: 0 8px 32px rgba(15,26,69,0.30);
+  position: relative;
+  overflow: hidden;
+}
+
+.top-header::before, .top-header::after {
+  content: ''; position: absolute; pointer-events: none; border-radius: 50%;
+}
+.top-header::before { top: -30px; right: -30px; width: 160px; height: 160px; background: rgba(74,179,232,0.12); }
+.top-header::after { bottom: -50px; left: 40%; width: 200px; height: 200px; background: rgba(255,255,255,0.04); }
+
+.header-brand { display: flex; align-items: center; gap: 16px; position: relative; z-index: 1; }
+
+.logo-box {
+  width: auto; max-width: 120px; height: 50px; background: white; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; padding: 6px; box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+.logo-box img { width: 100%; height: 100%; object-fit: contain; }
+
+.header-text h1 { font-size: 18px; font-weight: 800; color: #fff; line-height: 1.2; }
+.header-text p { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 4px; }
+
+.header-right { display: flex; align-items: center; gap: 10px; position: relative; z-index: 1; }
+.date-badge {
+  background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px; padding: 6px 12px; font-size: 12px;
+  color: rgba(255,255,255,0.9); font-family: var(--mono);
+}
+
+/* ─── PROGRESS STEPPER ─── */
+.stepper {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 4px; margin-bottom: 28px; overflow-x: auto; padding: 4px 0;
+}
+.step-item { display: flex; align-items: center; flex-shrink: 0; }
+.step-btn {
+  display: flex; align-items: center; gap: 8px; padding: 8px 14px;
+  border-radius: 50px; background: var(--surface); border: 1.5px solid var(--border);
+  cursor: pointer; transition: all 0.2s; font-family: var(--font); white-space: nowrap; outline: none;
+}
+.step-btn:hover:not(.active) { border-color: var(--sky); background: var(--sky-light); }
+.step-btn.active { background: var(--navy); border-color: var(--navy); color: white; box-shadow: 0 4px 14px rgba(27,43,107,0.30); }
+.step-btn.done { background: var(--green-soft); border-color: var(--green); color: #166534; }
+
+.step-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(27,43,107,0.08); display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0; transition: all 0.2s;
+}
+.step-btn.active .step-num { background: rgba(255,255,255,0.2); color: white; }
+.step-btn.done .step-num { background: var(--green); color: white; }
+.step-label { font-size: 12px; font-weight: 600; color: var(--text-2); }
+.step-btn.active .step-label { color: white; }
+.step-btn.done .step-label { color: #166534; }
+
+.step-connector { flex: 1; height: 2px; background: var(--border); min-width: 10px; margin: 0 4px; transition: background 0.3s; }
+.step-connector.done { background: var(--green); }
+
+@media (max-width: 700px) {
+  .step-label { display: none; }
+  .step-btn { padding: 8px; justify-content: center; width: 38px; height: 38px; }
+  .step-num { margin: 0; }
+  .stepper { justify-content: center; gap: 0; }
+  .step-connector { width: 15px; flex: none; }
+}
+
+/* ─── SECTION PANEL ─── */
+.section-panel { display: none; animation: fadeUp 0.3s ease forwards; }
+.section-panel.active { display: block; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ─── CARD ─── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-md); box-shadow: var(--shadow-sm);
+  margin-bottom: 20px; overflow: hidden;
+}
+.card-head {
+  display: flex; align-items: center; gap: 10px; padding: 14px 20px;
+  background: linear-gradient(90deg, var(--sky-light) 0%, rgba(238,242,248,0.5) 100%);
+  border-bottom: 1px solid var(--border);
+}
+.card-head-icon {
+  width: 32px; height: 32px; border-radius: 9px; background: var(--navy);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.card-head-icon svg { width: 16px; height: 16px; color: white; stroke: white; fill: none; stroke-width: 2; }
+.card-head-title { font-size: 14px; font-weight: 700; color: var(--navy); text-transform: uppercase; }
+.card-body { padding: 22px 20px; }
+
+/* ─── FORM GRID ─── */
+.grid { display: grid; gap: 14px; }
+.g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field.span2 { grid-column: 1 / -1; }
+
+label { font-size: 11.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+input[type="text"], input[type="email"], input[type="tel"],
+input[type="number"], input[type="date"], select, textarea {
+  width: 100%; padding: 10px 14px; background: #F8FAFD; border: 1.5px solid var(--border);
+  border-radius: var(--r-sm); font-family: var(--font); font-size: 14px; font-weight: 500;
+  color: var(--text); transition: all 0.2s; outline: none; appearance: none;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--border-focus); background: white; box-shadow: 0 0 0 3px rgba(74,179,232,0.15); }
+input::placeholder, textarea::placeholder { color: var(--muted); font-weight: 400; }
+.error-input { border-color: var(--red) !important; background: var(--red-soft) !important; }
+
+.divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+/* ─── SIGNATURE PANEL (MODAL) ─── */
+.sig-overlay {
+  display: flex; position: fixed; inset: 0;
+  background: rgba(15,26,69,0.8); backdrop-filter: blur(5px);
+  z-index: 1000; align-items: center; justify-content: center;
+  padding: 20px; opacity: 0; pointer-events: none; visibility: hidden;
+  transition: opacity 0.3s ease;
+}
+.sig-overlay.open { opacity: 1; pointer-events: auto; visibility: visible; }
+.sig-modal {
+  background: white; border-radius: var(--r-lg); width: 100%; max-width: 540px;
+  box-shadow: 0 24px 80px rgba(15,26,69,0.30); overflow: hidden;
+  transform: translateY(20px) scale(0.95); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.sig-overlay.open .sig-modal { transform: translateY(0) scale(1); }
+
+.sig-modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px; background: linear-gradient(135deg, var(--navy-dark), var(--navy));
+}
+.sig-modal-head h3 { font-size: 16px; font-weight: 700; color: white; }
+.sig-modal-head p { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+
+.sig-modal-body { padding: 24px; }
+.canvas-wrap {
+  border: 2px solid var(--border); border-radius: var(--r-sm);
+  background: #FFFFFF; position: relative; overflow: hidden;
+}
+.canvas-wrap canvas {
+  display: block; width: 100%; height: 200px;
+  cursor: crosshair; touch-action: none;
+}
+.canvas-hint {
+  position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 16px;
+  background: rgba(248,250,253,0.95); border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.canvas-hint span { font-size: 12px; color: var(--muted); font-style: italic; }
+
+.sig-modal-foot { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 12px; justify-content: flex-end; background: #F8FAFD; }
+
+/* ─── SIGNATURE INLINE WIDGET ─── */
+.sig-widget {
+  border: 2px dashed var(--border); border-radius: var(--r-sm);
+  padding: 16px; display: flex; align-items: center; gap: 16px;
+  cursor: pointer; transition: all 0.2s; background: #F8FAFD;
+}
+.sig-widget:hover { border-color: var(--sky); background: var(--sky-light); }
+.sig-widget.has-sig { border-style: solid; border-color: var(--green); background: var(--green-soft); }
+
+.sig-preview-mini {
+  width: 140px; height: 56px; background: white; border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
+.sig-preview-mini img { width: 100%; height: 100%; object-fit: contain; display: none; padding: 4px; }
+
+.sig-widget-info { flex: 1; }
+.sig-widget-info strong { font-size: 14px; font-weight: 700; color: var(--text); display: block; }
+.sig-widget-info span { font-size: 12px; color: var(--muted); margin-top: 2px; display: block; }
+.sig-widget.has-sig .sig-widget-info span { color: #166534; }
+.sig-error { border-color: var(--red); background: var(--red-soft); }
+
+/* ─── NAV BUTTONS ─── */
+.nav-bar { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; gap: 12px; flex-wrap: wrap; }
+.nav-bar-left, .nav-bar-right { display: flex; gap: 12px; align-items: center; }
+
+/* ─── BUTTONS ─── */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px;
+  border-radius: var(--r-sm); border: none; font-family: var(--font); font-size: 14px;
+  font-weight: 700; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+.btn-primary { background: var(--navy); color: white; box-shadow: 0 4px 14px rgba(27,43,107,0.25); }
+.btn-primary:hover { background: var(--navy-dark); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(27,43,107,0.35); }
+.btn-sky { background: var(--sky); color: white; box-shadow: 0 4px 14px rgba(74,179,232,0.30); }
+.btn-sky:hover { background: #3AA0D5; transform: translateY(-1px); }
+.btn-ghost { background: white; color: var(--text-2); border: 1.5px solid var(--border); }
+.btn-ghost:hover { background: #F8FAFD; border-color: var(--sky); color: var(--navy); }
+.btn-danger { background: var(--red-soft); color: var(--red); border: 1.5px solid rgba(239,68,68,0.2); }
+.btn-danger:hover { background: #FEE2E2; }
+.btn-success { background: var(--green); color: white; box-shadow: 0 4px 14px rgba(34,197,94,0.30); }
+.btn-success:hover { background: #16A34A; transform: translateY(-1px); }
+.btn-sm { padding: 8px 14px; font-size: 13px; }
+.btn:active { transform: scale(0.97) !important; }
+
+/* ─── CLOSE BTN ─── */
+.btn-close {
+  width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.15);
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: white; transition: background 0.15s;
+}
+.btn-close:hover { background: rgba(255,255,255,0.25); }
+.btn-close svg { width: 18px; height: 18px; stroke: white; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+
+/* ─── SECTION TITLE ─── */
+.section-title { font-size: 22px; font-weight: 800; color: var(--navy); letter-spacing: -0.5px; margin-bottom: 6px; }
+.section-desc { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+
+/* ─── TOAST ─── */
+#toastBox { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 10px; z-index: 9999; }
+.toast {
+  display: flex; align-items: center; gap: 12px; background: white;
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+  padding: 14px 20px; box-shadow: var(--shadow-lg); font-size: 14px; font-weight: 600;
+  color: var(--text); opacity: 0; transform: translateY(15px);
+  transition: opacity 0.3s, transform 0.3s;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.hide { opacity: 0; transform: translateY(-10px); }
+.toast-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.toast-dot.success { background: var(--green); }
+.toast-dot.error   { background: var(--red); }
+.toast-dot.info    { background: var(--sky); }
+
+.step-indicator { font-size: 13px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+
+/* Flex utility para título de lat/lng con botón */
+.header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+
+canvas { user-select: none; -webkit-user-select: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- TOP HEADER -->
+  <div class="top-header">
+    <div class="header-brand">
+      <div class="logo-box">
+        <!-- Reemplace el valor de "src" con la URL o el string en formato Base64 de su logotipo real -->
+        <img id="brandLogo" src="data:image/png;base64,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" alt="Logo" onerror="fallbackLogo(this)">
+      </div>
+      <div class="header-text">
+        <h1>Solicitud de Apertura de Cliente (Contado)</h1>
+        <p>Pinturas y Más, S.A. · Complete todos los campos</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="date-badge" id="dateBadge"></div>
+    </div>
+  </div>
+
+  <!-- STEPPER (Reducido a 3 pasos) -->
+  <div class="stepper" id="stepper">
+    <div class="step-item"><button class="step-btn active" id="stepBtn0" onclick="attemptGoStep(0)"><span class="step-num">1</span><span class="step-label">Facturación</span></button></div>
+    <div class="step-connector" id="stepConn0"></div>
+    <div class="step-item"><button class="step-btn" id="stepBtn1" onclick="attemptGoStep(1)"><span class="step-num">2</span><span class="step-label">Negocio</span></button></div>
+    <div class="step-connector" id="stepConn1"></div>
+    <div class="step-item"><button class="step-btn" id="stepBtn2" onclick="attemptGoStep(2)"><span class="step-num">3</span><span class="step-label">Firma</span></button></div>
+  </div>
+
+  <!-- ═══════════════════════════ STEP 0: FACTURACIÓN ═══════════════════════════ -->
+  <div class="section-panel active" id="panel0">
+    <p class="section-title">Datos de Facturación</p>
+    <p class="section-desc">Información fiscal del cliente para emisión de facturas.</p>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-icon">
+          <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <span class="card-head-title">Datos Fiscales</span>
+      </div>
+      <div class="card-body">
+        <div class="grid">
+          <div class="field span2">
+            <label>Nombre o Razón Social</label>
+            <input type="text" id="nombreRs" placeholder="Nombre completo o razón social de la empresa">
+          </div>
+        </div>
+        <div class="grid g2" style="margin-top:14px">
+          <div class="field">
+            <label>N.I.T.</label>
+            <input type="text" id="nit" placeholder="Ej: 1234567-8">
+          </div>
+          <div class="field">
+            <label>Teléfono con WhatsApp</label>
+            <input type="tel" id="telefonoWA" placeholder="Ej: +502 5555-0000">
+          </div>
+        </div>
+        <div class="grid" style="margin-top:14px">
+          <div class="field span2">
+            <label>Dirección Fiscal</label>
+            <input type="text" id="direccionFiscal" placeholder="Dirección completa de facturación">
+          </div>
+        </div>
+        <div class="grid g3" style="margin-top:14px">
+          <div class="field">
+            <label>País</label>
+            <input type="text" id="pais" value="Guatemala">
+          </div>
+          <div class="field">
+            <label>Departamento</label>
+            <input type="text" id="departamento" placeholder="Ej: Guatemala">
+          </div>
+          <div class="field">
+            <label>Municipio</label>
+            <input type="text" id="municipio" placeholder="Ej: Guatemala">
+          </div>
+        </div>
+        
+        <div class="divider"></div>
+        <div class="header-flex">
+          <label style="margin-bottom:0">Coordenadas de Ubicación</label>
+          <button type="button" class="btn btn-sky btn-sm" onclick="getAutoLocation()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Obtener mi ubicación
+          </button>
+        </div>
+        <div class="grid g2" style="margin-top:8px">
+          <div class="field">
+            <input type="text" id="latitud" placeholder="Latitud (Clic en obtener ubicación)" readonly style="background:#fff; cursor:not-allowed;">
+          </div>
+          <div class="field">
+            <input type="text" id="longitud" placeholder="Longitud (Clic en obtener ubicación)" readonly style="background:#fff; cursor:not-allowed;">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-bar">
+      <div class="nav-bar-left"></div>
+      <div class="nav-bar-right">
+        <span class="step-indicator">Paso 1 de 3</span>
+        <button class="btn btn-primary" onclick="attemptGoStep(1)">
+          Siguiente
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ STEP 1: NEGOCIO ═══════════════════════════ -->
+  <div class="section-panel" id="panel1">
+    <p class="section-title">Información del Negocio</p>
+    <p class="section-desc">Datos de operación, entrega y contactos del negocio.</p>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <span class="card-head-title">Dirección y Teléfonos</span>
+      </div>
+      <div class="card-body">
+        <div class="grid">
+          <div class="field span2">
+            <label>Dirección del Negocio</label>
+            <input type="text" id="dirNegocio" placeholder="Dirección física del establecimiento">
+          </div>
+        </div>
+        <div class="grid g2" style="margin-top:14px">
+          <div class="field">
+            <label>Teléfonos del Negocio</label>
+            <input type="tel" id="telNegocio" placeholder="Ej: 2222-3333 / 4444-5555">
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="grid">
+          <div class="field span2">
+            <label>Dirección de Entrega</label>
+            <input type="text" id="dirEntrega" placeholder="Dirección donde se realizarán las entregas">
+          </div>
+        </div>
+        <div class="grid g2" style="margin-top:14px">
+          <div class="field">
+            <label>Teléfonos de Entrega</label>
+            <input type="tel" id="telEntrega" placeholder="Ej: 2222-3333">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-icon">
+          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 012 1.18 2 2 0 014 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14z"/></svg>
+        </div>
+        <span class="card-head-title">Contactos Administrativos</span>
+      </div>
+      <div class="card-body">
+        <div class="grid g3">
+          <div class="field"><label>Contacto de Compras</label><input type="text" id="contactoCompras" placeholder="Nombre"></div>
+          <div class="field"><label>Teléfono Compras</label><input type="tel" id="telCompras" placeholder="Ej: 5555-0000"></div>
+          <div class="field"><label>E-mail Compras</label><input type="email" id="emailCompras" placeholder="compras@empresa.com"></div>
+        </div>
+        <div class="grid g3" style="margin-top:14px">
+          <div class="field"><label>Contacto de Cobros</label><input type="text" id="contactoCobros" placeholder="Nombre"></div>
+          <div class="field"><label>Teléfono Cobros</label><input type="tel" id="telCobros" placeholder="Ej: 5555-0000"></div>
+          <div class="field"><label>E-mail Cobros</label><input type="email" id="emailCobros" placeholder="cobros@empresa.com"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-bar">
+      <div class="nav-bar-left">
+        <button class="btn btn-ghost" onclick="goStep(0)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Atrás
+        </button>
+      </div>
+      <div class="nav-bar-right">
+        <span class="step-indicator">Paso 2 de 3</span>
+        <button class="btn btn-primary" onclick="attemptGoStep(2)">
+          Siguiente <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ STEP 2: FIRMA SOLICITANTE ═══════════════════════════ -->
+  <div class="section-panel" id="panel2">
+    <p class="section-title">Firma del Solicitante</p>
+    <p class="section-desc">Firme electrónicamente para validar la solicitud de apertura al contado.</p>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+        <span class="card-head-title">Aceptación y Firma</span>
+      </div>
+      <div class="card-body">
+        <div class="grid g2" style="margin-bottom:20px">
+          <div class="field">
+            <label>Nombre de quien solicita</label>
+            <input type="text" id="nombreSolicita" placeholder="Nombre completo">
+          </div>
+          <div class="field">
+            <label>Fecha de solicitud</label>
+            <input type="date" id="fechaSolicitud">
+          </div>
+        </div>
+
+        <label style="margin-bottom:8px;display:block">Firma Electrónica Requerida</label>
+        <div class="sig-widget" id="sigWidgetSolicita" onclick="openSig('solicita')">
+          <div class="sig-preview-mini">
+            <img id="sigImgSolicita" src="" alt="firma">
+          </div>
+          <div class="sig-widget-info">
+            <strong id="sigStatusSolicita">Haga clic o toque aquí para firmar</strong>
+            <span id="sigSubSolicita">Se abrirá un panel para dibujar su firma</span>
+          </div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;color:var(--muted);flex-shrink:0"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-bar">
+      <div class="nav-bar-left">
+        <button class="btn btn-ghost" onclick="goStep(1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Atrás
+        </button>
+      </div>
+      <div class="nav-bar-right">
+        <span class="step-indicator">Paso 3 de 3</span>
+        <button class="btn btn-success" onclick="attemptGeneratePDF()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Generar Documento PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<!-- ═══ SIGNATURE MODAL ═══ -->
+<div class="sig-overlay" id="sigOverlay">
+  <div class="sig-modal">
+    <div class="sig-modal-head">
+      <div>
+        <h3 id="sigModalTitle">Firma Electrónica</h3>
+        <p id="sigModalSub">Firme dentro del recuadro blanco</p>
+      </div>
+      <button class="btn-close" onclick="closeSig()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="sig-modal-body">
+      <div class="canvas-wrap">
+        <canvas id="sigCanvas"></canvas>
+        <div class="canvas-hint">
+          <span>El trazo seguirá su dedo o ratón</span>
+          <button class="btn btn-danger btn-sm" onclick="clearModalCanvas()">Limpiar firma</button>
+        </div>
+      </div>
+    </div>
+    <div class="sig-modal-foot">
+      <button class="btn btn-ghost" onclick="closeSig()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveSig()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Guardar Firma
+      </button>
+    </div>
+  </div>
+</div>
+<!-- TOAST -->
+<div id="toastBox"></div>
+
+<script>
+// ────────────────────────────────────────────────────────
+// LOGO FALLBACK (Evitar error si logo.png no existe visualmente)
+// ────────────────────────────────────────────────────────
+function fallbackLogo(img) {
+  img.onerror = null;
+  img.src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgNjAiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNmZmYiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjMUIyQjZCIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjM1ZW0iPkxPR08gQVFVSTwvdGV4dD48L3N2Zz4=";
+}
+
+// ────────────────────────────────────────────────────────
+// NAVEGACIÓN Y VALIDACIÓN
+// ────────────────────────────────────────────────────────
+let currentStep = 0;
+const TOTAL_STEPS = 3; // Reducido a 3 pasos
+
+function attemptGoStep(targetStep) {
+  if (targetStep > currentStep) {
+    for (let i = currentStep; i < targetStep; i++) {
+      if (!validateStep(i)) return; 
+    }
+  }
+  goStep(targetStep);
+}
+
+function validateStep(stepIndex) {
+  const panel = document.getElementById('panel' + stepIndex);
+  if (!panel) return true;
+  const inputs = panel.querySelectorAll('input, select, textarea');
+  
+  inputs.forEach(inp => inp.classList.remove('error-input'));
+  if (stepIndex === 2) document.getElementById('sigWidgetSolicita').classList.remove('sig-error'); // Paso de firma es el 2
+
+  let isValid = true;
+
+  for (let input of inputs) {
+    if (input.value.trim() === '') {
+      input.classList.add('error-input');
+      isValid = false;
+    }
+  }
+
+  // Validación de firma (ahora en el paso 2)
+  if (stepIndex === 2 && !sigData['solicita']) {
+    document.getElementById('sigWidgetSolicita').classList.add('sig-error');
+    isValid = false;
+  }
+
+  if (!isValid) {
+    showToast('Debe completar TODOS los campos de esta sección para continuar.', 'error');
+    return false;
+  }
+  return true;
+}
+
+function goStep(targetStep) {
+  for (let i = 0; i < TOTAL_STEPS; i++) {
+    const btn = document.getElementById('stepBtn' + i);
+    const panel = document.getElementById('panel' + i);
+    const conn = document.getElementById('stepConn' + i);
+
+    if (i < targetStep) {
+      if(btn) btn.className = 'step-btn done';
+      if(conn) conn.classList.add('done');
+      if(panel) panel.classList.remove('active');
+    } else if (i === targetStep) {
+      if(btn) btn.className = 'step-btn active';
+      if(conn) conn.classList.remove('done');
+      if(panel) panel.classList.add('active');
+    } else {
+      if(btn) btn.className = 'step-btn';
+      if(conn) conn.classList.remove('done');
+      if(panel) panel.classList.remove('active');
+    }
+  }
+  currentStep = targetStep;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function setDefaults() {
+  const d = new Date();
+  const opts = { day: '2-digit', month: 'long', year: 'numeric' };
+  document.getElementById('dateBadge').textContent = d.toLocaleDateString('es-GT', opts);
+  const todayISO = d.toISOString().split('T')[0];
+  if(document.getElementById('fechaSolicitud')) {
+      document.getElementById('fechaSolicitud').value = todayISO;
+  }
+}
+setDefaults();
+
+// ────────────────────────────────────────────────────────
+// GEOLOCALIZACIÓN
+// ────────────────────────────────────────────────────────
+function getAutoLocation() {
+  if (navigator.geolocation) {
+    showToast('Obteniendo coordenadas GPS...', 'info');
+    navigator.geolocation.getCurrentPosition(function(position) {
+      document.getElementById('latitud').value = position.coords.latitude.toFixed(6);
+      document.getElementById('longitud').value = position.coords.longitude.toFixed(6);
+      document.getElementById('latitud').classList.remove('error-input');
+      document.getElementById('longitud').classList.remove('error-input');
+      showToast('Ubicación agregada correctamente', 'success');
+    }, function(error) {
+      showToast('Error al obtener GPS. Permita el acceso o ingrese manualmente.', 'error');
+      document.getElementById('latitud').removeAttribute('readonly');
+      document.getElementById('longitud').removeAttribute('readonly');
+    });
+  } else {
+    showToast('Su navegador no soporta geolocalización', 'error');
+  }
+}
+
+// ────────────────────────────────────────────────────────
+// PANEL DE FIRMA
+// ────────────────────────────────────────────────────────
+let activeSigTarget = null;
+let sigDrawing = false;
+let sigCtx = null;
+let sigCanvas = null;
+const sigData = { solicita: null };
+
+function initCanvas() {
+  sigCanvas = document.getElementById('sigCanvas');
+  sigCtx = sigCanvas.getContext('2d', { willReadFrequently: true });
+  
+  sigCanvas.addEventListener('mousedown', sigStart);
+  sigCanvas.addEventListener('mousemove', sigDraw);
+  window.addEventListener('mouseup', sigStop);
+
+  sigCanvas.addEventListener('touchstart', sigStart, { passive: false });
+  sigCanvas.addEventListener('touchmove', sigDraw, { passive: false });
+  window.addEventListener('touchend', sigStop);
+}
+
+function resizeCanvas() {
+  if (!sigCanvas) return;
+  const rect = sigCanvas.parentElement.getBoundingClientRect();
+  sigCanvas.width = rect.width;
+  sigCanvas.height = 200;
+  sigCtx.strokeStyle = '#0F1A45';
+  sigCtx.lineWidth = 3;
+  sigCtx.lineCap = 'round';
+  sigCtx.lineJoin = 'round';
+}
+
+function getSigPos(e) {
+  const rect = sigCanvas.getBoundingClientRect();
+  let clientX, clientY;
+  if (e.touches && e.touches.length > 0) {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  } else {
+    clientX = e.clientX;
+    clientY = e.clientY;
+  }
+  return { x: clientX - rect.left, y: clientY - rect.top };
+}
+
+function sigStart(e) {
+  e.preventDefault();
+  sigDrawing = true;
+  const pos = getSigPos(e);
+  sigCtx.beginPath();
+  sigCtx.moveTo(pos.x, pos.y);
+  sigCtx.lineTo(pos.x + 0.1, pos.y + 0.1);
+  sigCtx.stroke();
+}
+
+function sigDraw(e) {
+  if (!sigDrawing) return;
+  e.preventDefault();
+  const pos = getSigPos(e);
+  sigCtx.lineTo(pos.x, pos.y);
+  sigCtx.stroke();
+  sigCtx.beginPath();
+  sigCtx.moveTo(pos.x, pos.y);
+}
+
+function sigStop() { 
+  sigDrawing = false; 
+  if(sigCtx) sigCtx.beginPath(); 
+}
+
+function clearModalCanvas() {
+  if(!sigCtx) return;
+  sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+}
+
+function openSig(target) {
+  activeSigTarget = target;
+  const overlay = document.getElementById('sigOverlay');
+  const titleMap = { solicita: 'Firma del Solicitante' };
+  document.getElementById('sigModalTitle').textContent = titleMap[target] || 'Firma Electrónica';
+  
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  
+  setTimeout(() => {
+    resizeCanvas();
+    clearModalCanvas();
+  }, 350);
+}
+
+function closeSig() {
+  document.getElementById('sigOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  activeSigTarget = null;
+}
+
+function isCanvasEmpty() {
+  const blank = document.createElement('canvas');
+  blank.width = sigCanvas.width;
+  blank.height = sigCanvas.height;
+  return sigCanvas.toDataURL() === blank.toDataURL();
+}
+
+function saveSig() {
+  if (isCanvasEmpty()) {
+    showToast('El recuadro está vacío. Por favor firme.', 'error');
+    return;
+  }
+  
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = sigCanvas.width;
+  tempCanvas.height = sigCanvas.height;
+  const tCtx = tempCanvas.getContext('2d');
+  tCtx.fillStyle = '#FFFFFF';
+  tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+  tCtx.drawImage(sigCanvas, 0, 0); 
+  
+  const dataURL = tempCanvas.toDataURL('image/jpeg', 1.0);
+  sigData[activeSigTarget] = dataURL;
+
+  const widgetId = activeSigTarget === 'solicita' ? 'sigWidgetSolicita' : '';
+  if(!widgetId) return;
+
+  const widget = document.getElementById(widgetId);
+  widget.classList.add('has-sig');
+  widget.classList.remove('sig-error');
+  
+  const img = document.getElementById('sigImgSolicita');
+  img.src = dataURL;
+  img.style.display = 'block';
+  
+  document.getElementById('sigStatusSolicita').textContent = '✓ Firma guardada correctamente';
+  document.getElementById('sigSubSolicita').textContent = 'Toque el recuadro si desea repetir la firma';
+
+  closeSig();
+  showToast('Firma registrada con éxito', 'success');
+}
+initCanvas();
+
+// ────────────────────────────────────────────────────────
+// TOASTS
+// ────────────────────────────────────────────────────────
+function showToast(msg, type = 'success') {
+  const box = document.getElementById('toastBox');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<div class="toast-dot ${type}"></div><span>${msg}</span>`;
+  box.appendChild(t);
+  requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
+  setTimeout(() => { 
+    t.classList.remove('show'); t.classList.add('hide'); 
+    setTimeout(() => t.remove(), 300); 
+  }, 3500);
+}
+
+// ────────────────────────────────────────────────────────
+// LECTURA DE CAMPOS
+// ────────────────────────────────────────────────────────
+function g(id) { return document.getElementById(id)?.value?.trim() || ''; }
+function gDate(id) {
+  const val = document.getElementById(id)?.value;
+  if (!val) return '';
+  const d = new Date(val + 'T12:00:00');
+  return d.toLocaleDateString('es-GT', { day: '2-digit', month: 'long', year: 'numeric' });
+}
+
+// ────────────────────────────────────────────────────────
+// GENERADOR PDF CORPORATIVO (CONTADO)
+// ────────────────────────────────────────────────────────
+function attemptGeneratePDF() {
+  if(!validateStep(2)) return; // Validar paso 2 (firma)
+  generatePDF();
+}
+
+async function generatePDF() {
+  const { jsPDF } = window.jspdf;
+  if (!jsPDF) { showToast('Librería PDF no cargada. Verifique internet.', 'error'); return; }
+  
+  showToast('Procesando Documento PDF...', 'info');
+
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
+  const PW = doc.internal.pageSize.getWidth();
+  const PH = doc.internal.pageSize.getHeight();
+  const M  = 16;
+  const CW = PW - M * 2;
+  let y = M;
+
+  const C = {
+    navy:    [27, 43, 107],
+    sky:     [74, 179, 232],
+    white:   [255, 255, 255],
+    black:   [20, 20, 30],
+    muted:   [100, 115, 140],
+    border:  [200, 210, 225],
+    lightBg: [248, 250, 253]
+  };
+
+  const rgb = (...arr) => doc.setTextColor(...arr);
+  const fill = (...arr) => doc.setFillColor(...arr);
+  const draw = (...arr) => doc.setDrawColor(...arr);
+  const lw = (n) => doc.setLineWidth(n);
+  const font = (w='normal', s=10) => { doc.setFont('helvetica', w); doc.setFontSize(s); };
+
+  function checkY(needed) {
+    if (y + needed > PH - M) {
+      doc.addPage();
+      y = M + 4;
+      fill(...C.navy);
+      doc.rect(0, 0, PW, 4, 'F'); // Decoración top
+    }
+  }
+
+  function hr(yy) { draw(...C.border); lw(0.3); doc.line(M, yy, PW - M, yy); }
+
+  function sectionTitle(title) {
+    checkY(14);
+    fill(...C.navy);
+    doc.rect(M, y, CW, 7, 'F');
+    font('bold', 9);
+    rgb(...C.white);
+    doc.text(title.toUpperCase(), M + 3, y + 5);
+    y += 12;
+  }
+
+  function drawField(label, value, x, width) {
+    font('bold', 6.5);
+    rgb(...C.muted);
+    doc.text(label.toUpperCase(), x, y);
+    font(value ? 'normal' : 'italic', 9);
+    rgb(...(value ? C.black : C.muted));
+    
+    const safeVal = value || ''; 
+    
+    doc.text(safeVal, x, y + 4.5, { maxWidth: width - 2 });
+    draw(...C.border); lw(0.2);
+    doc.line(x, y + 6, x + width - 2, y + 6);
+  }
+
+  // ─────────────────────────────────────────────
+  // 1. OBTENER Y DIBUJAR LOGO.PNG AUTOMÁTICAMENTE
+  // ─────────────────────────────────────────────
+  const imgEl = document.getElementById('brandLogo');
+  let logoData = null;
+  let logoW = 0, logoH = 0;
+  
+  try {
+    const c = document.createElement('canvas');
+    c.width = imgEl.naturalWidth || 300;
+    c.height = imgEl.naturalHeight || 100;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(imgEl, 0, 0);
+    logoData = c.toDataURL('image/png');
+    
+    const aspect = c.width / c.height;
+    logoH = 16;
+    logoW = logoH * aspect;
+    if (logoW > 60) {
+      logoW = 60;
+      logoH = logoW / aspect;
+    }
+  } catch (e) {
+    console.log("No se pudo cargar logo.png por bloqueos de seguridad. Se usará cabecera texto.");
+  }
+
+  if (logoData) {
+    doc.addImage(logoData, 'PNG', M, y, logoW, logoH, '', 'FAST');
+  } else {
+    font('bold', 14); rgb(...C.navy); doc.text("GRUPO IMADE", M, y + 8);
+  }
+
+  font('bold', 12);
+  rgb(...C.navy);
+  // TITULO CAMBIADO
+  doc.text('APERTURA DE CLIENTE (CONTADO)', PW - M, y + 6, { align: 'right' });
+  font('normal', 8);
+  rgb(...C.muted);
+  doc.text(`Pinturas y Más, S.A. | Fecha: ${new Date().toLocaleDateString('es-GT')}`, PW - M, y + 12, { align: 'right' });
+  
+  y += Math.max(logoH, 14) + 10;
+  draw(...C.sky); lw(0.5); doc.line(M, y-4, PW-M, y-4);
+
+  // ─────────────────────────────────────────────
+  // 2. DATOS DE FACTURACIÓN
+  // ─────────────────────────────────────────────
+  sectionTitle('1. Datos de Facturación');
+  drawField('Nombre o Razón Social', g('nombreRs'), M, CW);
+  y += 12;
+  const col2 = CW / 2;
+  drawField('N.I.T.', g('nit'), M, col2);
+  drawField('Teléfono con WhatsApp', g('telefonoWA'), M + col2, col2);
+  y += 12;
+  drawField('Dirección Fiscal', g('direccionFiscal'), M, CW);
+  y += 12;
+  const col3 = CW / 3;
+  drawField('País', g('pais'), M, col3);
+  drawField('Departamento', g('departamento'), M + col3, col3);
+  drawField('Municipio', g('municipio'), M + col3 * 2, col3);
+  y += 12;
+  drawField('Coordenada Latitud', g('latitud'), M, col2);
+  drawField('Coordenada Longitud', g('longitud'), M + col2, col2);
+  y += 14;
+
+  // ─────────────────────────────────────────────
+  // 3. INFORMACIÓN DEL NEGOCIO
+  // ─────────────────────────────────────────────
+  checkY(40);
+  sectionTitle('2. Información General del Negocio');
+  drawField('Dirección del Negocio', g('dirNegocio'), M, CW); y += 12;
+  drawField('Teléfonos del Negocio', g('telNegocio'), M, col2); y += 12;
+  drawField('Dirección de Entrega', g('dirEntrega'), M, CW); y += 12;
+  drawField('Teléfonos de Entrega', g('telEntrega'), M, col2); y += 14;
+
+  drawField('Contacto de Compras', g('contactoCompras'), M, col3);
+  drawField('Tel. Compras', g('telCompras'), M + col3, col3);
+  drawField('E-mail Compras', g('emailCompras'), M + col3 * 2, col3); y += 12;
+
+  drawField('Contacto de Cobros', g('contactoCobros'), M, col3);
+  drawField('Tel. Cobros', g('telCobros'), M + col3, col3);
+  drawField('E-mail Cobros', g('emailCobros'), M + col3 * 2, col3); y += 16;
+
+  // ─────────────────────────────────────────────
+  // 4. FIRMA SOLICITANTE
+  // ─────────────────────────────────────────────
+  checkY(60);
+  sectionTitle('3. Aceptación y Firma del Solicitante');
+  drawField('Nombre de quien solicita', g('nombreSolicita'), M, col2);
+  drawField('Fecha de firma', gDate('fechaSolicitud'), M + col2, col2);
+  y += 14;
+
+  font('bold', 8); rgb(...C.muted); doc.text('FIRMA DEL SOLICITANTE', M + (col2/2), y, {align: 'center'});
+  draw(...C.border); lw(0.5); doc.rect(M, y + 2, col2 - 10, 26, 'S');
+  
+  if (sigData['solicita']) {
+    doc.addImage(sigData['solicita'], 'JPEG', M + 2, y + 3, col2 - 14, 24, '', 'FAST');
+  }
+  y += 36;
+
+  // ─────────────────────────────────────────────
+  // PAGINACIÓN AUTOMÁTICA AL FINAL
+  // ─────────────────────────────────────────────
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let p = 1; p <= totalPages; p++) {
+    doc.setPage(p);
+    font('normal', 7); rgb(...C.muted);
+    doc.text(`Página ${p} de ${totalPages}`, PW - M, PH - 8, { align: 'right' });
+    fill(...C.navy); doc.rect(0, PH - 3, PW, 3, 'F');
+  }
+
+  // DESCARGA
+  const filePrefix = (g('nombreRs') || 'Cliente_Nuevo').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+  doc.save(`Apertura_Cliente_${filePrefix}.pdf`);
+  showToast('Documento PDF generado y descargado con éxito', 'success');
+}
+</script>
+</body>
+</html>
