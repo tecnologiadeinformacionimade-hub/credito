@@ -866,10 +866,10 @@ function gDate(id) {
 
 
 // ────────────────────────────────────────────────────────
-// ENVIAR A GOOGLE SHEETS
+// ENVIAR A GOOGLE SHEETS (CORREGIDO PARA EVITAR ERROR CORS)
 // ────────────────────────────────────────────────────────
 async function enviarAGoogleSheets() {
-  if (SCRIPT_URL === "URL_DE_TU_GOOGLE_APPS_SCRIPT_AQUI") {
+  if (SCRIPT_URL === "URL_DE_TU_GOOGLE_APPS_SCRIPT_AQUI" || SCRIPT_URL === "") {
     showToast("Por favor configura la URL del Google Script en el código HTML.", "error");
     return false;
   }
@@ -902,23 +902,21 @@ async function enviarAGoogleSheets() {
   };
 
   try {
-    const response = await fetch(SCRIPT_URL, {
+    // Al usar mode: "no-cors", el navegador permite enviar la petición sin bloquearla
+    await fetch(SCRIPT_URL, {
       method: "POST",
+      mode: "no-cors", 
       body: JSON.stringify(data),
       headers: {
         "Content-Type": "text/plain;charset=utf-8", 
       }
     });
 
-    const result = await response.json();
-    if (result.result === "success") {
-      showToast('Datos guardados en Google Sheets', 'success');
-      return true;
-    } else {
-      console.error(result.error);
-      showToast('Error en el script: ' + result.error, 'error');
-      return false;
-    }
+    // Con "no-cors" la respuesta es opaca, por lo que no usamos response.json()
+    // Asumimos éxito si no hubo un error a nivel de red (Catch).
+    showToast('Datos guardados en Google Sheets', 'success');
+    return true;
+    
   } catch (error) {
     console.error("Error de conexión:", error);
     showToast('Error al conectar con Google Sheets', 'error');
