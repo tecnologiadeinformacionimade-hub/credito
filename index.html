@@ -3,62 +3,55 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Solicitud de Crédito · Grupo Imade</title>
+<title>Apertura de Código · Grupo Imade</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<!-- Importando jsPDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ─── RESET Y VARIABLES ─── */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
   --navy: #1B2B6B;
   --navy-dark: #0F1A45;
   --sky: #4AB3E8;
   --sky-light: #E8F6FD;
-  --sky-mid: #C2E5F7;
   --white: #FFFFFF;
   --bg: #EEF2F8;
   --surface: #FFFFFF;
   --border: #D8E2EF;
-  --border-focus: #4AB3E8;
   --text: #0F1A45;
   --text-2: #3A4A6B;
   --muted: #8494B2;
   --green: #22C55E;
   --green-soft: #DCFCE7;
-  --orange: #F97316;
-  --orange-soft: #FFF7ED;
-  --red: #EF4444;
-  --red-soft: #FEF2F2;
   --shadow-sm: 0 1px 4px rgba(27,43,107,0.07);
-  --shadow-md: 0 4px 20px rgba(27,43,107,0.10);
-  --shadow-lg: 0 8px 40px rgba(27,43,107,0.14);
-  --r-sm: 10px;
+  --shadow-md: 0 8px 24px rgba(27,43,107,0.12);
   --r-md: 16px;
   --r-lg: 20px;
   --font: 'Plus Jakarta Sans', -apple-system, sans-serif;
-  --mono: 'JetBrains Mono', monospace;
 }
 
-html,body {
+html, body {
   min-height: 100%;
   font-family: var(--font);
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
 }
 
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(27,43,107,0.15);border-radius:4px}
-
+/* ─── CONTENEDOR PRINCIPAL ─── */
 .wrap {
-  max-width: 800px;
+  width: 100%;
+  max-width: 600px; /* Más angosto para un menú de selección */
   margin: 0 auto;
   padding: 24px 16px 80px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centrar verticalmente si hay espacio */
 }
 
 /* ─── TOP HEADER ─── */
@@ -67,11 +60,11 @@ html,body {
   border-radius: var(--r-lg);
   padding: 24px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
+  text-align: center;
   gap: 16px;
-  margin-bottom: 28px;
+  margin-bottom: 40px;
   box-shadow: 0 8px 32px rgba(15,26,69,0.30);
   position: relative;
   overflow: hidden;
@@ -81,1271 +74,231 @@ html,body {
   content: ''; position: absolute; pointer-events: none; border-radius: 50%;
 }
 .top-header::before { top: -30px; right: -30px; width: 160px; height: 160px; background: rgba(74,179,232,0.12); }
-.top-header::after { bottom: -50px; left: 40%; width: 200px; height: 200px; background: rgba(255,255,255,0.04); }
+.top-header::after { bottom: -50px; left: 10%; width: 200px; height: 200px; background: rgba(255,255,255,0.04); }
 
-.header-brand { display: flex; align-items: center; gap: 16px; position: relative; z-index: 1; }
+.header-brand { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 16px; }
 
 .logo-box {
-  width: auto; max-width: 120px; height: 50px; background: white; border-radius: 10px;
+  width: auto; height: 60px; background: white; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
-  overflow: hidden; padding: 6px; box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  overflow: hidden; padding: 8px 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.25);
 }
 .logo-box img { width: 100%; height: 100%; object-fit: contain; }
 
-.header-text h1 { font-size: 18px; font-weight: 800; color: #fff; line-height: 1.2; }
-.header-text p { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 4px; }
+.header-text h1 { font-size: 22px; font-weight: 800; color: #fff; line-height: 1.2; letter-spacing: -0.5px; }
+.header-text p { font-size: 14px; color: rgba(255,255,255,0.8); margin-top: 6px; }
 
-.header-right { display: flex; align-items: center; gap: 10px; position: relative; z-index: 1; }
-.date-badge {
-  background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 8px; padding: 6px 12px; font-size: 12px;
-  color: rgba(255,255,255,0.9); font-family: var(--mono);
+/* ─── ÁREA DE SELECCIÓN ─── */
+.selection-area {
+  animation: fadeUp 0.5s ease forwards;
 }
 
-/* ─── PROGRESS STEPPER ─── */
-.stepper {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 4px; margin-bottom: 28px; overflow-x: auto; padding: 4px 0;
-}
-.step-item { display: flex; align-items: center; flex-shrink: 0; }
-.step-btn {
-  display: flex; align-items: center; gap: 8px; padding: 8px 14px;
-  border-radius: 50px; background: var(--surface); border: 1.5px solid var(--border);
-  cursor: pointer; transition: all 0.2s; font-family: var(--font); white-space: nowrap; outline: none;
-}
-.step-btn:hover:not(.active) { border-color: var(--sky); background: var(--sky-light); }
-.step-btn.active { background: var(--navy); border-color: var(--navy); color: white; box-shadow: 0 4px 14px rgba(27,43,107,0.30); }
-.step-btn.done { background: var(--green-soft); border-color: var(--green); color: #166534; }
-
-.step-num {
-  width: 22px; height: 22px; border-radius: 50%;
-  background: rgba(27,43,107,0.08); display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700; flex-shrink: 0; transition: all 0.2s;
-}
-.step-btn.active .step-num { background: rgba(255,255,255,0.2); color: white; }
-.step-btn.done .step-num { background: var(--green); color: white; }
-.step-label { font-size: 12px; font-weight: 600; color: var(--text-2); }
-.step-btn.active .step-label { color: white; }
-.step-btn.done .step-label { color: #166534; }
-
-.step-connector { flex: 1; height: 2px; background: var(--border); min-width: 10px; margin: 0 4px; transition: background 0.3s; }
-.step-connector.done { background: var(--green); }
-
-@media (max-width: 700px) {
-  .step-label { display: none; }
-  .step-btn { padding: 8px; justify-content: center; width: 38px; height: 38px; }
-  .step-num { margin: 0; }
-  .stepper { justify-content: center; gap: 0; }
-  .step-connector { width: 15px; flex: none; }
+@keyframes fadeUp { 
+  from { opacity: 0; transform: translateY(20px); } 
+  to { opacity: 1; transform: translateY(0); } 
 }
 
-/* ─── SECTION PANEL ─── */
-.section-panel { display: none; animation: fadeUp 0.3s ease forwards; }
-.section-panel.active { display: block; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-
-/* ─── CARD ─── */
-.card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--r-md); box-shadow: var(--shadow-sm);
-  margin-bottom: 20px; overflow: hidden;
+.section-title { 
+  font-size: 20px; 
+  font-weight: 800; 
+  color: var(--navy); 
+  text-align: center;
+  margin-bottom: 8px; 
 }
-.card-head {
-  display: flex; align-items: center; gap: 10px; padding: 14px 20px;
-  background: linear-gradient(90deg, var(--sky-light) 0%, rgba(238,242,248,0.5) 100%);
-  border-bottom: 1px solid var(--border);
+
+.section-desc { 
+  font-size: 14px; 
+  color: var(--muted); 
+  text-align: center;
+  margin-bottom: 32px; 
 }
-.card-head-icon {
-  width: 32px; height: 32px; border-radius: 9px; background: var(--navy);
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+
+/* ─── BOTONES / TARJETAS DE ACCIÓN ─── */
+.action-btn {
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 20px;
+  text-decoration: none;
+  margin-bottom: 16px;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
 }
-.card-head-icon svg { width: 16px; height: 16px; color: white; stroke: white; fill: none; stroke-width: 2; }
-.card-head-title { font-size: 14px; font-weight: 700; color: var(--navy); text-transform: uppercase; }
-.card-body { padding: 22px 20px; }
 
-/* ─── FORM GRID ─── */
-.grid { display: grid; gap: 14px; }
-.g2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-.g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
-
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field.span2 { grid-column: 1 / -1; }
-
-label { font-size: 11.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-
-input[type="text"], input[type="email"], input[type="tel"],
-input[type="number"], input[type="date"], select, textarea {
-  width: 100%; padding: 10px 14px; background: #F8FAFD; border: 1.5px solid var(--border);
-  border-radius: var(--r-sm); font-family: var(--font); font-size: 14px; font-weight: 500;
-  color: var(--text); transition: all 0.2s; outline: none; appearance: none;
+.action-btn:active {
+  transform: scale(0.97);
 }
-input:focus, select:focus, textarea:focus { border-color: var(--border-focus); background: white; box-shadow: 0 0 0 3px rgba(74,179,232,0.15); }
-input::placeholder, textarea::placeholder { color: var(--muted); font-weight: 400; }
-.error-input { border-color: var(--red) !important; background: var(--red-soft) !important; }
 
-.divider { height: 1px; background: var(--border); margin: 20px 0; }
-
-/* ─── REFS TABLE (Responsive) ─── */
-.refs-tbl-container { overflow-x: auto; }
-.refs-tbl { width: 100%; border-collapse: collapse; min-width: 600px; }
-.refs-tbl th {
-  text-align: left; font-size: 11px; font-weight: 700; color: var(--muted);
-  text-transform: uppercase; padding: 10px; background: #F8FAFD;
-  border-bottom: 1.5px solid var(--border);
+.action-btn:hover {
+  border-color: var(--sky);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
 }
-.refs-tbl td { padding: 6px 4px; border-bottom: 1px solid var(--border); }
-.refs-tbl tr:last-child td { border-bottom: none; }
-.refs-tbl input { background: transparent; border: 1.5px solid transparent; border-radius: 8px; padding: 8px 10px; width: 100%; }
-.refs-tbl input:focus { background: white; border-color: var(--border-focus); }
 
-/* ─── NOTICE BOXES ─── */
-.notice { border-radius: var(--r-sm); padding: 16px; margin-top: 14px; }
-.notice.orange { background: var(--orange-soft); border: 1px solid rgba(249,115,22,0.25); }
-.notice.blue { background: var(--sky-light); border: 1px solid rgba(74,179,232,0.3); }
-.notice p { font-size: 13px; color: var(--text-2); line-height: 1.6; margin-bottom: 6px; }
-.notice p:last-child { margin-bottom: 0; }
-.notice strong { font-weight: 700; color: var(--text); }
-.notice.blue strong { color: var(--navy); }
+/* Variante Crédito */
+.btn-credito:hover { border-color: var(--navy); }
+.btn-credito .icon-box { background: var(--navy); color: white; }
 
-/* ─── SIGNATURE PANEL (MODAL) ─── */
-.sig-overlay {
-  display: flex; position: fixed; inset: 0;
-  background: rgba(15,26,69,0.8); backdrop-filter: blur(5px);
-  z-index: 1000; align-items: center; justify-content: center;
-  padding: 20px; opacity: 0; pointer-events: none; visibility: hidden;
-  transition: opacity 0.3s ease;
+/* Variante Contado */
+.btn-contado:hover { border-color: var(--green); }
+.btn-contado .icon-box { background: var(--green); color: white; }
+
+.icon-box {
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 16px;
+  transition: transform 0.3s ease;
 }
-.sig-overlay.open { opacity: 1; pointer-events: auto; visibility: visible; }
-.sig-modal {
-  background: white; border-radius: var(--r-lg); width: 100%; max-width: 540px;
-  box-shadow: 0 24px 80px rgba(15,26,69,0.30); overflow: hidden;
-  transform: translateY(20px) scale(0.95); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+.action-btn:hover .icon-box {
+  transform: scale(1.05) rotate(3deg);
 }
-.sig-overlay.open .sig-modal { transform: translateY(0) scale(1); }
 
-.sig-modal-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 24px; background: linear-gradient(135deg, var(--navy-dark), var(--navy));
+.icon-box svg {
+  width: 26px;
+  height: 26px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
-.sig-modal-head h3 { font-size: 16px; font-weight: 700; color: white; }
-.sig-modal-head p { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 2px; }
 
-.sig-modal-body { padding: 24px; }
-.canvas-wrap {
-  border: 2px solid var(--border); border-radius: var(--r-sm);
-  background: #FFFFFF; position: relative; overflow: hidden;
+.btn-text {
+  flex: 1;
 }
-.canvas-wrap canvas {
-  display: block; width: 100%; height: 200px;
-  cursor: crosshair; touch-action: none;
+
+.btn-text h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 4px;
 }
-.canvas-hint {
-  position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 16px;
-  background: rgba(248,250,253,0.95); border-top: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
+
+.btn-text p {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.4;
 }
-.canvas-hint span { font-size: 12px; color: var(--muted); font-style: italic; }
 
-.sig-modal-foot { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 12px; justify-content: flex-end; background: #F8FAFD; }
-
-/* ─── SIGNATURE INLINE WIDGET ─── */
-.sig-widget {
-  border: 2px dashed var(--border); border-radius: var(--r-sm);
-  padding: 16px; display: flex; align-items: center; gap: 16px;
-  cursor: pointer; transition: all 0.2s; background: #F8FAFD;
+.arrow-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--navy);
+  flex-shrink: 0;
+  transition: all 0.3s ease;
 }
-.sig-widget:hover { border-color: var(--sky); background: var(--sky-light); }
-.sig-widget.has-sig { border-style: solid; border-color: var(--green); background: var(--green-soft); }
 
-.sig-preview-mini {
-  width: 140px; height: 56px; background: white; border: 1px solid var(--border);
-  border-radius: 8px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+.arrow-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
-.sig-preview-mini img { width: 100%; height: 100%; object-fit: contain; display: none; padding: 4px; }
 
-.sig-widget-info { flex: 1; }
-.sig-widget-info strong { font-size: 14px; font-weight: 700; color: var(--text); display: block; }
-.sig-widget-info span { font-size: 12px; color: var(--muted); margin-top: 2px; display: block; }
-.sig-widget.has-sig .sig-widget-info span { color: #166534; }
-.sig-error { border-color: var(--red); background: var(--red-soft); }
-
-/* ─── NAV BUTTONS ─── */
-.nav-bar { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; gap: 12px; flex-wrap: wrap; }
-.nav-bar-left, .nav-bar-right { display: flex; gap: 12px; align-items: center; }
-
-/* ─── BUTTONS ─── */
-.btn {
-  display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px;
-  border-radius: var(--r-sm); border: none; font-family: var(--font); font-size: 14px;
-  font-weight: 700; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+.action-btn:hover .arrow-icon {
+  background: var(--sky-light);
+  color: var(--sky);
+  transform: translateX(4px);
 }
-.btn svg { width: 18px; height: 18px; flex-shrink: 0; }
-.btn-primary { background: var(--navy); color: white; box-shadow: 0 4px 14px rgba(27,43,107,0.25); }
-.btn-primary:hover { background: var(--navy-dark); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(27,43,107,0.35); }
-.btn-sky { background: var(--sky); color: white; box-shadow: 0 4px 14px rgba(74,179,232,0.30); }
-.btn-sky:hover { background: #3AA0D5; transform: translateY(-1px); }
-.btn-ghost { background: white; color: var(--text-2); border: 1.5px solid var(--border); }
-.btn-ghost:hover { background: #F8FAFD; border-color: var(--sky); color: var(--navy); }
-.btn-danger { background: var(--red-soft); color: var(--red); border: 1.5px solid rgba(239,68,68,0.2); }
-.btn-danger:hover { background: #FEE2E2; }
-.btn-success { background: var(--green); color: white; box-shadow: 0 4px 14px rgba(34,197,94,0.30); }
-.btn-success:hover { background: #16A34A; transform: translateY(-1px); }
-.btn-sm { padding: 8px 14px; font-size: 13px; }
-.btn:active { transform: scale(0.97) !important; }
 
-/* ─── CLOSE BTN ─── */
-.btn-close {
-  width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.15);
-  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  color: white; transition: background 0.15s;
+/* Adaptación para pantallas muy pequeñas */
+@media (max-width: 400px) {
+  .action-btn { padding: 16px; }
+  .icon-box { width: 44px; height: 44px; margin-right: 12px; }
+  .icon-box svg { width: 22px; height: 22px; }
+  .btn-text h3 { font-size: 16px; }
+  .btn-text p { font-size: 12px; }
+  .arrow-icon { width: 28px; height: 28px; }
+  .arrow-icon svg { width: 16px; height: 16px; }
 }
-.btn-close:hover { background: rgba(255,255,255,0.25); }
-.btn-close svg { width: 18px; height: 18px; stroke: white; fill: none; stroke-width: 2.5; stroke-linecap: round; }
-
-/* ─── ADMIN CARD ─── */
-.card.admin .card-head { background: linear-gradient(90deg, #1a1a2e, #1B2B6B); }
-.card.admin .card-head-title { color: white; }
-.card.admin .card-head-icon { background: rgba(255,255,255,0.15); }
-
-/* ─── SECTION TITLE ─── */
-.section-title { font-size: 22px; font-weight: 800; color: var(--navy); letter-spacing: -0.5px; margin-bottom: 6px; }
-.section-desc { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
-
-/* ─── TOAST ─── */
-#toastBox { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 10px; z-index: 9999; }
-.toast {
-  display: flex; align-items: center; gap: 12px; background: white;
-  border: 1px solid var(--border); border-radius: var(--r-sm);
-  padding: 14px 20px; box-shadow: var(--shadow-lg); font-size: 14px; font-weight: 600;
-  color: var(--text); opacity: 0; transform: translateY(15px);
-  transition: opacity 0.3s, transform 0.3s;
-}
-.toast.show { opacity: 1; transform: translateY(0); }
-.toast.hide { opacity: 0; transform: translateY(-10px); }
-.toast-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.toast-dot.success { background: var(--green); }
-.toast-dot.error   { background: var(--red); }
-.toast-dot.info    { background: var(--sky); }
-
-.step-indicator { font-size: 13px; color: var(--muted); font-weight: 600; white-space: nowrap; }
-
-/* Flex utility para título de lat/lng con botón */
-.header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-
-canvas { user-select: none; -webkit-user-select: none; }
 </style>
 </head>
 <body>
+
 <div class="wrap">
   <!-- TOP HEADER -->
   <div class="top-header">
     <div class="header-brand">
       <div class="logo-box">
-        <!-- AQUÍ VA EL LOGO: Se ajustará a sus proporciones nativas en el PDF -->
-        <img id="brandLogo" src="logo.png" alt="Logo" onerror="fallbackLogo(this)">
+        <!-- AQUÍ VA EL LOGO: Se ajustará a sus proporciones de forma responsiva -->
+        <img id="brandLogo" src="logo.png" alt="Logo Grupo Imade" onerror="fallbackLogo(this)">
       </div>
       <div class="header-text">
-        <h1>Solicitud de Apertura para Crédito</h1>
-        <p>Pinturas y Más, S.A. · Complete todos los campos</p>
-      </div>
-    </div>
-    <div class="header-right">
-      <div class="date-badge" id="dateBadge"></div>
-    </div>
-  </div>
-
-  <!-- STEPPER -->
-  <div class="stepper" id="stepper">
-    <div class="step-item"><button class="step-btn active" id="stepBtn0" onclick="attemptGoStep(0)"><span class="step-num">1</span><span class="step-label">Facturación</span></button></div>
-    <div class="step-connector" id="stepConn0"></div>
-    <div class="step-item"><button class="step-btn" id="stepBtn1" onclick="attemptGoStep(1)"><span class="step-num">2</span><span class="step-label">Negocio</span></button></div>
-    <div class="step-connector" id="stepConn1"></div>
-    <div class="step-item"><button class="step-btn" id="stepBtn2" onclick="attemptGoStep(2)"><span class="step-num">3</span><span class="step-label">Referencias</span></button></div>
-    <div class="step-connector" id="stepConn2"></div>
-    <div class="step-item"><button class="step-btn" id="stepBtn3" onclick="attemptGoStep(3)"><span class="step-num">4</span><span class="step-label">Crédito</span></button></div>
-    <div class="step-connector" id="stepConn3"></div>
-    <div class="step-item"><button class="step-btn" id="stepBtn4" onclick="attemptGoStep(4)"><span class="step-num">5</span><span class="step-label">Firma</span></button></div>
-    <div class="step-connector" id="stepConn4"></div>
-    <div class="step-item"><button class="step-btn" id="stepBtn5" onclick="attemptGoStep(5)"><span class="step-num">6</span><span class="step-label">Autorización</span></button></div>
-  </div>
-
-  <!-- ═══════════════════════════ STEP 0: FACTURACIÓN ═══════════════════════════ -->
-  <div class="section-panel active" id="panel0">
-    <p class="section-title">Datos de Facturación</p>
-    <p class="section-desc">Información fiscal del cliente para emisión de facturas.</p>
-    <div class="card">
-      <div class="card-head">
-        <div class="card-head-icon">
-          <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        </div>
-        <span class="card-head-title">Datos Fiscales</span>
-      </div>
-      <div class="card-body">
-        <div class="grid">
-          <div class="field span2">
-            <label>Nombre o Razón Social</label>
-            <input type="text" id="nombreRs" placeholder="Nombre completo o razón social de la empresa">
-          </div>
-        </div>
-        <div class="grid g2" style="margin-top:14px">
-          <div class="field">
-            <label>N.I.T.</label>
-            <input type="text" id="nit" placeholder="Ej: 1234567-8">
-          </div>
-          <div class="field">
-            <label>Teléfono con WhatsApp</label>
-            <input type="tel" id="telefonoWA" placeholder="Ej: +502 5555-0000">
-          </div>
-        </div>
-        <div class="grid" style="margin-top:14px">
-          <div class="field span2">
-            <label>Dirección Fiscal</label>
-            <input type="text" id="direccionFiscal" placeholder="Dirección completa de facturación">
-          </div>
-        </div>
-        <div class="grid g3" style="margin-top:14px">
-          <div class="field">
-            <label>País</label>
-            <input type="text" id="pais" value="Guatemala">
-          </div>
-          <div class="field">
-            <label>Departamento</label>
-            <input type="text" id="departamento" placeholder="Ej: Guatemala">
-          </div>
-          <div class="field">
-            <label>Municipio</label>
-            <input type="text" id="municipio" placeholder="Ej: Guatemala">
-          </div>
-        </div>
-        
-        <div class="divider"></div>
-        <div class="header-flex">
-          <label style="margin-bottom:0">Coordenadas de Ubicación</label>
-          <button type="button" class="btn btn-sky btn-sm" onclick="getAutoLocation()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            Obtener mi ubicación
-          </button>
-        </div>
-        <div class="grid g2" style="margin-top:8px">
-          <div class="field">
-            <input type="text" id="latitud" placeholder="Latitud (Clic en obtener ubicación)" readonly style="background:#fff; cursor:not-allowed;">
-          </div>
-          <div class="field">
-            <input type="text" id="longitud" placeholder="Longitud (Clic en obtener ubicación)" readonly style="background:#fff; cursor:not-allowed;">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="nav-bar">
-      <div class="nav-bar-left"></div>
-      <div class="nav-bar-right">
-        <span class="step-indicator">Paso 1 de 6</span>
-        <button class="btn btn-primary" onclick="attemptGoStep(1)">
-          Siguiente
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
+        <h1>Solicitud para Apertura de Código</h1>
+        <p>Pinturas y Más, S.A.</p>
       </div>
     </div>
   </div>
 
-  <!-- ═══════════════════════════ STEP 1: NEGOCIO ═══════════════════════════ -->
-  <div class="section-panel" id="panel1">
-    <p class="section-title">Información del Negocio</p>
-    <p class="section-desc">Datos de operación, entrega y contactos del negocio.</p>
-    <div class="card">
-      <div class="card-head">
-        <div class="card-head-icon">
-          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        </div>
-        <span class="card-head-title">Dirección y Teléfonos</span>
-      </div>
-      <div class="card-body">
-        <div class="grid">
-          <div class="field span2">
-            <label>Dirección del Negocio</label>
-            <input type="text" id="dirNegocio" placeholder="Dirección física del establecimiento">
-          </div>
-        </div>
-        <div class="grid g2" style="margin-top:14px">
-          <div class="field">
-            <label>Teléfonos del Negocio</label>
-            <input type="tel" id="telNegocio" placeholder="Ej: 2222-3333 / 4444-5555">
-          </div>
-        </div>
-        <div class="divider"></div>
-        <div class="grid">
-          <div class="field span2">
-            <label>Dirección de Entrega</label>
-            <input type="text" id="dirEntrega" placeholder="Dirección donde se realizarán las entregas">
-          </div>
-        </div>
-        <div class="grid g2" style="margin-top:14px">
-          <div class="field">
-            <label>Teléfonos de Entrega</label>
-            <input type="tel" id="telEntrega" placeholder="Ej: 2222-3333">
-          </div>
-        </div>
-      </div>
-    </div>
+  <!-- SELECCIÓN DE FORMULARIO -->
+  <div class="selection-area">
+    <h2 class="section-title">¿Qué tipo de solicitud desea realizar?</h2>
+    <p class="section-desc">Seleccione la modalidad que se adapte a su perfil comercial.</p>
 
-    <div class="card">
-      <div class="card-head">
-        <div class="card-head-icon">
-          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 012 1.18 2 2 0 014 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14z"/></svg>
-        </div>
-        <span class="card-head-title">Contactos Administrativos</span>
+    <!-- BOTÓN CRÉDITO -->
+    <a href="credito.html" class="action-btn btn-credito">
+      <div class="icon-box">
+        <!-- Icono de Tarjeta / Documento -->
+        <svg viewBox="0 0 24 24">
+          <rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect>
+          <line x1="2" y1="10" x2="22" y2="10"></line>
+        </svg>
       </div>
-      <div class="card-body">
-        <div class="grid g3">
-          <div class="field"><label>Contacto de Compras</label><input type="text" id="contactoCompras" placeholder="Nombre"></div>
-          <div class="field"><label>Teléfono Compras</label><input type="tel" id="telCompras" placeholder="Ej: 5555-0000"></div>
-          <div class="field"><label>E-mail Compras</label><input type="email" id="emailCompras" placeholder="compras@empresa.com"></div>
-        </div>
-        <div class="grid g3" style="margin-top:14px">
-          <div class="field"><label>Contacto de Cobros</label><input type="text" id="contactoCobros" placeholder="Nombre"></div>
-          <div class="field"><label>Teléfono Cobros</label><input type="tel" id="telCobros" placeholder="Ej: 5555-0000"></div>
-          <div class="field"><label>E-mail Cobros</label><input type="email" id="emailCobros" placeholder="cobros@empresa.com"></div>
-        </div>
+      <div class="btn-text">
+        <h3>Crédito</h3>
+        <p>Apertura de código con solicitud de límite y días de plazo para pago.</p>
       </div>
-    </div>
+      <div class="arrow-icon">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </div>
+    </a>
 
-    <div class="nav-bar">
-      <div class="nav-bar-left">
-        <button class="btn btn-ghost" onclick="goStep(0)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Atrás
-        </button>
+    <!-- BOTÓN CONTADO -->
+    <a href="contado.html" class="action-btn btn-contado">
+      <div class="icon-box">
+        <!-- Icono de Efectivo / Rápido -->
+        <svg viewBox="0 0 24 24">
+          <rect x="2" y="6" width="20" height="12" rx="2" ry="2"></rect>
+          <circle cx="12" cy="12" r="2"></circle>
+          <path d="M6 12h.01M18 12h.01"></path>
+        </svg>
       </div>
-      <div class="nav-bar-right">
-        <span class="step-indicator">Paso 2 de 6</span>
-        <button class="btn btn-primary" onclick="attemptGoStep(2)">
-          Siguiente <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
+      <div class="btn-text">
+        <h3>Contado</h3>
+        <p>Apertura de código para compras con modalidad de pago inmediato.</p>
       </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════ STEP 2: REFERENCIAS ═══════════════════════════ -->
-  <div class="section-panel" id="panel2">
-    <p class="section-title">Referencias Comerciales</p>
-    <p class="section-desc">Ingrese al menos tres referencias comerciales verificables.</p>
-    <div class="card">
-      <div class="card-head">
-        <div class="card-head-icon">
-          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-        </div>
-        <span class="card-head-title">Listado de Referencias</span>
+      <div class="arrow-icon">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </div>
-      <div class="card-body" style="padding:0">
-        <div class="refs-tbl-container">
-          <table class="refs-tbl">
-            <thead>
-              <tr>
-                <th style="width:40%">Nombre Empresa / Persona</th>
-                <th style="width:30%">Teléfonos</th>
-                <th style="width:30%">Relación Comercial</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><input type="text" id="ref1nombre" placeholder="Empresa o persona 1"></td>
-                <td><input type="tel" id="ref1tel" placeholder="Teléfono 1"></td>
-                <td><input type="text" id="ref1rel" placeholder="Relación 1"></td>
-              </tr>
-              <tr>
-                <td><input type="text" id="ref2nombre" placeholder="Empresa o persona 2"></td>
-                <td><input type="tel" id="ref2tel" placeholder="Teléfono 2"></td>
-                <td><input type="text" id="ref2rel" placeholder="Relación 2"></td>
-              </tr>
-              <tr>
-                <td><input type="text" id="ref3nombre" placeholder="Empresa o persona 3"></td>
-                <td><input type="tel" id="ref3tel" placeholder="Teléfono 3"></td>
-                <td><input type="text" id="ref3rel" placeholder="Relación 3"></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <div class="nav-bar">
-      <div class="nav-bar-left">
-        <button class="btn btn-ghost" onclick="goStep(1)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Atrás
-        </button>
-      </div>
-      <div class="nav-bar-right">
-        <span class="step-indicator">Paso 3 de 6</span>
-        <button class="btn btn-primary" onclick="attemptGoStep(3)">
-          Siguiente <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════ STEP 3: CRÉDITO ═══════════════════════════ -->
-  <div class="section-panel" id="panel3">
-    <p class="section-title">Límite de Crédito</p>
-    <p class="section-desc">Especifique el monto y plazo de crédito solicitado.</p>
-    <div class="card">
-      <div class="card-head">
-        <div class="card-head-icon">
-          <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-        </div>
-        <span class="card-head-title">Montos y Plazos</span>
-      </div>
-      <div class="card-body">
-        <div class="grid g2">
-          <div class="field">
-            <label>Monto Solicitado (Q.)</label>
-            <input type="number" id="limiteCredito" placeholder="Ej: 5000.00" min="0" step="0.01">
-          </div>
-          <div class="field">
-            <label>Días de Crédito Solicitados</label>
-            <input type="number" id="diasCredito" placeholder="Ej: 30" min="0">
-          </div>
-        </div>
-
-        <div class="notice orange">
-          <p><strong>Condiciones de la empresa:</strong></p>
-          <p>1. Hacer efectivos sus pagos el día de vencimiento del crédito.</p>
-          <p>2. Todo pago con cheque, debe hacerlo a nombre de la empresa <strong>(PINTURAS Y MAS, S.A.)</strong>.</p>
-          <p>3. Todo pago se respalda únicamente con Recibo de Caja oficial.</p>
-          <p>4. Todo cheque rechazado genera un cobro administrativo de <strong>Q100.00</strong>.</p>
-          <p>5. Cualquier cambio de datos de esta solicitud, comunicarlo inmediatamente.</p>
-        </div>
-
-        <div class="notice blue">
-          <p><strong>IMPORTANTE:</strong> Al completar este formulario, genere el PDF y adjunte fotocopia de Patente de Comercio (si aplica), RTU, DPI del representante legal, recibo de servicios y fotografías del negocio.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="nav-bar">
-      <div class="nav-bar-left">
-        <button class="btn btn-ghost" onclick="goStep(2)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Atrás
-        </button>
-      </div>
-      <div class="nav-bar-right">
-        <span class="step-indicator">Paso 4 de 6</span>
-        <button class="btn btn-primary" onclick="attemptGoStep(4)">
-          Siguiente <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════ STEP 4: FIRMA SOLICITANTE ═══════════════════════════ -->
-  <div class="section-panel" id="panel4">
-    <p class="section-title">Firma del Solicitante</p>
-    <p class="section-desc">Firme electrónicamente para validar la solicitud.</p>
-    <div class="card">
-      <div class="card-head">
-        <div class="card-head-icon">
-          <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        </div>
-        <span class="card-head-title">Aceptación y Firma</span>
-      </div>
-      <div class="card-body">
-        <div class="grid g2" style="margin-bottom:20px">
-          <div class="field">
-            <label>Nombre de quien solicita</label>
-            <input type="text" id="nombreSolicita" placeholder="Nombre completo">
-          </div>
-          <div class="field">
-            <label>Fecha de solicitud</label>
-            <input type="date" id="fechaSolicitud">
-          </div>
-        </div>
-
-        <label style="margin-bottom:8px;display:block">Firma Electrónica Requerida</label>
-        <div class="sig-widget" id="sigWidgetSolicita" onclick="openSig('solicita')">
-          <div class="sig-preview-mini">
-            <img id="sigImgSolicita" src="" alt="firma">
-          </div>
-          <div class="sig-widget-info">
-            <strong id="sigStatusSolicita">Haga clic o toque aquí para firmar</strong>
-            <span id="sigSubSolicita">Se abrirá un panel para dibujar su firma</span>
-          </div>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;color:var(--muted);flex-shrink:0"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        </div>
-      </div>
-    </div>
-
-    <div class="nav-bar">
-      <div class="nav-bar-left">
-        <button class="btn btn-ghost" onclick="goStep(3)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Atrás
-        </button>
-      </div>
-      <div class="nav-bar-right">
-        <span class="step-indicator">Paso 5 de 6</span>
-        <button class="btn btn-primary" onclick="attemptGoStep(5)">
-          Siguiente <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════ STEP 5: AUTORIZACIÓN ═══════════════════════════ -->
-  <div class="section-panel" id="panel5">
-    <p class="section-title">Uso Exclusivo — Autorización</p>
-    <p class="section-desc">Esta sección es completada por personal administrativo interno.</p>
-    <div class="card admin">
-      <div class="card-head">
-        <div class="card-head-icon">
-          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-        </div>
-        <span class="card-head-title">USO EXCLUSIVO — ADMINISTRACIÓN</span>
-      </div>
-      <div class="card-body">
-        <div class="grid g2">
-          <div class="field">
-            <label>Monto Autorizado (Q.)</label>
-            <input type="number" id="montoAutorizado" placeholder="Ej: 3000.00" min="0" step="0.01">
-          </div>
-          <div class="field">
-            <label>Fecha de Autorización</label>
-            <input type="date" id="fechaAutorizacion">
-          </div>
-        </div>
-        <div class="grid g2" style="margin-top:14px">
-          <div class="field">
-            <label>Días de Crédito Autorizados</label>
-            <input type="number" id="diasCreditoAut" placeholder="Ej: 30" min="0">
-          </div>
-          <div class="field">
-            <label>Código Interno Asignado</label>
-            <input type="text" id="codigoCliente" placeholder="Ej: CLI-00123">
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="field" style="margin-bottom:14px">
-          <label>Nombre del Autorizante</label>
-          <input type="text" id="nombreAutoriza" placeholder="Nombre completo">
-        </div>
-
-        <label style="margin-bottom:8px;display:block">Firma Electrónica Autorizante Requerida</label>
-        <div class="sig-widget" id="sigWidgetAutoriza" onclick="openSig('autoriza')">
-          <div class="sig-preview-mini">
-            <img id="sigImgAutoriza" src="" alt="firma">
-          </div>
-          <div class="sig-widget-info">
-            <strong id="sigStatusAutoriza">Haga clic o toque aquí para firmar</strong>
-            <span id="sigSubAutoriza">Se abrirá un panel para dibujar su firma</span>
-          </div>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;color:var(--muted);flex-shrink:0"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        </div>
-      </div>
-    </div>
-
-    <div class="nav-bar">
-      <div class="nav-bar-left">
-        <button class="btn btn-ghost" onclick="goStep(4)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Atrás
-        </button>
-      </div>
-      <div class="nav-bar-right">
-        <span class="step-indicator">Paso 6 de 6</span>
-        <button class="btn btn-success" onclick="attemptGeneratePDF()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Generar Documento PDF
-        </button>
-      </div>
-    </div>
-  </div>
-</div><!-- /wrap -->
-
-<!-- ═══ SIGNATURE MODAL ═══ -->
-<div class="sig-overlay" id="sigOverlay">
-  <div class="sig-modal">
-    <div class="sig-modal-head">
-      <div>
-        <h3 id="sigModalTitle">Firma Electrónica</h3>
-        <p id="sigModalSub">Firme dentro del recuadro blanco</p>
-      </div>
-      <button class="btn-close" onclick="closeSig()">
-        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="sig-modal-body">
-      <div class="canvas-wrap">
-        <canvas id="sigCanvas"></canvas>
-        <div class="canvas-hint">
-          <span>El trazo seguirá su dedo o ratón</span>
-          <button class="btn btn-danger btn-sm" onclick="clearModalCanvas()">Limpiar firma</button>
-        </div>
-      </div>
-    </div>
-    <div class="sig-modal-foot">
-      <button class="btn btn-ghost" onclick="closeSig()">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveSig()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        Guardar Firma
-      </button>
-    </div>
+    </a>
   </div>
 </div>
-<!-- TOAST -->
-<div id="toastBox"></div>
 
 <script>
-// ────────────────────────────────────────────────────────
-// LOGO FALLBACK (Evitar error si logo.png no existe visualmente)
-// ────────────────────────────────────────────────────────
+// Fallback visual por si logo.png no se encuentra en el servidor
 function fallbackLogo(img) {
-  // SVG Genérico si logo.png no se encuentra en el directorio.
   img.onerror = null;
   img.src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgNjAiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNmZmYiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjMUIyQjZCIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjM1ZW0iPkxPR08gQVFVSTwvdGV4dD48L3N2Zz4=";
 }
-
-// ────────────────────────────────────────────────────────
-// NAVEGACIÓN Y VALIDACIÓN (Evitar avanzar sin datos completos)
-// ────────────────────────────────────────────────────────
-let currentStep = 0;
-const TOTAL_STEPS = 6;
-
-function attemptGoStep(targetStep) {
-  if (targetStep > currentStep) {
-    // Validar todos los pasos anteriores hasta llegar al target
-    for (let i = currentStep; i < targetStep; i++) {
-      if (!validateStep(i)) return; // Si falla la validación, detener.
-    }
-  }
-  goStep(targetStep);
-}
-
-function validateStep(stepIndex) {
-  const panel = document.getElementById('panel' + stepIndex);
-  const inputs = panel.querySelectorAll('input, select, textarea');
-  
-  // Limpiar errores visuales previos
-  inputs.forEach(inp => inp.classList.remove('error-input'));
-  if (stepIndex === 4) document.getElementById('sigWidgetSolicita').classList.remove('sig-error');
-  if (stepIndex === 5) document.getElementById('sigWidgetAutoriza').classList.remove('sig-error');
-
-  let isValid = true;
-
-  // Revisar campos de texto y número
-  for (let input of inputs) {
-    if (input.value.trim() === '') {
-      input.classList.add('error-input');
-      isValid = false;
-    }
-  }
-
-  // Revisar Firmas en los pasos respectivos
-  if (stepIndex === 4 && !sigData['solicita']) {
-    document.getElementById('sigWidgetSolicita').classList.add('sig-error');
-    isValid = false;
-  }
-  if (stepIndex === 5 && !sigData['autoriza']) {
-    document.getElementById('sigWidgetAutoriza').classList.add('sig-error');
-    isValid = false;
-  }
-
-  if (!isValid) {
-    showToast('Debe completar TODOS los campos de esta sección para continuar.', 'error');
-    return false;
-  }
-  return true;
-}
-
-function goStep(targetStep) {
-  for (let i = 0; i < TOTAL_STEPS; i++) {
-    const btn = document.getElementById('stepBtn' + i);
-    const panel = document.getElementById('panel' + i);
-    const conn = document.getElementById('stepConn' + i);
-
-    if (i < targetStep) {
-      btn.className = 'step-btn done';
-      if(conn) conn.classList.add('done');
-      panel.classList.remove('active');
-    } else if (i === targetStep) {
-      btn.className = 'step-btn active';
-      if(conn) conn.classList.remove('done');
-      panel.classList.add('active');
-    } else {
-      btn.className = 'step-btn';
-      if(conn) conn.classList.remove('done');
-      panel.classList.remove('active');
-    }
-  }
-  currentStep = targetStep;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function setDefaults() {
-  const d = new Date();
-  const opts = { day: '2-digit', month: 'long', year: 'numeric' };
-  document.getElementById('dateBadge').textContent = d.toLocaleDateString('es-GT', opts);
-  const todayISO = d.toISOString().split('T')[0];
-  document.getElementById('fechaSolicitud').value = todayISO;
-  document.getElementById('fechaAutorizacion').value = todayISO;
-}
-setDefaults();
-
-// ────────────────────────────────────────────────────────
-// GEOLOCALIZACIÓN
-// ────────────────────────────────────────────────────────
-function getAutoLocation() {
-  if (navigator.geolocation) {
-    showToast('Obteniendo coordenadas GPS...', 'info');
-    navigator.geolocation.getCurrentPosition(function(position) {
-      document.getElementById('latitud').value = position.coords.latitude.toFixed(6);
-      document.getElementById('longitud').value = position.coords.longitude.toFixed(6);
-      document.getElementById('latitud').classList.remove('error-input');
-      document.getElementById('longitud').classList.remove('error-input');
-      showToast('Ubicación agregada correctamente', 'success');
-    }, function(error) {
-      showToast('Error al obtener GPS. Permita el acceso o ingrese manualmente.', 'error');
-      document.getElementById('latitud').removeAttribute('readonly');
-      document.getElementById('longitud').removeAttribute('readonly');
-    });
-  } else {
-    showToast('Su navegador no soporta geolocalización', 'error');
-  }
-}
-
-// ────────────────────────────────────────────────────────
-// PANEL DE FIRMA (FONDO BLANCO Y JPEG PARA EVITAR ERRORES EN PDF)
-// ────────────────────────────────────────────────────────
-let activeSigTarget = null;
-let sigDrawing = false;
-let sigCtx = null;
-let sigCanvas = null;
-const sigData = { solicita: null, autoriza: null };
-
-function initCanvas() {
-  sigCanvas = document.getElementById('sigCanvas');
-  sigCtx = sigCanvas.getContext('2d', { willReadFrequently: true });
-  
-  sigCanvas.addEventListener('mousedown', sigStart);
-  sigCanvas.addEventListener('mousemove', sigDraw);
-  window.addEventListener('mouseup', sigStop);
-
-  sigCanvas.addEventListener('touchstart', sigStart, { passive: false });
-  sigCanvas.addEventListener('touchmove', sigDraw, { passive: false });
-  window.addEventListener('touchend', sigStop);
-}
-
-function resizeCanvas() {
-  if (!sigCanvas) return;
-  const rect = sigCanvas.parentElement.getBoundingClientRect();
-  sigCanvas.width = rect.width;
-  sigCanvas.height = 200;
-  sigCtx.strokeStyle = '#0F1A45';
-  sigCtx.lineWidth = 3;
-  sigCtx.lineCap = 'round';
-  sigCtx.lineJoin = 'round';
-}
-
-function getSigPos(e) {
-  const rect = sigCanvas.getBoundingClientRect();
-  let clientX, clientY;
-  if (e.touches && e.touches.length > 0) {
-    clientX = e.touches[0].clientX;
-    clientY = e.touches[0].clientY;
-  } else {
-    clientX = e.clientX;
-    clientY = e.clientY;
-  }
-  return { x: clientX - rect.left, y: clientY - rect.top };
-}
-
-function sigStart(e) {
-  e.preventDefault();
-  sigDrawing = true;
-  const pos = getSigPos(e);
-  sigCtx.beginPath();
-  sigCtx.moveTo(pos.x, pos.y);
-  sigCtx.lineTo(pos.x + 0.1, pos.y + 0.1);
-  sigCtx.stroke();
-}
-
-function sigDraw(e) {
-  if (!sigDrawing) return;
-  e.preventDefault();
-  const pos = getSigPos(e);
-  sigCtx.lineTo(pos.x, pos.y);
-  sigCtx.stroke();
-  sigCtx.beginPath();
-  sigCtx.moveTo(pos.x, pos.y);
-}
-
-function sigStop() { 
-  sigDrawing = false; 
-  if(sigCtx) sigCtx.beginPath(); 
-}
-
-function clearModalCanvas() {
-  if(!sigCtx) return;
-  sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
-}
-
-function openSig(target) {
-  activeSigTarget = target;
-  const overlay = document.getElementById('sigOverlay');
-  const titleMap = { solicita: 'Firma del Solicitante', autoriza: 'Firma del Autorizante' };
-  document.getElementById('sigModalTitle').textContent = titleMap[target] || 'Firma Electrónica';
-  
-  overlay.classList.add('open');
-  document.body.style.overflow = 'hidden'; // Evitar scroll de fondo en móviles
-  
-  setTimeout(() => {
-    resizeCanvas();
-    clearModalCanvas();
-  }, 350);
-}
-
-function closeSig() {
-  document.getElementById('sigOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-  activeSigTarget = null;
-}
-
-function isCanvasEmpty() {
-  const blank = document.createElement('canvas');
-  blank.width = sigCanvas.width;
-  blank.height = sigCanvas.height;
-  return sigCanvas.toDataURL() === blank.toDataURL();
-}
-
-function saveSig() {
-  if (isCanvasEmpty()) {
-    showToast('El recuadro está vacío. Por favor firme.', 'error');
-    return;
-  }
-  
-  // SOLUCIÓN DEFINITIVA A FIRMAS NEGRAS EN PDF: Crear un canvas temporal con fondo blanco
-  const tempCanvas = document.createElement('canvas');
-  tempCanvas.width = sigCanvas.width;
-  tempCanvas.height = sigCanvas.height;
-  const tCtx = tempCanvas.getContext('2d');
-  tCtx.fillStyle = '#FFFFFF'; // Fondo blanco
-  tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-  tCtx.drawImage(sigCanvas, 0, 0); // Pegar firma
-  
-  // Guardar como JPEG para evitar la transparencia maldita en el PDF
-  const dataURL = tempCanvas.toDataURL('image/jpeg', 1.0);
-  sigData[activeSigTarget] = dataURL;
-
-  const widgetId = activeSigTarget === 'solicita' ? 'sigWidgetSolicita' : 'sigWidgetAutoriza';
-  const imgId = activeSigTarget === 'solicita' ? 'sigImgSolicita' : 'sigImgAutoriza';
-  const statusId = activeSigTarget === 'solicita' ? 'sigStatusSolicita' : 'sigStatusAutoriza';
-  const subId = activeSigTarget === 'solicita' ? 'sigSubSolicita' : 'sigSubAutoriza';
-
-  const widget = document.getElementById(widgetId);
-  widget.classList.add('has-sig');
-  widget.classList.remove('sig-error');
-  
-  const img = document.getElementById(imgId);
-  img.src = dataURL;
-  img.style.display = 'block';
-  
-  document.getElementById(statusId).textContent = '✓ Firma guardada correctamente';
-  document.getElementById(subId).textContent = 'Toque el recuadro si desea repetir la firma';
-
-  closeSig();
-  showToast('Firma registrada con éxito', 'success');
-}
-initCanvas();
-
-// ────────────────────────────────────────────────────────
-// TOASTS
-// ────────────────────────────────────────────────────────
-function showToast(msg, type = 'success') {
-  const box = document.getElementById('toastBox');
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.innerHTML = `<div class="toast-dot ${type}"></div><span>${msg}</span>`;
-  box.appendChild(t);
-  requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
-  setTimeout(() => { 
-    t.classList.remove('show'); t.classList.add('hide'); 
-    setTimeout(() => t.remove(), 300); 
-  }, 3500);
-}
-
-// ────────────────────────────────────────────────────────
-// LECTURA DE CAMPOS
-// ────────────────────────────────────────────────────────
-function g(id) { return document.getElementById(id)?.value?.trim() || ''; }
-function gDate(id) {
-  const val = document.getElementById(id)?.value;
-  if (!val) return '';
-  const d = new Date(val + 'T12:00:00');
-  return d.toLocaleDateString('es-GT', { day: '2-digit', month: 'long', year: 'numeric' });
-}
-function formatMoney(id) {
-  const val = parseFloat(g(id));
-  if (isNaN(val)) return '';
-  return 'Q. ' + val.toLocaleString('es-GT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-// ────────────────────────────────────────────────────────
-// GENERADOR PDF CORPORATIVO (ESTRUCTURA Y LOGO AUTOMÁTICO)
-// ────────────────────────────────────────────────────────
-function attemptGeneratePDF() {
-  if(!validateStep(5)) return; // Validar último paso antes de crear PDF
-  generatePDF();
-}
-
-async function generatePDF() {
-  const { jsPDF } = window.jspdf;
-  if (!jsPDF) { showToast('Librería PDF no cargada. Verifique internet.', 'error'); return; }
-  
-  showToast('Procesando Documento PDF...', 'info');
-
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
-  const PW = doc.internal.pageSize.getWidth();
-  const PH = doc.internal.pageSize.getHeight();
-  const M  = 16;
-  const CW = PW - M * 2;
-  let y = M;
-
-  const C = {
-    navy:    [27, 43, 107],
-    sky:     [74, 179, 232],
-    white:   [255, 255, 255],
-    black:   [20, 20, 30],
-    muted:   [100, 115, 140],
-    border:  [200, 210, 225],
-    lightBg: [248, 250, 253]
-  };
-
-  const rgb = (...arr) => doc.setTextColor(...arr);
-  const fill = (...arr) => doc.setFillColor(...arr);
-  const draw = (...arr) => doc.setDrawColor(...arr);
-  const lw = (n) => doc.setLineWidth(n);
-  const font = (w='normal', s=10) => { doc.setFont('helvetica', w); doc.setFontSize(s); };
-
-  function checkY(needed) {
-    if (y + needed > PH - M) {
-      doc.addPage();
-      y = M + 4;
-      fill(...C.navy);
-      doc.rect(0, 0, PW, 4, 'F'); // Decoración top
-    }
-  }
-
-  function hr(yy) { draw(...C.border); lw(0.3); doc.line(M, yy, PW - M, yy); }
-
-  // ─── Diseño de cabecera limpio y corporativo sin "cuadrados" ───
-  function sectionTitle(title) {
-    checkY(14);
-    fill(...C.navy);
-    doc.rect(M, y, CW, 7, 'F');
-    font('bold', 9);
-    rgb(...C.white);
-    doc.text(title.toUpperCase(), M + 3, y + 5);
-    y += 12;
-  }
-
-  function drawField(label, value, x, width) {
-    font('bold', 6.5);
-    rgb(...C.muted);
-    doc.text(label.toUpperCase(), x, y);
-    font(value ? 'normal' : 'italic', 9);
-    rgb(...(value ? C.black : C.muted));
-    const safeVal = value || 'N/A';
-    doc.text(safeVal, x, y + 4.5, { maxWidth: width - 2 });
-    draw(...C.border); lw(0.2);
-    doc.line(x, y + 6, x + width - 2, y + 6);
-  }
-
-  // ─────────────────────────────────────────────
-  // 1. OBTENER Y DIBUJAR LOGO.PNG AUTOMÁTICAMENTE
-  // ─────────────────────────────────────────────
-  const imgEl = document.getElementById('brandLogo');
-  let logoData = null;
-  let logoW = 0, logoH = 0;
-  
-  try {
-    const c = document.createElement('canvas');
-    c.width = imgEl.naturalWidth || 300;
-    c.height = imgEl.naturalHeight || 100;
-    const ctx = c.getContext('2d');
-    ctx.drawImage(imgEl, 0, 0);
-    logoData = c.toDataURL('image/png');
-    
-    // Calcular proporciones dinámicas (Máximo Alto 16mm, Máximo Ancho 60mm)
-    const aspect = c.width / c.height;
-    logoH = 16;
-    logoW = logoH * aspect;
-    if (logoW > 60) {
-      logoW = 60;
-      logoH = logoW / aspect;
-    }
-  } catch (e) {
-    console.log("No se pudo cargar logo.png por bloqueos de seguridad. Se usará cabecera texto.");
-  }
-
-  // HEADER DEL DOCUMENTO
-  if (logoData) {
-    doc.addImage(logoData, 'PNG', M, y, logoW, logoH, '', 'FAST');
-  } else {
-    font('bold', 14); rgb(...C.navy); doc.text("GRUPO IMADE", M, y + 8);
-  }
-
-  font('bold', 12);
-  rgb(...C.navy);
-  doc.text('SOLICITUD DE CRÉDITO', PW - M, y + 6, { align: 'right' });
-  font('normal', 8);
-  rgb(...C.muted);
-  doc.text(`Pinturas y Más, S.A. | Fecha: ${new Date().toLocaleDateString('es-GT')}`, PW - M, y + 12, { align: 'right' });
-  
-  y += Math.max(logoH, 14) + 10;
-  draw(...C.sky); lw(0.5); doc.line(M, y-4, PW-M, y-4);
-
-  // ─────────────────────────────────────────────
-  // 2. DATOS DE FACTURACIÓN
-  // ─────────────────────────────────────────────
-  sectionTitle('1. Datos de Facturación');
-  drawField('Nombre o Razón Social', g('nombreRs'), M, CW);
-  y += 12;
-  const col2 = CW / 2;
-  drawField('N.I.T.', g('nit'), M, col2);
-  drawField('Teléfono con WhatsApp', g('telefonoWA'), M + col2, col2);
-  y += 12;
-  drawField('Dirección Fiscal', g('direccionFiscal'), M, CW);
-  y += 12;
-  const col3 = CW / 3;
-  drawField('País', g('pais'), M, col3);
-  drawField('Departamento', g('departamento'), M + col3, col3);
-  drawField('Municipio', g('municipio'), M + col3 * 2, col3);
-  y += 12;
-  drawField('Coordenada Latitud', g('latitud'), M, col2);
-  drawField('Coordenada Longitud', g('longitud'), M + col2, col2);
-  y += 14;
-
-  // ─────────────────────────────────────────────
-  // 3. INFORMACIÓN DEL NEGOCIO
-  // ─────────────────────────────────────────────
-  checkY(40);
-  sectionTitle('2. Información General del Negocio');
-  drawField('Dirección del Negocio', g('dirNegocio'), M, CW); y += 12;
-  drawField('Teléfonos del Negocio', g('telNegocio'), M, col2); y += 12;
-  drawField('Dirección de Entrega', g('dirEntrega'), M, CW); y += 12;
-  drawField('Teléfonos de Entrega', g('telEntrega'), M, col2); y += 14;
-
-  drawField('Contacto de Compras', g('contactoCompras'), M, col3);
-  drawField('Tel. Compras', g('telCompras'), M + col3, col3);
-  drawField('E-mail Compras', g('emailCompras'), M + col3 * 2, col3); y += 12;
-
-  drawField('Contacto de Cobros', g('contactoCobros'), M, col3);
-  drawField('Tel. Cobros', g('telCobros'), M + col3, col3);
-  drawField('E-mail Cobros', g('emailCobros'), M + col3 * 2, col3); y += 16;
-
-  // ─────────────────────────────────────────────
-  // 4. REFERENCIAS COMERCIALES
-  // ─────────────────────────────────────────────
-  checkY(45);
-  sectionTitle('3. Referencias Comerciales');
-  
-  fill(240, 245, 250); doc.rect(M, y, CW, 6, 'F');
-  font('bold', 7); rgb(...C.navy);
-  doc.text('NOMBRE / EMPRESA', M + 2, y + 4);
-  doc.text('TELÉFONOS', M + col2, y + 4);
-  doc.text('RELACIÓN', M + col2 + col3, y + 4);
-  y += 6;
-
-  const refs = [
-    [g('ref1nombre'), g('ref1tel'), g('ref1rel')],
-    [g('ref2nombre'), g('ref2tel'), g('ref2rel')],
-    [g('ref3nombre'), g('ref3tel'), g('ref3rel')]
-  ];
-
-  refs.forEach(([n, t, r]) => {
-    hr(y + 8);
-    font('normal', 8); rgb(...C.black);
-    doc.text(n || '-', M + 2, y + 5);
-    doc.text(t || '-', M + col2, y + 5);
-    doc.text(r || '-', M + col2 + col3, y + 5);
-    y += 8;
-  });
-  y += 10;
-
-  // ─────────────────────────────────────────────
-  // 5. LÍMITE DE CRÉDITO Y CONDICIONES
-  // ─────────────────────────────────────────────
-  checkY(50);
-  sectionTitle('4. Límite de Crédito Solicitado');
-  drawField('Monto Solicitado (Q.)', formatMoney('limiteCredito'), M, col2);
-  drawField('Días de Crédito Solicitados', g('diasCredito'), M + col2, col2);
-  y += 16;
-
-  fill(255, 247, 237); draw(249, 115, 22); lw(0.4);
-  doc.rect(M, y, CW, 30, 'FD');
-  font('bold', 8); rgb(0,0,0); doc.text('Condiciones del crédito:', M + 4, y + 5);
-  font('normal', 7.5);
-  const conds = [
-    '1. Hacer efectivos sus pagos el día de vencimiento del crédito.',
-    '2. Todo pago con cheque, debe hacerlo a nombre de la empresa (PINTURAS Y MAS, S.A.).',
-    '3. Todo pago se respalda únicamente con Recibo de Caja de PINTURAS Y MAS, S.A.',
-    '4. Todo cheque rechazado genera un cobro administrativo de Q100.00.',
-    '5. Cualquier cambio de dirección o teléfono debe ser reportado inmediatamente.'
-  ];
-  let condY = y + 10;
-  conds.forEach(c => { doc.text(c, M + 4, condY); condY += 4; });
-  y += 36;
-
-  // ─────────────────────────────────────────────
-  // 6. FIRMA SOLICITANTE
-  // ─────────────────────────────────────────────
-  checkY(60);
-  sectionTitle('5. Aceptación y Firma del Solicitante');
-  drawField('Nombre de quien solicita', g('nombreSolicita'), M, col2);
-  drawField('Fecha de firma', gDate('fechaSolicitud'), M + col2, col2);
-  y += 14;
-
-  font('bold', 8); rgb(...C.muted); doc.text('FIRMA DEL SOLICITANTE', M + (col2/2), y, {align: 'center'});
-  draw(...C.border); lw(0.5); doc.rect(M, y + 2, col2 - 10, 26, 'S');
-  
-  if (sigData['solicita']) {
-    // Usar 'JPEG' asegura que no haya fondo negro.
-    doc.addImage(sigData['solicita'], 'JPEG', M + 2, y + 3, col2 - 14, 24, '', 'FAST');
-  }
-  y += 36;
-
-  // ─────────────────────────────────────────────
-  // 7. AUTORIZACIÓN (USO INTERNO)
-  // ─────────────────────────────────────────────
-  checkY(65);
-  sectionTitle('6. Uso Exclusivo Administración');
-  
-  drawField('Monto Autorizado (Q.)', formatMoney('montoAutorizado'), M, col2);
-  drawField('Fecha de Autorización', gDate('fechaAutorizacion'), M + col2, col2); y += 12;
-  drawField('Días de Crédito', g('diasCreditoAut'), M, col2);
-  drawField('Código Interno', g('codigoCliente'), M + col2, col2); y += 14;
-  drawField('Nombre Autorizante', g('nombreAutoriza'), M, CW); y += 14;
-
-  font('bold', 8); rgb(...C.muted); doc.text('FIRMA AUTORIZANTE', M + (col2/2), y, {align: 'center'});
-  draw(...C.border); lw(0.5); doc.rect(M, y + 2, col2 - 10, 26, 'S');
-  
-  if (sigData['autoriza']) {
-    doc.addImage(sigData['autoriza'], 'JPEG', M + 2, y + 3, col2 - 14, 24, '', 'FAST');
-  }
-
-  // ─────────────────────────────────────────────
-  // PAGINACIÓN AUTOMÁTICA AL FINAL
-  // ─────────────────────────────────────────────
-  const totalPages = doc.internal.getNumberOfPages();
-  for (let p = 1; p <= totalPages; p++) {
-    doc.setPage(p);
-    font('normal', 7); rgb(...C.muted);
-    doc.text(`Página ${p} de ${totalPages}`, PW - M, PH - 8, { align: 'right' });
-    fill(...C.navy); doc.rect(0, PH - 3, PW, 3, 'F');
-  }
-
-  // DESCARGA
-  const filePrefix = (g('nombreRs') || 'Cliente_Nuevo').replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
-  doc.save(`Solicitud_Credito_${filePrefix}.pdf`);
-  showToast('Documento PDF generado y descargado con éxito', 'success');
-}
 </script>
+
 </body>
 </html>
