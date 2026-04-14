@@ -107,7 +107,7 @@
         // =========================================================================
         // ¡IMPORTANTE! PEGA AQUÍ LA URL QUE TE DIO GOOGLE APPS SCRIPT
         // =========================================================================
-        const SCRIPT_URL = "URL_DE_TU_GOOGLE_APPS_SCRIPT_AQUI"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxudLUBF8nj4trvpobmmC7TQRuqaqJqbpJdzQapELHE91SNy4ioMNYZV39NkuK_0XXDRQ/exec"; 
         // =========================================================================
 
         let globalData = [];
@@ -115,7 +115,7 @@
         async function loadData() {
             const tbody = document.getElementById('tableBody');
             
-            if (SCRIPT_URL === "URL_DE_TU_GOOGLE_APPS_SCRIPT_AQUI") {
+            if (SCRIPT_URL === "https://script.google.com/macros/s/AKfycbxudLUBF8nj4trvpobmmC7TQRuqaqJqbpJdzQapELHE91SNy4ioMNYZV39NkuK_0XXDRQ/exec") {
                 tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500 font-bold bg-red-50">🚨 Falta configurar la URL de Google Apps Script (SCRIPT_URL) en el código.</td></tr>`;
                 return;
             }
