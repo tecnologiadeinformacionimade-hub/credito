@@ -584,7 +584,7 @@ canvas { user-select: none; -webkit-user-select: none; }
 // CONFIGURACIÓN DE GOOGLE APPS SCRIPT (IMPORTANTE)
 // ────────────────────────────────────────────────────────
 // REEMPLAZA ESTA URL CON LA QUE TE DIO GOOGLE APPS SCRIPT
-const SCRIPT_URL = "URL_DE_TU_GOOGLE_APPS_SCRIPT_AQUI";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxudLUBF8nj4trvpobmmC7TQRuqaqJqbpJdzQapELHE91SNy4ioMNYZV39NkuK_0XXDRQ/exec";
 
 
 // ────────────────────────────────────────────────────────
@@ -906,6 +906,7 @@ async function enviarAGoogleSheets() {
     await fetch(SCRIPT_URL, {
       method: "POST",
       mode: "no-cors", 
+      redirect: "follow",
       body: JSON.stringify(data),
       headers: {
         "Content-Type": "text/plain;charset=utf-8", 
