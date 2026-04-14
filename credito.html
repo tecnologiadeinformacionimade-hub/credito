@@ -721,7 +721,7 @@ canvas { user-select: none; -webkit-user-select: none; }
 // =========================================================================
 // ¡IMPORTANTE! PEGA AQUÍ LA URL QUE TE DIO GOOGLE APPS SCRIPT
 // =========================================================================
-const SCRIPT_URL = "URL_DE_TU_GOOGLE_APPS_SCRIPT_AQUI"; 
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxudLUBF8nj4trvpobmmC7TQRuqaqJqbpJdzQapELHE91SNy4ioMNYZV39NkuK_0XXDRQ/exec"; 
 // =========================================================================
 
 function fallbackLogo(img) {
@@ -1004,7 +1004,7 @@ async function attemptSaveAndGeneratePDF() {
     }
   });
 
-  if (SCRIPT_URL !== "URL_DE_TU_GOOGLE_APPS_SCRIPT_AQUI") {
+  if (SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbxudLUBF8nj4trvpobmmC7TQRuqaqJqbpJdzQapELHE91SNy4ioMNYZV39NkuK_0XXDRQ/exec") {
       try {
         await fetch(SCRIPT_URL, {
           method: 'POST',
